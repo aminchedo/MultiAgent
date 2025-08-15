@@ -4,10 +4,11 @@ Disables database and Redis dependencies that are not available in serverless en
 """
 
 import os
+import tempfile
+import logging
 from pathlib import Path
 from pydantic_settings import BaseSettings
 from typing import Optional
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class VercelSettings(BaseSettings):
     # Database settings
     database_url: str = "sqlite:///:memory:"
     
-    # Upload settings - Modified for Vercel
+    # Upload settings - Modified for Vercel with tempfile
     upload_dir: Optional[str] = None  # Will be set based on environment
     max_file_size: int = 10 * 1024 * 1024  # 10MB
     
@@ -37,7 +38,8 @@ class VercelSettings(BaseSettings):
         
         if is_vercel_env:
             # Running on Vercel - read-only filesystem
-            kwargs.setdefault('upload_dir', None)  # Disable uploads by default
+            # Use tempfile for uploads - no filesystem writes during init
+            kwargs.setdefault('upload_dir', None)  # Will be set lazily
             kwargs.setdefault('is_vercel', True)
             kwargs.setdefault('is_local', False)
             kwargs.setdefault('database_url', 'sqlite:///:memory:')
@@ -52,16 +54,18 @@ class VercelSettings(BaseSettings):
         super().__init__(**kwargs)
     
     def ensure_upload_dir(self) -> Optional[str]:
-        """Lazily create upload directory when needed (only for local development)"""
+        """Lazily create upload directory when needed using tempfile"""
         if self.is_vercel:
-            # On Vercel, use /tmp for temporary uploads
-            upload_path = "/tmp/uploads"
+            # On Vercel, use tempfile for temporary uploads
             try:
+                # Use tempfile to get proper temp directory
+                temp_dir = tempfile.gettempdir()
+                upload_path = os.path.join(temp_dir, 'uploads')
                 Path(upload_path).mkdir(parents=True, exist_ok=True)
                 logger.info(f"Created temporary upload directory: {upload_path}")
                 return upload_path
             except (OSError, PermissionError) as e:
-                logger.warning(f"Could not create upload directory {upload_path}: {e}")
+                logger.warning(f"Could not create upload directory: {e}")
                 return None
         else:
             # Local development
@@ -79,9 +83,18 @@ class VercelSettings(BaseSettings):
         env_file = ".env"
         case_sensitive = False
 
-# Create settings instance safely - no directory operations at module level
+# Environment variable fallbacks with proper logging
+def get_jwt_secret_key() -> str:
+    """Get JWT secret key with fallback and warning"""
+    jwt_secret = os.getenv('JWT_SECRET_KEY', 'default_dev_secret')
+    if jwt_secret == 'default_dev_secret':
+        logger.warning('Using default JWT secret - insecure for production!')
+        logger.warning('Set JWT_SECRET_KEY environment variable in Vercel dashboard')
+    return jwt_secret
+
+# Create settings instance safely - NO filesystem operations at module level
 def get_vercel_settings():
-    """Get settings instance with error handling"""
+    """Get settings instance with error handling - no filesystem writes"""
     try:
         settings = VercelSettings()
         logger.info("Vercel settings created successfully")
@@ -97,6 +110,9 @@ def get_vercel_settings():
             is_local=False
         )
 
-# Global settings instance - created without directory operations
+# Global settings instance - created without ANY filesystem operations
 # This prevents read-only filesystem errors during import
 vercel_settings = get_vercel_settings()
+
+# Export JWT secret for easy access
+JWT_SECRET_KEY = get_jwt_secret_key()

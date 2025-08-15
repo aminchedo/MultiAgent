@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
@@ -7,6 +13,10 @@
     }
   },
   "routes": [
+    {
+      "src": "/health",
+      "dest": "/api/index.py"
+    },
     {
       "src": "/favicon.ico",
       "dest": "/static/favicon.ico"
@@ -30,6 +40,15 @@
   ],
   "headers": [
     {
+      "source": "/health",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/favicon.ico",
       "headers": [
         {
@@ -47,5 +66,9 @@
         }
       ]
     }
-  ]
+  ],
+  "env": {
+    "PYTHONPATH": ".",
+    "VERCEL": "1"
+  }
 }

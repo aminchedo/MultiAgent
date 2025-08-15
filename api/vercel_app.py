@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-# Validate required environment variables
+# Enhanced environment variable validation
 def validate_env_vars():
-    """Validate that required environment variables are present"""
+    """Validate that required environment variables are present with enhanced security"""
     required_vars = ["OPENAI_API_KEY"]
     missing_vars = []
     
@@ -26,24 +26,29 @@ def validate_env_vars():
         if not os.getenv(var):
             missing_vars.append(var)
     
-    # Handle JWT_SECRET_KEY securely
+    # Enhanced JWT_SECRET_KEY handling with security warnings
     jwt_secret = os.getenv("JWT_SECRET_KEY")
     is_production = os.getenv("VERCEL") == "1" or os.getenv("NODE_ENV") == "production"
     
     if not jwt_secret:
         if is_production:
             logger.error("JWT_SECRET_KEY is required in production environment")
+            logger.error("Set JWT_SECRET_KEY in Vercel dashboard environment variables")
             raise ValueError("JWT_SECRET_KEY environment variable is required in production")
         else:
             logger.warning("JWT_SECRET_KEY not set, using default secret for development")
+            logger.warning("This is insecure for production - set JWT_SECRET_KEY in Vercel dashboard")
             os.environ["JWT_SECRET_KEY"] = "default-secret-key-for-development-only"
+    elif jwt_secret == "default-secret-key-for-development-only":
+        logger.warning("Using default JWT secret - insecure for production!")
+        logger.warning("Set JWT_SECRET_KEY environment variable in Vercel dashboard")
     
     if missing_vars:
         logger.warning(f"Missing environment variables: {missing_vars}")
         return False
     return True
 
-# Check environment variables
+# Check environment variables with enhanced error handling
 try:
     env_valid = validate_env_vars()
 except ValueError as e:
@@ -66,11 +71,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Import settings safely
+# Import settings safely with enhanced error handling
 try:
-    from config.vercel_config import get_vercel_settings
+    from config.vercel_config import get_vercel_settings, JWT_SECRET_KEY
     settings = get_vercel_settings()
     logger.info("Settings loaded successfully")
+    logger.info(f"JWT secret configured: {bool(JWT_SECRET_KEY and JWT_SECRET_KEY != 'default-secret-key-for-development-only')}")
     # Don't create upload directory at import time - use lazy initialization
     UPLOAD_ENABLED = not settings.is_vercel  # Disable uploads on Vercel by default
 except Exception as e:
@@ -78,6 +84,7 @@ except Exception as e:
     logger.error(f"Traceback: {traceback.format_exc()}")
     settings = None
     UPLOAD_ENABLED = False
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default-secret-key-for-development-only")
 
 # Mount static files directory
 try:
@@ -101,7 +108,8 @@ async def root_path():
             "status": "operational",
             "environment": "vercel" if os.getenv("VERCEL") else "local",
             "endpoints": {
-                "health": "/api/health",
+                "health": "/health",
+                "api_health": "/api/health",
                 "root": "/api",
                 "test": "/api/test"
             }
@@ -112,6 +120,29 @@ async def root_path():
         return {
             "error": "Internal server error",
             "message": str(e),
+            "environment": "vercel" if os.getenv("VERCEL") else "local"
+        }
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    try:
+        return {
+            "status": "healthy",
+            "message": "API is running",
+            "environment": "vercel" if os.getenv("VERCEL") else "local",
+            "upload_enabled": UPLOAD_ENABLED,
+            "settings_loaded": settings is not None,
+            "env_vars_valid": env_valid,
+            "jwt_configured": bool(JWT_SECRET_KEY and JWT_SECRET_KEY != "default-secret-key-for-development-only")
+        }
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return {
+            "status": "error",
+            "message": f"Health check failed: {str(e)}",
             "environment": "vercel" if os.getenv("VERCEL") else "local"
         }
 
@@ -166,9 +197,9 @@ async def favicon_png():
         logger.error(f"Favicon.png error: {e}")
         return Response(status_code=204)
 
-# Health check endpoint
+# API Health check endpoint
 @app.get("/api/health")
-async def health_check():
+async def api_health_check():
     try:
         return {
             "status": "healthy",
@@ -177,10 +208,10 @@ async def health_check():
             "upload_enabled": UPLOAD_ENABLED,
             "settings_loaded": settings is not None,
             "env_vars_valid": env_valid,
-            "jwt_configured": bool(os.getenv("JWT_SECRET_KEY") and os.getenv("JWT_SECRET_KEY") != "default-secret-key-for-development-only")
+            "jwt_configured": bool(JWT_SECRET_KEY and JWT_SECRET_KEY != "default-secret-key-for-development-only")
         }
     except Exception as e:
-        logger.error(f"Health check error: {e}")
+        logger.error(f"API Health check error: {e}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         return {
             "status": "error",
