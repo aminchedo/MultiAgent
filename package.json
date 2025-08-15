@@ -5,7 +5,6 @@
   "main": "public/index.html",
   "scripts": {
     "dev": "python3 -m http.server 8000 --directory public",
-    "build": "echo 'Static files ready for deployment'",
     "start": "python3 -m http.server 8000 --directory public",
     "test": "echo 'No tests specified'",
     "deploy": "./deploy-vercel.sh",
@@ -28,7 +27,6 @@
     "url": ""
   },
   "engines": {
-    "node": ">=16.0.0",
     "python": ">=3.9.0"
   },
   "devDependencies": {},

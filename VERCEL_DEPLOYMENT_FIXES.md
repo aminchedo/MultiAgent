@@ -20,7 +20,16 @@ This document outlines the fixes applied to resolve Vercel deployment issues wit
 - Vercel automatically detects FastAPI apps as ASGI applications
 - Added `app.debug = False` for production settings
 
-### 3. Upload Directory Handling
+### 3. Runtime Detection Issue
+**Problem**: Vercel was not properly detecting this as a Python project due to conflicting configuration.
+
+**Solution**:
+- Simplified `vercel.json` configuration
+- Updated `.vercelignore` to include Python files
+- Ensured `requirements.txt` is present for Python detection
+- Removed conflicting Node.js build scripts
+
+### 4. Upload Directory Handling
 **Problem**: Upload functionality was completely broken on Vercel due to filesystem restrictions.
 
 **Solution**:
@@ -56,27 +65,51 @@ This document outlines the fixes applied to resolve Vercel deployment issues wit
 ```
 
 ### 4. `vercel.json`
-```python
+```json
 # Key changes:
-- Increased maxDuration to 60 seconds
-- Increased memory to 1024MB
-- Added explicit Python 3.9 runtime
+- Simplified configuration to avoid runtime conflicts
+- Removed invalid runtime specifications
+- Kept only essential function settings
+```
+
+### 5. `.vercelignore`
+```gitignore
+# Key changes:
+- Removed exclusion of Python files
+- Ensured Python project is properly detected
+- Kept only necessary exclusions
+```
+
+### 6. `package.json`
+```json
+# Key changes:
+- Removed build script that could interfere with Python detection
+- Removed Node.js engine requirement
+- Kept only Python engine specification
 ```
 
 ## Deployment Instructions
 
 ### 1. Environment Variables
-Ensure these environment variables are set in Vercel:
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `JWT_SECRET_KEY`: A secure JWT secret key
-- `VERCEL`: Automatically set by Vercel
+**IMPORTANT**: Set these environment variables in your Vercel dashboard:
+
+1. Go to your Vercel project dashboard
+2. Navigate to **Settings → Environment Variables**
+3. Add these variables:
+   ```
+   OPENAI_API_KEY = your_actual_openai_api_key
+   JWT_SECRET_KEY = your_secure_jwt_secret
+   ```
 
 ### 2. Deploy to Vercel
 ```bash
-# Install Vercel CLI if not already installed
-npm i -g vercel
+# Option 1: Via Vercel Dashboard
+# - Push your code to GitHub
+# - Connect your repository to Vercel
+# - Deploy automatically
 
-# Deploy from project root
+# Option 2: Via Vercel CLI
+npm install -g vercel
 vercel --prod
 ```
 
@@ -110,37 +143,25 @@ After deployment, test these endpoints:
    ```
 
 2. **Verify environment variables**:
-   - Ensure `OPENAI_API_KEY` and `JWT_SECRET_KEY` are set
+   - Ensure `OPENAI_API_KEY` and `JWT_SECRET_KEY` are set in Vercel dashboard
    - Check that `VERCEL=1` is automatically set
 
-3. **Test locally with Vercel environment**:
+3. **Check Python detection**:
+   - Ensure `requirements.txt` exists in project root
+   - Verify `runtime.txt` specifies Python version
+   - Check that `.vercelignore` doesn't exclude Python files
+
+4. **Test locally with Vercel environment**:
    ```bash
    VERCEL=1 python3 -c "from api.index import app; print('App loaded successfully')"
    ```
 
-4. **Check function timeout**:
-   - If requests timeout, increase `maxDuration` in `vercel.json`
-   - Consider optimizing slow endpoints
-
 ### Common Issues
 
-1. **Import errors**: Ensure all dependencies are in `requirements-vercel.txt`
-2. **Memory issues**: Increase memory allocation in `vercel.json`
-3. **Timeout issues**: Increase `maxDuration` in `vercel.json`
-4. **Path issues**: Ensure `PYTHONPATH` is set correctly
-
-## Testing the Fixes
-
-Run the test script to verify fixes work:
-```bash
-python3 test_vercel_fixes.py
-```
-
-This will test:
-- Vercel configuration loading
-- App import without directory creation
-- Index module import
-- /tmp directory access
+1. **Runtime detection errors**: Ensure `requirements.txt` is present and `.vercelignore` includes Python files
+2. **Import errors**: Ensure all dependencies are in `requirements.txt`
+3. **Memory issues**: Increase memory allocation in `vercel.json`
+4. **Timeout issues**: Increase `maxDuration` in `vercel.json`
 
 ## File Upload Alternative for Vercel
 
@@ -155,6 +176,7 @@ Since Vercel has a read-only filesystem, consider these alternatives for file up
 
 The fixes ensure that:
 - ✅ App imports successfully without filesystem errors
+- ✅ Vercel properly detects this as a Python project
 - ✅ Vercel handler is properly exported
 - ✅ Upload functionality gracefully degrades on Vercel
 - ✅ All other API endpoints work normally

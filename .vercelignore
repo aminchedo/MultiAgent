@@ -43,15 +43,8 @@ pytest.ini
 *.sh
 !deploy-vercel.sh
 
-# Python development files
-*.py
-!api/
-!api/**
-!main.py
-!validate_deployment.py
-
-# Other config files that might conflict
-favicon.png
+# Keep all Python files for Vercel deployment
+# Only exclude specific development files
 fix_and_run.sh
 simple_run.py
 solution_script.sh
