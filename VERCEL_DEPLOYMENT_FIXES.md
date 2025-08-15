@@ -29,7 +29,15 @@ This document outlines the fixes applied to resolve Vercel deployment issues wit
 - Ensured `requirements.txt` is present for Python detection
 - Removed conflicting Node.js build scripts
 
-### 4. Upload Directory Handling
+### 4. Dependency Conflict Issue
+**Problem**: There was a dependency conflict between `langchain==0.1.0` and `crewai==0.28.0` during pip installation.
+
+**Solution**:
+- Created minimal `requirements.txt` with only essential packages for Vercel deployment
+- Moved AI packages to `requirements-dev.txt` for local development
+- Ensured no conflicting dependencies in production requirements
+
+### 5. Upload Directory Handling
 **Problem**: Upload functionality was completely broken on Vercel due to filesystem restrictions.
 
 **Solution**:
@@ -88,6 +96,22 @@ This document outlines the fixes applied to resolve Vercel deployment issues wit
 - Kept only Python engine specification
 ```
 
+### 7. `requirements.txt`
+```txt
+# Key changes:
+- Minimal requirements for Vercel deployment
+- Removed conflicting AI packages (crewai, langchain)
+- Kept only essential FastAPI and core dependencies
+```
+
+### 8. `requirements-dev.txt` (New)
+```txt
+# Key changes:
+- Complete requirements including AI packages
+- Compatible versions for local development
+- Use for full functionality locally
+```
+
 ## Deployment Instructions
 
 ### 1. Environment Variables
@@ -123,15 +147,18 @@ After deployment, test these endpoints:
 ## Expected Behavior
 
 ### Local Development
+- Install full dependencies: `pip install -r requirements-dev.txt`
 - Uploads work normally with local `uploads/` directory
-- Full functionality available
+- Full AI functionality available
 - Debug mode enabled
 
 ### Vercel Production
+- Uses minimal `requirements.txt` (no AI packages)
 - Uploads disabled (returns 503 Service Unavailable)
 - Uses in-memory SQLite database
 - Debug mode disabled
-- All other API endpoints work normally
+- Basic API endpoints work normally
+- AI features not available (would need separate deployment)
 
 ## Troubleshooting
 
@@ -162,6 +189,19 @@ After deployment, test these endpoints:
 2. **Import errors**: Ensure all dependencies are in `requirements.txt`
 3. **Memory issues**: Increase memory allocation in `vercel.json`
 4. **Timeout issues**: Increase `maxDuration` in `vercel.json`
+5. **Dependency conflicts**: Use minimal `requirements.txt` for Vercel, `requirements-dev.txt` for local development
+
+## Local Development Setup
+
+For full functionality locally:
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run the application
+python3 -m uvicorn api.vercel_app:app --reload --host 0.0.0.0 --port 8000
+```
 
 ## File Upload Alternative for Vercel
 
@@ -178,9 +218,11 @@ The fixes ensure that:
 - ✅ App imports successfully without filesystem errors
 - ✅ Vercel properly detects this as a Python project
 - ✅ Vercel handler is properly exported
+- ✅ No dependency conflicts during deployment
 - ✅ Upload functionality gracefully degrades on Vercel
-- ✅ All other API endpoints work normally
+- ✅ All basic API endpoints work normally
 - ✅ Proper error handling and logging
 - ✅ Environment-specific configuration
+- ✅ Separate requirements for production vs development
 
 The application should now deploy successfully on Vercel while maintaining full functionality for local development.
