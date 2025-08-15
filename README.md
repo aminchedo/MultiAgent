@@ -40,8 +40,13 @@ A production-ready, intelligent code generation platform powered by CrewAI and O
 
 ### Hugging Face Spaces Deployment
 
+⚠️ **SECURITY NOTICE**: Never hardcode tokens! See [SECURITY_DEPLOYMENT_GUIDE.md](./SECURITY_DEPLOYMENT_GUIDE.md) for secure practices.
+
 1. **Quick Deploy**:
 ```bash
+# Set your HF token as environment variable
+export HF_TOKEN=your_hf_token_here
+
 chmod +x quick-deploy-test.sh
 ./quick-deploy-test.sh
 ```

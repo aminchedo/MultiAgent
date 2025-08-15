@@ -5,7 +5,7 @@
 Your Hugging Face token integration has been successfully configured! This document summarizes everything that was implemented.
 
 ## 🔐 Your Token
-**HF_TOKEN**: `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`
+**HF_TOKEN**: `Set as environment variable - do not hardcode!`
 
 ## 🌐 Deployment Target
 **Hugging Face Space**: https://huggingface.co/spaces/Really-amin/ultichat-hugginigfae
@@ -84,7 +84,7 @@ git push origin main
 ### Option 2: Quick Setup + Manual Deploy
 ```bash
 # One-command setup
-HF_TOKEN=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 ./scripts/setup.sh
+HF_TOKEN=your_hf_token_here ./scripts/setup.sh
 
 # Manual deployment
 ./deploy.sh "🧪 Initial deployment"
@@ -93,7 +93,7 @@ HF_TOKEN=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 ./scripts/setup.sh
 ### Option 3: Step-by-step Setup
 ```bash
 # 1. Validate token
-export HF_TOKEN=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
+export HF_TOKEN=your_hf_token_here
 python scripts/validate-token.py
 
 # 2. Create environment
@@ -119,7 +119,7 @@ cp .env.example .env
 3. **Add Repository Secret**
    - Click: "New repository secret"
    - **Name**: `HF_TOKEN`
-   - **Value**: `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`
+   - **Value**: `your_hf_token_here`
    - Click: "Add secret"
 
 ---
@@ -129,13 +129,13 @@ cp .env.example .env
 ### Setup Commands
 ```bash
 # Complete setup
-HF_TOKEN=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 ./scripts/setup.sh
+HF_TOKEN=your_hf_token_here ./scripts/setup.sh
 
 # Validation only
-HF_TOKEN=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 ./scripts/setup.sh validate-only
+HF_TOKEN=your_hf_token_here ./scripts/setup.sh validate-only
 
 # Environment setup only
-HF_TOKEN=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 ./scripts/setup.sh env-only
+HF_TOKEN=your_hf_token_here ./scripts/setup.sh env-only
 ```
 
 ### Deployment Commands
@@ -159,7 +159,7 @@ HF_TOKEN=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 ./scripts/setup.sh env-only
 python scripts/validate-token.py
 
 # With specific token
-python scripts/validate-token.py --token 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
+python scripts/validate-token.py --token your_hf_token_here
 
 # Skip space check
 python scripts/validate-token.py --no-space-check
@@ -244,7 +244,7 @@ ENVIRONMENT=production
 #### 1. Token Not Found Error
 ```bash
 # Solution: Set the token
-export HF_TOKEN=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
+export HF_TOKEN=your_hf_token_here
 ```
 
 #### 2. GitHub Secrets Not Working
@@ -322,7 +322,7 @@ Your integration is working correctly when:
 ### Quick Commands Reference
 ```bash
 # Complete setup (one command)
-HF_TOKEN=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 ./scripts/setup.sh
+HF_TOKEN=your_hf_token_here ./scripts/setup.sh
 
 # Quick deployment test
 ./deploy.sh deploy "🧪 Test deployment"

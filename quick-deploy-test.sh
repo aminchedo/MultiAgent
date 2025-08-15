@@ -14,7 +14,15 @@ PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
 # Configuration
-HF_TOKEN="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"
+# Check if HF_TOKEN is set
+if [ -z "$HF_TOKEN" ]; then
+    echo -e "${RED}❌ Error: HF_TOKEN environment variable is not set!${NC}"
+    echo -e "${YELLOW}Please set your Hugging Face token:${NC}"
+    echo -e "${BLUE}export HF_TOKEN=your_hf_token_here${NC}"
+    echo -e "${BLUE}./quick-deploy-test.sh${NC}"
+    exit 1
+fi
+
 HF_SPACE="Really-amin/ultichat-hugginigfae"
 SPACE_URL="https://huggingface.co/spaces/${HF_SPACE}"
 LIVE_URL="https://really-amin-ultichat-hugginigfae.hf.space"

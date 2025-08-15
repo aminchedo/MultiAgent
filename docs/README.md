@@ -117,7 +117,7 @@ Use our automated setup script for easy Hugging Face integration:
 
 ```bash
 # Set your HF token and run setup
-HF_TOKEN=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 ./scripts/setup.sh
+HF_TOKEN=your_hf_token_here ./scripts/setup.sh
 ```
 
 This will:
@@ -133,7 +133,7 @@ This will:
    ```bash
    # Visit: https://huggingface.co/settings/tokens
    # Create a new token with 'write' permissions
-   export HF_TOKEN=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
+   export HF_TOKEN=your_hf_token_here
    ```
 
 2. **Validate Your Token**
@@ -144,7 +144,7 @@ This will:
 3. **Configure GitHub Secrets**
    - Go to your GitHub repository settings
    - Navigate to "Secrets and variables" → "Actions"  
-   - Add new secret: `HF_TOKEN` = `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`
+   - Add new secret: `HF_TOKEN` = `your_hf_token_here`
 
 4. **Test Deployment**
    ```bash
@@ -163,7 +163,7 @@ Every push to `main` branch automatically deploys to:
 
 #### 🛠️ Manual Deployment
 ```bash
-export HF_TOKEN=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
+export HF_TOKEN=your_hf_token_here
 ./deploy.sh "Your deployment message"
 ```
 
@@ -614,7 +614,7 @@ git clone <your-repo-url>
 cd multi-agent-code-generator
 
 # 2. Quick HF setup
-HF_TOKEN=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 ./scripts/setup.sh
+HF_TOKEN=your_hf_token_here ./scripts/setup.sh
 
 # 3. Configure other environment variables
 nano .env

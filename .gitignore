@@ -341,6 +341,13 @@ tramp
 .huggingface/
 hf_token
 huggingface_token
+# Prevent any files with HF token patterns
+*hf_*token*
+HF_TOKEN=*
+export HF_TOKEN=*
+# Prevent hardcoded tokens in any format
+hf_[a-zA-Z0-9]{34}
+hf_[a-zA-Z0-9]*
 
 # SSH keys
 id_rsa

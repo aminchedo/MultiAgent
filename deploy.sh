@@ -44,7 +44,7 @@ check_prerequisites() {
         print_error "HF_TOKEN environment variable is not set!"
         echo ""
         echo "Please set your Hugging Face token:"
-        echo "export HF_TOKEN=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"
+        echo "export HF_TOKEN=your_hf_token_here"
         echo ""
         echo "Or source it from .env file:"
         echo "source .env"

@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 HF_SPACE="Really-amin/ultichat-hugginigfae"
-REQUIRED_TOKEN="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"
+# Note: HF_TOKEN should be provided as environment variable
 
 # Function to print colored output
 print_status() {
