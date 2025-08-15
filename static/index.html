@@ -5,87 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم چند-عامله هوشمند تولید کد</title>
     
-    <!-- Enhanced Font Loading -->
+    <!-- Optimized Font Loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     
     <style>
         :root {
-            /* Enhanced Color Palette */
+            /* Enhanced Color System */
             --primary: #6366f1;
-            --primary-light: #8b5cf6;
+            --primary-light: #818cf8;
             --primary-dark: #4f46e5;
             --secondary: #0f172a;
             --accent: #f59e0b;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0284c7;
             
-            /* Advanced Background System */
+            /* Rich Background Palette */
             --bg-primary: #0a0e1a;
-            --bg-secondary: #151b2e;
-            --bg-tertiary: #1e2a42;
-            --bg-quaternary: #283548;
-            --bg-glass: rgba(15, 23, 42, 0.7);
-            --bg-glass-light: rgba(255, 255, 255, 0.05);
-            --bg-card: rgba(30, 42, 66, 0.8);
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-quaternary: #475569;
+            --bg-glass: rgba(30, 41, 59, 0.95);
+            --bg-card: rgba(51, 65, 85, 0.95);
+            --bg-hover: rgba(99, 102, 241, 0.1);
+            --bg-active: rgba(99, 102, 241, 0.2);
             
-            /* Enhanced Text Colors */
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --text-accent: #a855f7;
+            /* Enhanced Text Colors - Better Contrast */
+            --text-primary: #ffffff;
+            --text-secondary: #f1f5f9;
+            --text-muted: #cbd5e1;
+            --text-accent: #c084fc;
+            --text-inverse: #0f172a;
             
-            /* Border System */
+            /* Sophisticated Border System */
             --border-primary: #475569;
             --border-secondary: #64748b;
-            --border-accent: rgba(168, 85, 247, 0.3);
-            --border-glow: rgba(99, 102, 241, 0.4);
+            --border-accent: rgba(99, 102, 241, 0.4);
+            --border-focus: rgba(99, 102, 241, 0.6);
+            --border-success: rgba(5, 150, 105, 0.4);
+            --border-warning: rgba(217, 119, 6, 0.4);
+            --border-danger: rgba(220, 38, 38, 0.4);
             
             /* Advanced Effects */
-            --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.2);
-            --shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            --shadow-lg: 0 40px 80px rgba(0, 0, 0, 0.4);
-            --shadow-glow: 0 0 50px rgba(99, 102, 241, 0.3);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.35);
+            --shadow-glow: 0 0 32px rgba(99, 102, 241, 0.25);
             --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-            --gradient-secondary: linear-gradient(145deg, #0a0e1a 0%, #151b2e 50%, #1e2a42 100%);
-            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #facc15 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
-            --blur: blur(32px);
-            --blur-strong: blur(48px);
+            --gradient-secondary: linear-gradient(145deg, #0a0e1a 0%, #1e293b 50%, #334155 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --gradient-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            --gradient-danger: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            --blur: blur(24px);
             
             /* Enhanced Border Radius */
-            --radius-xs: 8px;
-            --radius-sm: 16px;
-            --radius: 24px;
-            --radius-lg: 32px;
-            --radius-xl: 48px;
+            --radius-xs: 6px;
+            --radius-sm: 10px;
+            --radius: 14px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+            --radius-2xl: 32px;
             
-            /* Animation System */
-            --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            /* Minimal Transitions - Faster and Lighter */
+            --transition-fast: all 0.1s ease;
+            --transition: all 0.2s ease;
+            --transition-slow: all 0.3s ease;
             
-            /* Enhanced Typography */
-            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
-            --font-persian: 'Vazirmatn', sans-serif;
-            --font-icon: 'Material Symbols Outlined';
+            /* Typography System */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            --font-persian: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Tahoma', sans-serif;
             
-            /* Spacing System */
-            --space-xs: 8px;
-            --space-sm: 16px;
-            --space: 24px;
-            --space-lg: 32px;
-            --space-xl: 48px;
-            --space-2xl: 64px;
+            /* Enhanced Spacing */
+            --space-xs: 6px;
+            --space-sm: 10px;
+            --space: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+            --space-3xl: 64px;
+            
+            /* Typography Scale */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --text-4xl: 2.25rem;
+            --text-5xl: 3rem;
         }
 
         * {
@@ -101,11 +115,15 @@
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
-            font-weight: 400;
-            position: relative;
+            font-size: var(--text-base);
+            /* Optimized scaling */
+            transform: scale(0.65);
+            transform-origin: top center;
+            width: 153.85%; /* 100/0.65 to compensate for scale */
+            min-height: 153.85vh;
         }
 
-        /* Enhanced Animated Background */
+        /* Enhanced background with better visual hierarchy */
         body::before {
             content: '';
             position: fixed;
@@ -114,35 +132,14 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 50% 100%, rgba(217, 70, 239, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 100% 50%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -2;
-            animation: backgroundMove 20s ease-in-out infinite;
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.01) 2px, rgba(255,255,255,0.01) 4px),
-                repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(99,102,241,0.02) 1px, rgba(99,102,241,0.02) 2px);
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(5, 150, 105, 0.08) 0%, transparent 50%);
             pointer-events: none;
             z-index: -1;
         }
 
-        @keyframes backgroundMove {
-            0%, 100% { filter: hue-rotate(0deg); }
-            50% { filter: hue-rotate(90deg); }
-        }
-
-        /* Enhanced Container */
+        /* Container with better spacing */
         .container {
             max-width: 1800px;
             margin: 0 auto;
@@ -150,134 +147,90 @@
             position: relative;
         }
 
-        /* Floating Particles Effect */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 10s infinite linear;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-        }
-
-        /* Enhanced Header */
+        /* Enhanced Header with better typography hierarchy */
         .header {
             background: var(--bg-glass);
             backdrop-filter: var(--blur);
             border: 1px solid var(--border-accent);
-            border-radius: var(--radius-xl);
-            padding: var(--space-2xl);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-3xl);
             margin-bottom: var(--space-2xl);
             text-align: center;
             position: relative;
-            overflow: hidden;
             box-shadow: var(--shadow-glow);
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-primary);
-            transform: scaleX(0);
-            transition: transform 1.2s var(--bounce);
-        }
-
-        .header:hover::before {
-            transform: scaleX(1);
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-
         .header-title {
-            font-size: clamp(2.5rem, 6vw, 5rem);
-            font-weight: 900;
+            font-size: var(--text-4xl);
+            font-weight: 800;
             background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: var(--space);
-            letter-spacing: -0.02em;
             font-family: var(--font-primary);
-            line-height: 1.1;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
         }
 
         .header-subtitle {
             color: var(--text-secondary);
-            font-size: clamp(1.125rem, 3vw, 1.75rem);
+            font-size: var(--text-lg);
             font-weight: 400;
-            max-width: 800px;
+            max-width: 700px;
             margin: 0 auto var(--space-lg);
-            opacity: 0.9;
             font-family: var(--font-persian);
-            line-height: 1.7;
+            line-height: 1.6;
         }
 
         .header-stats {
-            display: flex;
-            justify-content: center;
-            gap: var(--space-xl);
-            margin-top: var(--space-lg);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-2xl);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .stat-item {
             text-align: center;
-            padding: var(--space) var(--space-lg);
-            background: var(--bg-glass-light);
-            border-radius: var(--radius);
+            padding: var(--space-lg) var(--space-xl);
+            background: var(--bg-hover);
+            border-radius: var(--radius-lg);
             border: 1px solid var(--border-secondary);
+            transition: var(--transition);
+            backdrop-filter: var(--blur);
+        }
+
+        .stat-item:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: var(--text-3xl);
             font-weight: 700;
             color: var(--primary-light);
             font-family: var(--font-primary);
+            margin-bottom: var(--space-xs);
         }
 
         .stat-label {
-            font-size: 0.875rem;
+            font-size: var(--text-sm);
             color: var(--text-muted);
-            margin-top: var(--space-xs);
+            font-family: var(--font-persian);
+            font-weight: 500;
         }
 
-        /* Main Layout Enhancement */
+        /* Enhanced Main Layout */
         .main-layout {
             display: grid;
-            grid-template-columns: 450px 1fr 350px;
-            gap: var(--space-xl);
+            grid-template-columns: 400px 1fr 320px;
+            gap: var(--space-2xl);
             min-height: calc(100vh - 400px);
-        }
-
-        /* Enhanced Sidebar */
-        .sidebar, .right-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-lg);
+            align-items: start;
         }
 
         /* Enhanced Card System */
@@ -285,68 +238,51 @@
             background: var(--bg-card);
             backdrop-filter: var(--blur);
             border: 1px solid var(--border-primary);
-            border-radius: var(--radius-lg);
-            padding: var(--space-xl);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
             position: relative;
             transition: var(--transition-slow);
             box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            margin-bottom: var(--space-xl);
         }
 
         .card:hover {
-            border-color: var(--border-glow);
-            box-shadow: var(--shadow-glow);
-            transform: translateY(-8px) scale(1.02);
-        }
-
-        .card:hover::before {
-            opacity: 1;
+            border-color: var(--border-accent);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
         }
 
         .card-header {
             display: flex;
             align-items: center;
             gap: var(--space);
-            margin-bottom: var(--space-lg);
-            padding-bottom: var(--space);
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
             border-bottom: 1px solid var(--border-secondary);
         }
 
         .card-title {
-            font-size: 1.5rem;
+            font-size: var(--text-xl);
             font-weight: 700;
             color: var(--text-primary);
             margin: 0;
-            font-family: var(--font-primary);
+            font-family: var(--font-persian);
         }
 
         /* Enhanced Form Elements */
         .form-group {
             margin-bottom: var(--space-lg);
-            position: relative;
         }
 
         .form-label {
             display: flex;
             align-items: center;
-            gap: var(--space-xs);
-            margin-bottom: var(--space-sm);
+            gap: var(--space-sm);
+            margin-bottom: var(--space);
             font-weight: 600;
             color: var(--text-secondary);
-            font-size: 1rem;
-            font-family: var(--font-primary);
+            font-size: var(--text-base);
+            font-family: var(--font-persian);
         }
 
         .form-input, .form-select, .form-textarea {
@@ -357,22 +293,22 @@
             border-radius: var(--radius);
             color: var(--text-primary);
             font-family: var(--font-persian);
-            font-size: 1rem;
+            font-size: var(--text-base);
             transition: var(--transition);
-            position: relative;
+            outline: none;
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary-light);
+            border-color: var(--border-focus);
             background: var(--bg-secondary);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
         }
 
         .form-textarea {
-            min-height: 120px;
+            min-height: 100px;
             font-family: var(--font-mono);
             resize: vertical;
+            line-height: 1.7;
         }
 
         /* Enhanced Button System */
@@ -380,34 +316,24 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: var(--space-sm);
-            padding: var(--space) var(--space-lg);
+            gap: var(--space);
+            padding: var(--space) var(--space-xl);
             border: none;
             border-radius: var(--radius);
-            font-family: var(--font-primary);
-            font-size: 1rem;
+            font-family: var(--font-persian);
+            font-size: var(--text-base);
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
             transition: var(--transition);
+            white-space: nowrap;
             position: relative;
             overflow: hidden;
-            white-space: nowrap;
         }
 
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .btn:hover::before {
-            left: 100%;
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-primary {
@@ -416,7 +342,7 @@
             box-shadow: var(--shadow);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
@@ -427,42 +353,54 @@
             border: 1px solid var(--border-secondary);
         }
 
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-quaternary);
+            border-color: var(--border-accent);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--gradient-danger);
+            color: white;
+        }
+
         .btn-full {
             width: 100%;
         }
 
         .btn-sm {
-            padding: var(--space-xs) var(--space);
-            font-size: 0.875rem;
+            padding: var(--space-sm) var(--space);
+            font-size: var(--text-sm);
         }
 
-        /* API Configuration Section */
-        .api-config {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: var(--space-lg);
-            margin-bottom: var(--space-lg);
-        }
-
+        /* API Configuration with better visual feedback */
         .api-provider {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--space);
+            padding: var(--space-lg);
             background: var(--bg-tertiary);
-            border-radius: var(--radius-sm);
-            margin-bottom: var(--space-sm);
-            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space);
+            border: 2px solid var(--border-primary);
             transition: var(--transition);
+            cursor: pointer;
         }
 
         .api-provider:hover {
-            border-color: var(--border-glow);
+            border-color: var(--border-accent);
+            background: var(--bg-hover);
         }
 
         .api-provider.active {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--border-focus);
+            background: var(--bg-active);
+            box-shadow: var(--shadow-sm);
         }
 
         .api-info {
@@ -474,7 +412,22 @@
         .api-logo {
             width: 32px;
             height: 32px;
-            border-radius: var(--radius-xs);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .api-details h4 {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: var(--text-base);
+            margin-bottom: 2px;
+        }
+
+        .api-details p {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
         }
 
         .api-status {
@@ -482,7 +435,6 @@
             height: 12px;
             border-radius: 50%;
             background: var(--success);
-            animation: pulse 2s infinite;
         }
 
         .api-status.disconnected {
@@ -492,87 +444,75 @@
         /* Enhanced Agent Cards */
         .agents-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: var(--space);
         }
 
         .agent-card {
             background: var(--bg-secondary);
-            border: 1px solid var(--border-primary);
-            border-radius: var(--radius);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-lg);
             padding: var(--space-lg);
             text-align: center;
             transition: var(--transition-slow);
-            position: relative;
-            overflow: hidden;
             cursor: pointer;
+            position: relative;
         }
 
-        .agent-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-accent);
-            transform: scaleX(0);
-            transition: transform 0.4s ease;
-        }
-
-        .agent-card:hover::before {
-            transform: scaleX(1);
+        .agent-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
         }
 
         .agent-card.active {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.15);
-            transform: scale(1.05);
+            border-color: var(--border-focus);
+            background: var(--bg-active);
+            box-shadow: var(--shadow-glow);
         }
 
         .agent-avatar {
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             margin: 0 auto var(--space);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
             background: var(--gradient-primary);
             color: white;
-            position: relative;
+            font-size: var(--text-lg);
         }
 
-        .agent-avatar::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: var(--gradient-primary);
-            border-radius: 50%;
-            z-index: -1;
-            animation: rotate 3s linear infinite;
+        .agent-name {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            font-family: var(--font-persian);
+            color: var(--text-primary);
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .agent-status {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            font-family: var(--font-persian);
+            padding: 2px 8px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-xs);
+            display: inline-block;
         }
 
         /* Enhanced Status Bar */
         .status-bar {
             background: var(--bg-card);
-            backdrop-filter: var(--blur);
             border: 1px solid var(--border-primary);
-            border-radius: var(--radius);
+            border-radius: var(--radius-lg);
             padding: var(--space-lg);
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: var(--space-lg);
+            backdrop-filter: var(--blur);
         }
 
         .status-info {
@@ -582,11 +522,20 @@
         }
 
         .status-indicator {
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             position: relative;
-            animation: pulse 2s infinite;
+        }
+
+        .status-indicator::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: inherit;
+            animation: pulse-ring 2s infinite;
         }
 
         .status-working { background: var(--warning); }
@@ -597,7 +546,7 @@
         .progress-container {
             background: var(--bg-tertiary);
             border-radius: var(--radius);
-            height: 12px;
+            height: 10px;
             overflow: hidden;
             margin-bottom: var(--space-lg);
             position: relative;
@@ -607,34 +556,18 @@
             height: 100%;
             background: var(--gradient-primary);
             width: 0%;
-            transition: width 0.8s ease-in-out;
-            position: relative;
-        }
-
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            transition: width 0.3s ease;
+            border-radius: var(--radius);
         }
 
         /* Enhanced Tabs */
         .tabs {
             display: flex;
             background: var(--bg-tertiary);
-            border-radius: var(--radius);
-            padding: 8px;
+            border-radius: var(--radius-lg);
+            padding: var(--space-xs);
             margin-bottom: var(--space-lg);
-            gap: 4px;
+            gap: var(--space-xs);
         }
 
         .tab {
@@ -644,63 +577,64 @@
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius);
             transition: var(--transition);
-            font-family: var(--font-primary);
+            font-family: var(--font-persian);
+            font-size: var(--text-sm);
             font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: var(--space-xs);
+            gap: var(--space-sm);
         }
 
         .tab:hover {
-            background: var(--bg-glass-light);
+            background: var(--bg-hover);
             color: var(--text-primary);
         }
 
         .tab.active {
             background: var(--gradient-primary);
             color: white;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-sm);
         }
 
-        /* Enhanced Tab Content */
+        /* Tab Content */
         .tab-content {
             display: none;
             background: var(--bg-card);
-            backdrop-filter: var(--blur);
             border: 1px solid var(--border-primary);
-            border-radius: var(--radius);
-            height: 700px;
+            border-radius: var(--radius-lg);
+            height: 600px;
             overflow: hidden;
+            backdrop-filter: var(--blur);
         }
 
         .tab-content.active {
             display: block;
         }
 
-        /* Real-time Logs */
+        /* Enhanced Logs */
         .logs-container {
             padding: var(--space-lg);
             height: 100%;
             overflow-y: auto;
             font-family: var(--font-mono);
-            font-size: 0.9rem;
+            font-size: var(--text-sm);
         }
 
         .log-entry {
-            padding: var(--space) var(--space-lg);
+            padding: var(--space-sm) var(--space);
             margin-bottom: var(--space-sm);
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius);
             border-left: 4px solid;
             background: rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.4s ease;
             transition: var(--transition);
+            backdrop-filter: var(--blur);
         }
 
         .log-entry:hover {
-            transform: translateX(8px);
+            transform: translateX(6px);
         }
 
         .log-info { border-color: var(--info); }
@@ -708,12 +642,7 @@
         .log-warning { border-color: var(--warning); }
         .log-error { border-color: var(--danger); }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* File Tree Enhancement */
+        /* File Tree */
         .file-tree {
             padding: var(--space-lg);
             height: 100%;
@@ -723,44 +652,58 @@
         .file-item {
             padding: var(--space) var(--space-lg);
             cursor: pointer;
-            border-radius: var(--radius-sm);
-            margin-bottom: var(--space-xs);
+            border-radius: var(--radius);
+            margin-bottom: var(--space-sm);
             transition: var(--transition);
             display: flex;
             align-items: center;
             gap: var(--space);
             font-family: var(--font-mono);
+            font-size: var(--text-sm);
+            border: 1px solid transparent;
         }
 
         .file-item:hover {
-            background: var(--bg-tertiary);
-            transform: translateX(8px);
+            background: var(--bg-hover);
+            border-color: var(--border-accent);
+            transform: translateX(6px);
         }
 
         .file-item.active {
-            background: var(--gradient-primary);
-            color: white;
+            background: var(--bg-active);
+            border-color: var(--border-focus);
+            color: var(--text-primary);
+        }
+
+        .file-meta {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-top: 2px;
         }
 
         /* Monitor Cards */
         .monitor-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: var(--space);
         }
 
         .monitor-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-primary);
-            border-radius: var(--radius);
+            border-radius: var(--radius-lg);
             padding: var(--space-lg);
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .monitor-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
         }
 
         .monitor-value {
-            font-size: 2rem;
+            font-size: var(--text-2xl);
             font-weight: 700;
             color: var(--primary-light);
             margin-bottom: var(--space-xs);
@@ -768,8 +711,10 @@
         }
 
         .monitor-label {
-            font-size: 0.875rem;
+            font-size: var(--text-xs);
             color: var(--text-muted);
+            font-family: var(--font-persian);
+            font-weight: 500;
         }
 
         /* Chat Interface */
@@ -791,7 +736,6 @@
         .chat-message {
             display: flex;
             gap: var(--space);
-            animation: slideIn 0.3s ease;
         }
 
         .chat-message.user {
@@ -799,14 +743,15 @@
         }
 
         .message-avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: var(--gradient-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            font-size: var(--text-sm);
             font-weight: 600;
             flex-shrink: 0;
         }
@@ -814,14 +759,18 @@
         .message-content {
             background: var(--bg-tertiary);
             padding: var(--space) var(--space-lg);
-            border-radius: var(--radius);
-            max-width: 70%;
+            border-radius: var(--radius-lg);
+            max-width: 75%;
             border: 1px solid var(--border-primary);
+            font-size: var(--text-sm);
+            font-family: var(--font-persian);
+            line-height: 1.6;
         }
 
         .chat-message.user .message-content {
             background: var(--gradient-primary);
             color: white;
+            border-color: transparent;
         }
 
         .chat-input-container {
@@ -835,29 +784,38 @@
             flex: 1;
             padding: var(--space) var(--space-lg);
             background: var(--bg-tertiary);
-            border: 1px solid var(--border-primary);
-            border-radius: var(--radius);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-lg);
             color: var(--text-primary);
             resize: none;
-            min-height: 50px;
+            min-height: 44px;
             max-height: 120px;
             font-family: var(--font-persian);
+            font-size: var(--text-sm);
+            outline: none;
+            transition: var(--transition);
         }
 
-        /* Notification System */
+        .chat-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Enhanced Notification */
         .notification {
             position: fixed;
-            top: var(--space-lg);
-            right: var(--space-lg);
+            top: var(--space-xl);
+            right: var(--space-xl);
             background: var(--bg-card);
             backdrop-filter: var(--blur);
             border: 1px solid var(--border-primary);
-            border-radius: var(--radius);
+            border-radius: var(--radius-lg);
             padding: var(--space-lg);
-            min-width: 350px;
+            min-width: 360px;
+            max-width: 480px;
             z-index: 1000;
             transform: translateX(120%);
-            transition: transform 0.4s var(--bounce);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             box-shadow: var(--shadow-lg);
         }
 
@@ -865,64 +823,168 @@
             transform: translateX(0);
         }
 
-        .notification.success { border-color: var(--success); }
-        .notification.error { border-color: var(--danger); }
-        .notification.warning { border-color: var(--warning); }
+        .notification.success { border-color: var(--border-success); }
+        .notification.error { border-color: var(--border-danger); }
+        .notification.warning { border-color: var(--border-warning); }
+        .notification.info { border-color: var(--border-accent); }
 
-        /* Enhanced Empty States */
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+        }
+
+        .notification-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .notification-text h4 {
+            font-weight: 600;
+            font-size: var(--text-base);
+            margin-bottom: 2px;
+            color: var(--text-primary);
+        }
+
+        .notification-text p {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Preview Container */
+        .preview-container {
+            padding: var(--space-lg);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .preview-content {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            border: 1px solid var(--border-primary);
+        }
+
+        .preview-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .preview-title {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: var(--space);
+        }
+
+        .preview-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space);
+            margin-bottom: var(--space-xl);
+        }
+
+        .meta-item {
+            background: var(--bg-tertiary);
+            padding: var(--space);
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .meta-label {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-xs);
+            font-weight: 500;
+        }
+
+        .meta-value {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
+            border-radius: var(--radius);
+            background: white;
+        }
+
+        /* Empty State */
         .empty-state {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100%;
-            padding: var(--space-xl);
+            padding: var(--space-2xl);
             text-align: center;
             color: var(--text-muted);
         }
 
-        .empty-state .icon {
-            width: 80px;
-            height: 80px;
-            margin-bottom: var(--space-lg);
-            opacity: 0.6;
-            animation: pulse 2s infinite;
+        .empty-state h3 {
+            margin: var(--space-lg) 0 var(--space);
+            font-family: var(--font-persian);
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--text-secondary);
         }
 
-        /* Material Icons */
-        .material-icon {
-            font-family: var(--font-icon);
-            font-weight: normal;
-            font-style: normal;
-            font-size: 24px;
-            line-height: 1;
-            letter-spacing: normal;
-            text-transform: none;
-            display: inline-block;
-            white-space: nowrap;
-            word-wrap: normal;
-            direction: ltr;
+        .empty-state p {
+            font-family: var(--font-persian);
+            font-size: var(--text-sm);
+            line-height: 1.6;
+            max-width: 400px;
         }
 
-        /* Loading Animations */
-        .loading {
+        /* SVG Icons */
+        .icon {
+            width: 20px;
+            height: 20px;
             display: inline-block;
+            vertical-align: middle;
+        }
+
+        .icon-lg {
             width: 24px;
             height: 24px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .icon-xl {
+            width: 48px;
+            height: 48px;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive Design */
+        /* Enhanced Responsive Design */
+        @media (max-width: 1600px) {
+            .main-layout {
+                grid-template-columns: 360px 1fr 300px;
+                gap: var(--space-xl);
+            }
+        }
+
         @media (max-width: 1400px) {
             .main-layout {
-                grid-template-columns: 400px 1fr 300px;
+                grid-template-columns: 320px 1fr 280px;
                 gap: var(--space-lg);
             }
         }
@@ -939,73 +1001,260 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                transform: scale(0.85);
+                width: 117.65%;
+                min-height: 117.65vh;
+            }
+            
             .container {
                 padding: var(--space);
             }
             
             .header {
-                padding: var(--space-lg);
-                margin-bottom: var(--space-lg);
-            }
-            
-            .card {
-                padding: var(--space);
+                padding: var(--space-xl);
             }
             
             .header-stats {
-                flex-direction: column;
-                gap: var(--space);
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .notification {
+                right: var(--space);
+                left: var(--space);
+                min-width: auto;
+                max-width: none;
             }
         }
 
-        /* Accessibility */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
+        @media (max-width: 480px) {
+            .header-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .agents-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .monitor-grid {
+                grid-template-columns: 1fr;
             }
         }
 
-        .btn:focus-visible,
-        .form-input:focus-visible,
-        .tab:focus-visible {
-            outline: 3px solid var(--primary-light);
-            outline-offset: 2px;
+        /* Connection Status Indicator */
+        .connection-status {
+            position: fixed;
+            top: var(--space-lg);
+            left: var(--space-lg);
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space) var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+            backdrop-filter: var(--blur);
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            min-width: 180px;
+        }
+
+        .connection-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .connection-indicator.connected {
+            background: var(--success);
+        }
+
+        .connection-indicator.disconnected {
+            background: var(--danger);
+        }
+
+        .connection-indicator.checking {
+            background: var(--warning);
+        }
+
+        .connection-text {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Smart Notification System */
+        .notification-container {
+            position: fixed;
+            top: var(--space-xl);
+            right: var(--space-xl);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space);
+            max-width: 400px;
+        }
+
+        .smart-notification {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-lg);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            border-left: 4px solid var(--info);
+        }
+
+        .smart-notification.show {
+            transform: translateX(0);
+        }
+
+        .smart-notification.success { border-left-color: var(--success); }
+        .smart-notification.error { border-left-color: var(--danger); }
+        .smart-notification.warning { border-left-color: var(--warning); }
+        .smart-notification.info { border-left-color: var(--info); }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-sm);
+        }
+
+        .notification-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: var(--text-base);
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .notification-close:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .notification-body {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+            margin-bottom: var(--space);
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: flex-end;
+        }
+
+        .notification-btn {
+            padding: var(--space-xs) var(--space);
+            border: 1px solid var(--border-secondary);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-xs);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-accent);
+        }
+
+        .notification-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .notification-btn.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Simple Loading */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Right-to-left adjustments */
+        [dir="rtl"] .chat-message.user {
+            flex-direction: row;
+        }
+
+        [dir="rtl"] .chat-message:not(.user) {
+            flex-direction: row-reverse;
         }
     </style>
 </head>
 <body>
-    <!-- Floating Particles -->
-    <div class="particles" id="particles"></div>
+    <!-- Connection Status Indicator -->
+    <div class="connection-status" id="connectionStatus">
+        <div class="connection-indicator checking" id="connectionIndicator"></div>
+        <span class="connection-text" id="connectionText">بررسی ارتباط...</span>
+    </div>
+
+    <!-- Smart Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
 
     <div class="container">
         <!-- Enhanced Header -->
         <header class="header">
-            <div class="header-content">
-                <h1 class="header-title">
-                    🚀 سیستم چند-عامله هوشمند تولید کد
-                </h1>
-                <p class="header-subtitle">
-                    پلتفرم پیشرفته تولید پروژه با هوش مصنوعی و چندین عامل هوشمند برای ساخت اپلیکیشن‌های کامل و حرفه‌ای با قابلیت‌های سفارشی‌سازی بی‌شتر و یکپارچگی API
-                </p>
-                <div class="header-stats">
-                    <div class="stat-item">
-                        <div class="stat-value">15</div>
-                        <div class="stat-label">پروژه فعال</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">8</div>
-                        <div class="stat-label">عامل آنلاین</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">42</div>
-                        <div class="stat-label">API متصل</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">99.9%</div>
-                        <div class="stat-label">آپتایم</div>
-                    </div>
+            <h1 class="header-title">
+                <svg class="icon-lg" style="margin-left: 12px;" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                </svg>
+                هوش مصنوعی تولید کد
+            </h1>
+            <p class="header-subtitle">
+                سیستم پیشرفته برای تولید خودکار پروژه‌های نرم‌افزاری با کیفیت حرفه‌ای و تکنولوژی‌های روز دنیا
+            </p>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="activeProjects">23</div>
+                    <div class="stat-label">پروژه فعال</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="onlineAgents">12</div>
+                    <div class="stat-label">سرویس آنلاین</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="connectedAPIs">8</div>
+                    <div class="stat-label">API متصل</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="systemUptime">99.8%</div>
+                    <div class="stat-label">آپتایم سیستم</div>
                 </div>
             </div>
         </header>
@@ -1016,163 +1265,235 @@
                 <!-- Project Generation -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="material-icon">rocket_launch</span>
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
                         <h3 class="card-title">تولید پروژه جدید</h3>
                     </div>
                     
                     <form id="projectForm">
                         <div class="form-group">
                             <label for="project-name" class="form-label">
-                                <span class="material-icon">badge</span>
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
                                 نام پروژه
                             </label>
-                            <input type="text" id="project-name" class="form-input" placeholder="مثال: اپلیکیشن فروشگاهی هوشمند" required>
+                            <input type="text" id="project-name" class="form-input" placeholder="مثال: فروشگاه آنلاین هوشمند با AI" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="project-type" class="form-label">
-                                <span class="material-icon">category</span>
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
                                 نوع پروژه
                             </label>
                             <select id="project-type" class="form-select" required>
                                 <option value="">انتخاب کنید</option>
-                                <option value="web-app">وب اپلیکیشن</option>
-                                <option value="mobile-app">اپلیکیشن موبایل</option>
-                                <option value="desktop-app">اپلیکیشن دسکتاپ</option>
-                                <option value="api">API و بک‌اند</option>
+                                <option value="web-app">وب اپلیکیشن (React/Vue/Angular)</option>
+                                <option value="mobile-app">اپلیکیشن موبایل (React Native/Flutter)</option>
+                                <option value="desktop-app">اپلیکیشن دسکتاپ (Electron/Tauri)</option>
+                                <option value="api">API و بک‌اند (FastAPI/Django/Express)</option>
                                 <option value="ai-ml">هوش مصنوعی/یادگیری ماشین</option>
-                                <option value="blockchain">بلاکچین</option>
-                                <option value="game">بازی</option>
+                                <option value="blockchain">بلاکچین و Web3</option>
+                                <option value="game">بازی (Unity/Godot)</option>
+                                <option value="automation">اتوماسیون و ربات</option>
                             </select>
                         </div>
                         
                         <div class="form-group">
                             <label for="project-desc" class="form-label">
-                                <span class="material-icon">description</span>
-                                توضیحات پروژه
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                                </svg>
+                                توضیحات کامل پروژه
                             </label>
-                            <textarea id="project-desc" class="form-textarea" placeholder="توضیح کامل در مورد پروژه، نیازمندی‌ها، قابلیت‌های مورد نظر و جزئیات تکنیکی..." required></textarea>
+                            <textarea id="project-desc" class="form-textarea" placeholder="توضیح کامل در مورد پروژه، نیازمندی‌ها، قابلیت‌های مورد نظر، تکنولوژی‌های مطلوب و جزئیات عملکردی..." required></textarea>
                         </div>
                         
                         <div class="form-group">
                             <label for="project-lang" class="form-label">
-                                <span class="material-icon">code</span>
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                                </svg>
                                 زبان‌های برنامه نویسی
                             </label>
-                            <input type="text" id="project-lang" class="form-input" placeholder="مثال: Python, JavaScript, TypeScript, Rust">
+                            <input type="text" id="project-lang" class="form-input" placeholder="مثال: Python, TypeScript, Rust, Go">
                         </div>
                         
                         <div class="form-group">
                             <label for="project-framework" class="form-label">
-                                <span class="material-icon">extension</span>
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
                                 فریم‌ورک‌ها و کتابخانه‌ها
                             </label>
-                            <input type="text" id="project-framework" class="form-input" placeholder="مثال: Django, React, FastAPI, TensorFlow">
+                            <input type="text" id="project-framework" class="form-input" placeholder="مثال: Next.js, FastAPI, PostgreSQL, Redis">
                         </div>
                         
                         <div class="form-group">
                             <label for="project-complexity" class="form-label">
-                                <span class="material-icon">tune</span>
-                                سطح پیچیدگی
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                سطح پیچیدگی و زمان تولید
                             </label>
                             <select id="project-complexity" class="form-select">
-                                <option value="simple">ساده (1-3 روز)</option>
-                                <option value="medium" selected>متوسط (1-2 هفته)</option>
-                                <option value="complex">پیچیده (1-2 ماه)</option>
-                                <option value="enterprise">سازمانی (3+ ماه)</option>
+                                <option value="simple">ساده - MVP (2-5 روز)</option>
+                                <option value="medium" selected>متوسط - کامل (1-3 هفته)</option>
+                                <option value="complex">پیچیده - پیشرفته (1-3 ماه)</option>
+                                <option value="enterprise">سازمانی - مقیاس‌پذیر (3+ ماه)</option>
                             </select>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary btn-full">
-                            <span class="material-icon">play_arrow</span>
-                            شروع تولید
+                        <button type="submit" class="btn btn-primary btn-full" id="generateBtn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            شروع تولید هوشمند
                         </button>
                     </form>
                 </div>
 
-                <!-- API Configuration -->
+                <!-- Enhanced API Configuration -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="material-icon">api</span>
-                        <h3 class="card-title">تنظیمات API</h3>
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <h3 class="card-title">سرویس‌های هوش مصنوعی</h3>
                     </div>
                     
-                    <div class="api-config">
-                        <div class="api-provider active" data-provider="openai">
-                            <div class="api-info">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'%3E%3Cpath d='M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z'/%3E%3C/svg%3E" alt="OpenAI" class="api-logo">
-                                <div>
-                                    <div style="font-weight: 600;">OpenAI GPT</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">GPT-4, GPT-3.5</div>
-                                </div>
+                    <div class="api-provider active" data-provider="openai">
+                        <div class="api-info">
+                            <div class="api-logo" style="background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%);">
+                                <svg class="icon" viewBox="0 0 24 24" fill="white">
+                                    <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729z"/>
+                                </svg>
                             </div>
-                            <div class="api-status"></div>
-                        </div>
-                        
-                        <div class="api-provider" data-provider="anthropic">
-                            <div class="api-info">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b5cf6'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E" alt="Anthropic" class="api-logo">
-                                <div>
-                                    <div style="font-weight: 600;">Anthropic Claude</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Claude-3, Claude-2</div>
-                                </div>
+                            <div class="api-details">
+                                <h4>OpenAI GPT</h4>
+                                <p>GPT-4 Turbo، GPT-3.5، Codex</p>
                             </div>
-                            <div class="api-status"></div>
                         </div>
-                        
-                        <div class="api-provider" data-provider="google">
-                            <div class="api-info">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z'/%3E%3Cpath d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z'/%3E%3Cpath d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z'/%3E%3Cpath d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z'/%3E%3C/svg%3E" alt="Google" class="api-logo">
-                                <div>
-                                    <div style="font-weight: 600;">Google AI</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Gemini, PaLM</div>
-                                </div>
-                            </div>
-                            <div class="api-status disconnected"></div>
-                        </div>
-                        
-                        <button class="btn btn-secondary btn-full" style="margin-top: 16px;">
-                            <span class="material-icon">settings</span>
-                            تنظیمات پیشرفته API
-                        </button>
+                        <div class="api-status" title="متصل"></div>
                     </div>
+                    
+                    <div class="api-provider" data-provider="anthropic">
+                        <div class="api-info">
+                            <div class="api-logo" style="background: linear-gradient(135deg, #d97706 0%, #92400e 100%);">
+                                <svg class="icon" viewBox="0 0 24 24" fill="white">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="api-details">
+                                <h4>Anthropic Claude</h4>
+                                <p>Claude-3 Opus، Claude-3 Sonnet</p>
+                            </div>
+                        </div>
+                        <div class="api-status" title="متصل"></div>
+                    </div>
+                    
+                    <div class="api-provider" data-provider="google">
+                        <div class="api-info">
+                            <div class="api-logo" style="background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);">
+                                <svg class="icon" viewBox="0 0 24 24" fill="white">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                </svg>
+                            </div>
+                            <div class="api-details">
+                                <h4>Google AI</h4>
+                                <p>Gemini Pro، PaLM 2، Bard</p>
+                            </div>
+                        </div>
+                        <div class="api-status disconnected" title="قطع شده"></div>
+                    </div>
+                    
+                    <div class="api-provider" data-provider="mistral">
+                        <div class="api-info">
+                            <div class="api-logo" style="background: linear-gradient(135deg, #ff7000 0%, #cc5a00 100%);">
+                                <svg class="icon" viewBox="0 0 24 24" fill="white">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="api-details">
+                                <h4>Mistral AI</h4>
+                                <p>Mistral Large، Mixtral 8x7B</p>
+                            </div>
+                        </div>
+                        <div class="api-status" title="متصل"></div>
+                    </div>
+                    
+                    <button class="btn btn-secondary btn-full" style="margin-top: var(--space);">
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        تنظیمات پیشرفته API
+                    </button>
                 </div>
 
-                <!-- Agent Status -->
+                <!-- Enhanced Agent Status -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="material-icon">group</span>
-                        <h3 class="card-title">وضعیت عامل‌ها</h3>
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                        </svg>
+                        <h3 class="card-title">ابزارهای کدنویسی</h3>
                     </div>
                     <div class="agents-grid">
-                        <div class="agent-card active">
-                            <div class="agent-avatar">🤖</div>
-                            <div class="agent-name">مدیر پروژه</div>
-                            <div class="agent-status">در حال کار</div>
+                        <div class="agent-card active" data-agent="manager">
+                            <div class="agent-avatar">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="agent-name">مدیریت پروژه</div>
+                            <div class="agent-status">فعال</div>
                         </div>
-                        <div class="agent-card">
-                            <div class="agent-avatar">👨‍💻</div>
-                            <div class="agent-name">برنامه نویس</div>
+                        <div class="agent-card" data-agent="developer">
+                            <div class="agent-avatar">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                                </svg>
+                            </div>
+                            <div class="agent-name">تولید کد</div>
                             <div class="agent-status">آماده</div>
                         </div>
-                        <div class="agent-card">
-                            <div class="agent-avatar">🎨</div>
-                            <div class="agent-name">طراح UI/UX</div>
+                        <div class="agent-card" data-agent="designer">
+                            <div class="agent-avatar">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="agent-name">طراحی UI</div>
                             <div class="agent-status">آماده</div>
                         </div>
-                        <div class="agent-card">
-                            <div class="agent-avatar">🧪</div>
-                            <div class="agent-name">تستر</div>
+                        <div class="agent-card" data-agent="tester">
+                            <div class="agent-avatar">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="agent-name">تست کد</div>
                             <div class="agent-status">آماده</div>
                         </div>
-                        <div class="agent-card">
-                            <div class="agent-avatar">🔒</div>
-                            <div class="agent-name">امنیت</div>
+                        <div class="agent-card" data-agent="security">
+                            <div class="agent-avatar">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11.5C15.4,11.5 16,12.1 16,12.7V16.3C16,16.9 15.4,17.5 14.8,17.5H9.2C8.6,17.5 8,16.9 8,16.3V12.6C8,12 8.6,11.4 9.2,11.4V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.5,8.7 10.5,10V11.5H13.5V10C13.5,8.7 12.8,8.2 12,8.2Z"/>
+                                </svg>
+                            </div>
+                            <div class="agent-name">بررسی امنیت</div>
                             <div class="agent-status">آماده</div>
                         </div>
-                        <div class="agent-card">
-                            <div class="agent-avatar">📊</div>
-                            <div class="agent-name">تحلیلگر</div>
+                        <div class="agent-card" data-agent="analyst">
+                            <div class="agent-avatar">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z"/>
+                                </svg>
+                            </div>
+                            <div class="agent-name">بهینه‌سازی</div>
                             <div class="agent-status">آماده</div>
                         </div>
                     </div>
@@ -1181,53 +1502,64 @@
 
             <!-- Main Content -->
             <main class="main-content">
-                <!-- Status Bar -->
+                <!-- Enhanced Status Bar -->
                 <div class="status-bar">
                     <div class="status-info">
-                        <div class="status-indicator status-working"></div>
-                        <span class="status-text">در حال تولید پروژه...</span>
+                        <div class="status-indicator status-working" id="statusIndicator"></div>
+                        <span class="status-text" id="statusText">آماده برای شروع تولید پروژه...</span>
                     </div>
                     <div class="status-info">
-                        <span class="status-text">گام 1 از 10</span>
+                        <span class="status-text" id="stepText">گام 0 از 12</span>
                     </div>
                 </div>
 
-                <!-- Progress Bar -->
+                <!-- Enhanced Progress Bar -->
                 <div class="progress-container">
-                    <div class="progress-bar" style="width: 10%;" id="progressBar"></div>
+                    <div class="progress-bar" id="progressBar"></div>
                 </div>
                 
-                <!-- Tabs -->
+                <!-- Enhanced Tabs -->
                 <div class="tabs">
                     <button class="tab active" data-tab-target="#logs-tab">
-                        <span class="material-icon">terminal</span>
-                        لاگ‌ها
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2 3h20v2H2zm1.15 4h17.7l-2 8H4.5l.65-8z"/>
+                        </svg>
+                        لاگ‌های سیستم
                     </button>
                     <button class="tab" data-tab-target="#files-tab">
-                        <span class="material-icon">folder</span>
-                        فایل‌ها
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+                        </svg>
+                        فایل‌های پروژه
                     </button>
                     <button class="tab" data-tab-target="#preview-tab">
-                        <span class="material-icon">preview</span>
-                        پیش‌نمایش
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                        پیش‌نمایش زنده
                     </button>
                     <button class="tab" data-tab-target="#chat-tab">
-                        <span class="material-icon">chat</span>
-                        چت با عامل‌ها
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        دستیار کدنویسی
                     </button>
                 </div>
 
                 <!-- Tab Contents -->
                 <div id="logs-tab" class="tab-content active">
                     <div class="logs-container" id="logsContainer">
-                        <div class="log-entry log-info">
-                            <span>[00:00:01]</span> سیستم با موفقیت راه‌اندازی شد
+                        <div class="log-entry log-success">
+                            <span>[00:00:01]</span> سیستم هوش مصنوعی با موفقیت راه‌اندازی شد
                         </div>
                         <div class="log-entry log-success">
-                            <span>[00:00:02]</span> اتصال به APIهای هوش مصنوعی برقرار شد
+                            <span>[00:00:02]</span> اتصال به سرویس‌های هوش مصنوعی برقرار شد (OpenAI ✓ Anthropic ✓ Mistral ✓)
                         </div>
-                        <div class="log-entry log-warning">
-                            <span>[00:00:05]</span> عامل "مدیر پروژه" در حال بررسی نیازمندی‌ها
+                        <div class="log-entry log-info">
+                            <span>[00:00:03]</span> تمامی ابزارهای کدنویسی آماده دریافت دستورات هستند
+                        </div>
+                        <div class="log-entry log-info">
+                            <span>[00:00:04]</span> سیستم مانیتورینگ فعال شد - CPU: 45% | RAM: 8.2GB | API Latency: 34ms
                         </div>
                     </div>
                 </div>
@@ -1235,18 +1567,24 @@
                 <div id="files-tab" class="tab-content">
                     <div class="file-tree" id="fileTree">
                         <div class="empty-state">
-                            <span class="material-icon" style="font-size: 80px;">folder_open</span>
-                            <h3>هنوز فایلی ایجاد نشده</h3>
-                            <p>پس از شروع فرآیند تولید، فایل‌های پروژه اینجا نمایش داده خواهند شد.</p>
+                            <svg class="icon-xl" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.3;">
+                                <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+                            </svg>
+                            <h3>درخت فایل‌های پروژه خالی است</h3>
+                            <p>پس از شروع فرآیند تولید، ساختار کامل پروژه شامل فایل‌های کد، تست‌ها، مستندات و تنظیمات اینجا نمایش داده خواهند شد.</p>
                         </div>
                     </div>
                 </div>
 
                 <div id="preview-tab" class="tab-content">
-                    <div class="empty-state">
-                        <span class="material-icon" style="font-size: 80px;">visibility</span>
-                        <h3>پیش‌نمایشی برای نمایش وجود ندارد</h3>
-                        <p>پس از تولید کد، می‌توانید پیش‌نمایش آن را در اینجا مشاهده کنید.</p>
+                    <div class="preview-container" id="previewContainer">
+                        <div class="empty-state">
+                            <svg class="icon-xl" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.3;">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                            <h3>پیش‌نمایش زنده در انتظار پروژه</h3>
+                            <p>پس از تولید پروژه، می‌توانید پیش‌نمایش زنده و تعاملی آن را در این بخش مشاهده کنید. سیستم از سرویس‌های آنلاین برای ارائه پیش‌نمایش واقعی استفاده می‌کند.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1254,16 +1592,22 @@
                     <div class="chat-container">
                         <div class="chat-messages" id="chatMessages">
                             <div class="chat-message">
-                                <div class="message-avatar">🤖</div>
+                                <div class="message-avatar">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                                    </svg>
+                                </div>
                                 <div class="message-content">
-                                    سلام! من مدیر پروژه هستم. چه پروژه‌ای می‌خواهید بسازیم؟
+                                    سلام! من دستیار کدنویسی هستم. آماده‌ام تا پروژه ایده‌آل شما را با بهترین تکنولوژی‌ها و استانداردهای روز دنیا بسازم. چه نوع اپلیکیشنی می‌خواهید بسازیم؟
                                 </div>
                             </div>
                         </div>
                         <div class="chat-input-container">
-                            <textarea class="chat-input" placeholder="پیام خود را بنویسید..." id="chatInput"></textarea>
+                            <textarea class="chat-input" placeholder="سوال یا درخواست کدنویسی خود را بنویسید..." id="chatInput"></textarea>
                             <button class="btn btn-primary" id="sendChatBtn">
-                                <span class="material-icon">send</span>
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -1272,85 +1616,128 @@
 
             <!-- Right Sidebar -->
             <aside class="right-sidebar">
-                <!-- System Monitor -->
+                <!-- Enhanced System Monitor -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="material-icon">monitor_heart</span>
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M13 9h8L11 24v-9H4l9-15v9z"/>
+                        </svg>
                         <h3 class="card-title">مانیتور سیستم</h3>
                     </div>
                     <div class="monitor-grid">
                         <div class="monitor-card">
-                            <div class="monitor-value">87%</div>
-                            <div class="monitor-label">CPU</div>
+                            <div class="monitor-value" id="cpuUsage">67%</div>
+                            <div class="monitor-label">پردازنده CPU</div>
                         </div>
                         <div class="monitor-card">
-                            <div class="monitor-value">12.4GB</div>
-                            <div class="monitor-label">RAM</div>
+                            <div class="monitor-value" id="ramUsage">14.2GB</div>
+                            <div class="monitor-label">حافظه RAM</div>
                         </div>
                         <div class="monitor-card">
-                            <div class="monitor-value">42ms</div>
-                            <div class="monitor-label">API Latency</div>
+                            <div class="monitor-value" id="apiLatency">28ms</div>
+                            <div class="monitor-label">تاخیر API</div>
                         </div>
                         <div class="monitor-card">
-                            <div class="monitor-value">1.2M</div>
-                            <div class="monitor-label">Tokens/hr</div>
+                            <div class="monitor-value" id="tokensPerHour">2.4M</div>
+                            <div class="monitor-label">توکن/ساعت</div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-value" id="activeConnections">156</div>
+                            <div class="monitor-label">اتصالات فعال</div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-value" id="dailyGenerated">42</div>
+                            <div class="monitor-label">پروژه/روز</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Projects -->
+                <!-- Enhanced Recent Projects -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="material-icon">history</span>
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
+                        </svg>
                         <h3 class="card-title">پروژه‌های اخیر</h3>
                     </div>
                     <div class="file-tree">
-                        <div class="file-item">
-                            <span class="material-icon">web</span>
+                        <div class="file-item" data-project="ecommerce">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
                             <div>
-                                <div>فروشگاه آنلاین</div>
-                                <div class="file-meta">2 ساعت پیش</div>
+                                <div>فروشگاه آنلاین NextJS</div>
+                                <div class="file-meta">3 ساعت پیش - NextJS + Stripe</div>
                             </div>
                         </div>
-                        <div class="file-item">
-                            <span class="material-icon">smartphone</span>
+                        <div class="file-item" data-project="dashboard">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z"/>
+                            </svg>
                             <div>
-                                <div>اپ موبایل</div>
-                                <div class="file-meta">1 روز پیش</div>
+                                <div>داشبورد تحلیلی</div>
+                                <div class="file-meta">1 روز پیش - React + D3.js</div>
                             </div>
                         </div>
-                        <div class="file-item">
-                            <span class="material-icon">psychology</span>
+                        <div class="file-item" data-project="ai-chat">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                            </svg>
                             <div>
-                                <div>AI Chatbot</div>
-                                <div class="file-meta">3 روز پیش</div>
+                                <div>چت‌بات هوشمند</div>
+                                <div class="file-meta">2 روز پیش - Python + OpenAI</div>
+                            </div>
+                        </div>
+                        <div class="file-item" data-project="mobile-banking">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                            </svg>
+                            <div>
+                                <div>اپ موبایل بانکداری</div>
+                                <div class="file-meta">5 روز پیش - Flutter + Firebase</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
+                <!-- Enhanced Quick Actions -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="material-icon">flash_on</span>
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M13 9h8L11 24v-9H4l9-15v9z"/>
+                        </svg>
                         <h3 class="card-title">اقدامات سریع</h3>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <button class="btn btn-secondary btn-full btn-sm">
-                            <span class="material-icon">upload_file</span>
-                            آپلود فایل
+                    <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+                        <button class="btn btn-secondary btn-full btn-sm" id="uploadBtn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                            </svg>
+                            آپلود فایل پروژه
                         </button>
-                        <button class="btn btn-secondary btn-full btn-sm">
-                            <span class="material-icon">file_download</span>
-                            دانلود پروژه
+                        <button class="btn btn-secondary btn-full btn-sm" id="downloadBtn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M5 20v-5h2v3h10v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1zM9 4h6v7l-2-2-2 2-2-2V4z"/>
+                            </svg>
+                            دانلود پروژه کامل
                         </button>
-                        <button class="btn btn-secondary btn-full btn-sm">
-                            <span class="material-icon">share</span>
-                            اشتراک‌گذاری
+                        <button class="btn btn-secondary btn-full btn-sm" id="shareBtn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
+                            </svg>
+                            اشتراک‌گذاری پروژه
                         </button>
-                        <button class="btn btn-secondary btn-full btn-sm">
-                            <span class="material-icon">backup</span>
-                            پشتیبان‌گیری
+                        <button class="btn btn-secondary btn-full btn-sm" id="templateBtn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                            </svg>
+                            قالب‌های آماده
+                        </button>
+                        <button class="btn btn-success btn-full btn-sm" id="backupBtn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12,1L8,5H11V14H13V5H16M18,23H6C4.89,23 4,22.1 4,21V9A2,2 0 0,1 6,7H9V9H6V21H18V9H15V7H18A2,2 0 0,1 20,9V21A2,2 0 0,1 18,23Z"/>
+                            </svg>
+                            پشتیبان‌گیری خودکار
                         </button>
                     </div>
                 </div>
@@ -1358,44 +1745,316 @@
         </div>
     </div>
 
-    <!-- Notification -->
-    <div class="notification success" id="notification">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span class="material-icon">check_circle</span>
-            <div>
-                <div style="font-weight: 600;">عملیات موفق</div>
-                <div style="font-size: 0.875rem; opacity: 0.8;">پروژه با موفقیت ایجاد شد!</div>
-            </div>
-        </div>
-    </div>
+    <!-- Enhanced Scrollbar -->
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-secondary);
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--border-accent);
+        }
+
+        /* Right-to-left adjustments */
+        [dir="rtl"] .chat-message.user {
+            flex-direction: row;
+        }
+
+        [dir="rtl"] .chat-message:not(.user) {
+            flex-direction: row-reverse;
+        }
+    </style>
 
     <script>
-        // Enhanced JavaScript functionality
         class EnhancedAICodeGenerator {
             constructor() {
                 this.init();
+                this.checkAPIConnections();
                 this.setupEventListeners();
-                this.createParticles();
                 this.startSystemMonitoring();
-                this.simulateProgress();
+                this.startRealTimeUpdates();
+                this.initializeSmartNotifications();
             }
 
             init() {
                 this.currentStep = 0;
-                this.totalSteps = 10;
-                this.agents = [
-                    { name: 'مدیر پروژه', status: 'active', emoji: '🤖' },
-                    { name: 'برنامه نویس', status: 'ready', emoji: '👨‍💻' },
-                    { name: 'طراح UI/UX', status: 'ready', emoji: '🎨' },
-                    { name: 'تستر', status: 'ready', emoji: '🧪' },
-                    { name: 'امنیت', status: 'ready', emoji: '🔒' },
-                    { name: 'تحلیلگر', status: 'ready', emoji: '📊' }
-                ];
-                this.apis = {
-                    openai: { connected: true, latency: 42 },
-                    anthropic: { connected: true, latency: 38 },
-                    google: { connected: false, latency: 0 }
+                this.totalSteps = 12;
+                this.isGenerating = false;
+                this.apiConnections = {
+                    openai: { status: 'checking', latency: 0, lastCheck: null },
+                    anthropic: { status: 'checking', latency: 0, lastCheck: null },
+                    google: { status: 'checking', latency: 0, lastCheck: null },
+                    mistral: { status: 'checking', latency: 0, lastCheck: null }
                 };
+                this.agents = [
+                    { id: 'manager', name: 'مدیریت پروژه', status: 'ready', emoji: '🤖' },
+                    { id: 'developer', name: 'تولید کد', status: 'ready', emoji: '👨‍💻' },
+                    { id: 'designer', name: 'طراحی UI', status: 'ready', emoji: '🎨' },
+                    { id: 'tester', name: 'تست کد', status: 'ready', emoji: '🧪' },
+                    { id: 'security', name: 'بررسی امنیت', status: 'ready', emoji: '🔒' },
+                    { id: 'analyst', name: 'بهینه‌سازی', status: 'ready', emoji: '📊' }
+                ];
+                this.files = [];
+                this.systemStats = {
+                    activeProjects: 0,
+                    onlineAgents: 0,
+                    connectedAPIs: 0,
+                    systemUptime: 0,
+                    cpuUsage: 0,
+                    ramUsage: 0,
+                    apiLatency: 0,
+                    tokensPerHour: 0,
+                    activeConnections: 0,
+                    dailyGenerated: 0
+                };
+                this.notificationId = 0;
+            }
+
+            async checkAPIConnections() {
+                this.updateConnectionStatus('checking', 'بررسی ارتباط با APIها...');
+                
+                const apis = ['openai', 'anthropic', 'google', 'mistral'];
+                let connectedCount = 0;
+                
+                for (const api of apis) {
+                    try {
+                        const startTime = Date.now();
+                        
+                        // Simulate API check with realistic delays
+                        await this.simulateAPICheck(api);
+                        
+                        const latency = Date.now() - startTime;
+                        this.apiConnections[api] = {
+                            status: Math.random() > 0.2 ? 'connected' : 'disconnected', // 80% success rate
+                            latency: latency,
+                            lastCheck: new Date()
+                        };
+                        
+                        if (this.apiConnections[api].status === 'connected') {
+                            connectedCount++;
+                        }
+                        
+                        this.updateAPIProviderStatus(api, this.apiConnections[api].status);
+                        
+                    } catch (error) {
+                        this.apiConnections[api] = {
+                            status: 'disconnected',
+                            latency: 0,
+                            lastCheck: new Date()
+                        };
+                        this.updateAPIProviderStatus(api, 'disconnected');
+                    }
+                }
+                
+                // Update system stats
+                this.systemStats.connectedAPIs = connectedCount;
+                this.systemStats.onlineAgents = connectedCount > 0 ? Math.min(connectedCount * 2, 6) : 0;
+                this.systemStats.activeProjects = connectedCount > 0 ? Math.floor(Math.random() * 15) + 10 : 0;
+                this.systemStats.systemUptime = connectedCount > 0 ? (99.0 + Math.random() * 0.9).toFixed(1) : 0;
+                
+                this.updateHeaderStats();
+                
+                if (connectedCount === 0) {
+                    this.updateConnectionStatus('disconnected', 'ارتباط با APIها قطع است');
+                    this.showSmartNotification({
+                        type: 'error',
+                        title: 'خطا در ارتباط',
+                        message: 'هیچ API در دسترس نیست. لطفاً تنظیمات را بررسی کنید.',
+                        persistent: true,
+                        actions: [
+                            { text: 'تلاش مجدد', action: () => this.checkAPIConnections(), primary: true },
+                            { text: 'تنظیمات', action: () => this.openSettings() }
+                        ]
+                    });
+                } else if (connectedCount < apis.length) {
+                    this.updateConnectionStatus('connected', `${connectedCount} از ${apis.length} API متصل`);
+                    this.showSmartNotification({
+                        type: 'warning',
+                        title: 'ارتباط جزئی',
+                        message: `تنها ${connectedCount} از ${apis.length} API در دسترس است. عملکرد ممکن است محدود باشد.`,
+                        autoClose: 5000
+                    });
+                } else {
+                    this.updateConnectionStatus('connected', 'تمام APIها متصل');
+                    this.showSmartNotification({
+                        type: 'success',
+                        title: 'ارتباط برقرار',
+                        message: 'تمام سرویس‌های هوش مصنوعی آماده استفاده هستند.',
+                        autoClose: 3000
+                    });
+                }
+                
+                this.addLog(`🔌 بررسی ارتباط کامل شد - ${connectedCount}/${apis.length} API متصل`, 
+                    connectedCount === apis.length ? 'success' : connectedCount > 0 ? 'warning' : 'error');
+            }
+
+            async simulateAPICheck(api) {
+                // Simulate realistic API response times
+                const delays = {
+                    openai: 200 + Math.random() * 300,
+                    anthropic: 150 + Math.random() * 250,
+                    google: 300 + Math.random() * 400,
+                    mistral: 180 + Math.random() * 280
+                };
+                
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        // Simulate occasional failures
+                        if (Math.random() < 0.1) {
+                            reject(new Error(`${api} connection failed`));
+                        } else {
+                            resolve();
+                        }
+                    }, delays[api] || 250);
+                });
+            }
+
+            updateConnectionStatus(status, text) {
+                const indicator = document.getElementById('connectionIndicator');
+                const textEl = document.getElementById('connectionText');
+                
+                indicator.className = `connection-indicator ${status}`;
+                textEl.textContent = text;
+            }
+
+            updateAPIProviderStatus(api, status) {
+                const provider = document.querySelector(`[data-provider="${api}"]`);
+                if (provider) {
+                    const statusIndicator = provider.querySelector('.api-status');
+                    statusIndicator.className = `api-status ${status === 'connected' ? '' : 'disconnected'}`;
+                }
+            }
+
+            updateHeaderStats() {
+                document.getElementById('activeProjects').textContent = this.systemStats.activeProjects || 0;
+                document.getElementById('onlineAgents').textContent = this.systemStats.onlineAgents || 0;
+                document.getElementById('connectedAPIs').textContent = this.systemStats.connectedAPIs || 0;
+                document.getElementById('systemUptime').textContent = this.systemStats.systemUptime ? `${this.systemStats.systemUptime}%` : '0%';
+            }
+
+            initializeSmartNotifications() {
+                // Initialize notification system
+                this.notifications = new Map();
+                
+                // Welcome notification
+                setTimeout(() => {
+                    this.showSmartNotification({
+                        type: 'info',
+                        title: 'خوش آمدید',
+                        message: 'سیستم هوش مصنوعی تولید کد آماده استفاده است.',
+                        autoClose: 4000
+                    });
+                }, 2000);
+            }
+
+            showSmartNotification(options) {
+                const {
+                    type = 'info',
+                    title,
+                    message,
+                    autoClose = null,
+                    persistent = false,
+                    actions = []
+                } = options;
+
+                const notificationId = ++this.notificationId;
+                const container = document.getElementById('notificationContainer');
+                
+                const notification = document.createElement('div');
+                notification.className = `smart-notification ${type}`;
+                notification.id = `notification-${notificationId}`;
+                
+                const icons = {
+                    success: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
+                    error: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>',
+                    warning: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
+                    info: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'
+                };
+                
+                const actionsHTML = actions.length > 0 ? `
+                    <div class="notification-actions">
+                        ${actions.map(action => `
+                            <button class="notification-btn ${action.primary ? 'primary' : ''}" 
+                                    onclick="aiGenerator.handleNotificationAction('${notificationId}', '${action.text}')">
+                                ${action.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                ` : '';
+                
+                notification.innerHTML = `
+                    <div class="notification-header">
+                        <div class="notification-title">
+                            ${icons[type]}
+                            ${title}
+                        </div>
+                        ${!persistent ? '<button class="notification-close" onclick="aiGenerator.closeNotification(\'' + notificationId + '\')">&times;</button>' : ''}
+                    </div>
+                    <div class="notification-body">${message}</div>
+                    ${actionsHTML}
+                `;
+                
+                container.appendChild(notification);
+                
+                // Store notification data for actions
+                this.notifications.set(notificationId.toString(), { actions, element: notification });
+                
+                // Show notification
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+                
+                // Auto close if specified
+                if (autoClose && !persistent) {
+                    setTimeout(() => {
+                        this.closeNotification(notificationId);
+                    }, autoClose);
+                }
+                
+                return notificationId;
+            }
+
+            closeNotification(notificationId) {
+                const notification = document.getElementById(`notification-${notificationId}`);
+                if (notification) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                        this.notifications.delete(notificationId.toString());
+                    }, 400);
+                }
+            }
+
+            handleNotificationAction(notificationId, actionText) {
+                const notificationData = this.notifications.get(notificationId.toString());
+                if (notificationData) {
+                    const action = notificationData.actions.find(a => a.text === actionText);
+                    if (action && action.action) {
+                        action.action();
+                    }
+                    this.closeNotification(notificationId);
+                }
+            }
+
+            openSettings() {
+                this.showSmartNotification({
+                    type: 'info',
+                    title: 'تنظیمات API',
+                    message: 'صفحه تنظیمات API در حال توسعه است. لطفاً با تیم پشتیبانی تماس بگیرید.',
+                    autoClose: 3000
+                });
             }
 
             setupEventListeners() {
@@ -1431,20 +2090,39 @@
                 document.querySelectorAll('.agent-card').forEach(card => {
                     card.addEventListener('click', () => this.selectAgent(card));
                 });
+
+                // Quick action buttons
+                this.setupQuickActions();
+
+                // Recent project clicks
+                document.querySelectorAll('[data-project]').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const projectName = item.querySelector('div > div').textContent;
+                        this.loadProject(projectName);
+                    });
+                });
             }
 
-            createParticles() {
-                const particlesContainer = document.getElementById('particles');
-                const particleCount = 50;
+            setupQuickActions() {
+                document.getElementById('uploadBtn').addEventListener('click', () => {
+                    this.handleUpload();
+                });
 
-                for (let i = 0; i < particleCount; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.animationDelay = Math.random() * 10 + 's';
-                    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                    particlesContainer.appendChild(particle);
-                }
+                document.getElementById('downloadBtn').addEventListener('click', () => {
+                    this.downloadProject();
+                });
+
+                document.getElementById('shareBtn').addEventListener('click', () => {
+                    this.shareProject();
+                });
+
+                document.getElementById('templateBtn').addEventListener('click', () => {
+                    this.showTemplates();
+                });
+
+                document.getElementById('backupBtn').addEventListener('click', () => {
+                    this.backupProject();
+                });
             }
 
             switchTab(activeTab) {
@@ -1461,72 +2139,434 @@
             }
 
             startProjectGeneration() {
-                const formData = new FormData(document.getElementById('projectForm'));
-                const projectName = formData.get('project-name') || document.getElementById('project-name').value;
+                if (this.isGenerating) {
+                    this.showSmartNotification({
+                        type: 'warning',
+                        title: 'پروژه در حال تولید',
+                        message: 'پروژه‌ای در حال تولید است. لطفاً صبر کنید تا تکمیل شود.',
+                        autoClose: 3000
+                    });
+                    return;
+                }
+
+                // Check API connections before starting
+                const connectedAPIs = Object.values(this.apiConnections).filter(api => api.status === 'connected');
+                if (connectedAPIs.length === 0) {
+                    this.showSmartNotification({
+                        type: 'error',
+                        title: 'خطا در ارتباط',
+                        message: 'هیچ API متصل نیست. لطفاً ابتدا ارتباط را بررسی کنید.',
+                        persistent: true,
+                        actions: [
+                            { text: 'بررسی ارتباط', action: () => this.checkAPIConnections(), primary: true },
+                            { text: 'ادامه آفلاین', action: () => this.startOfflineGeneration() }
+                        ]
+                    });
+                    return;
+                }
+
+                const formData = this.getFormData();
                 
-                this.showNotification('شروع تولید پروژه...', 'info');
-                this.addLog('شروع فرآیند تولید پروژه: ' + projectName, 'info');
+                if (!this.validateFormData(formData)) {
+                    return;
+                }
+
+                this.isGenerating = true;
+                document.getElementById('generateBtn').disabled = true;
                 
-                // Simulate project generation steps
-                this.simulateProjectSteps();
+                this.showSmartNotification({
+                    type: 'success',
+                    title: 'شروع تولید پروژه',
+                    message: `پروژه "${formData.name}" با استفاده از ${connectedAPIs.length} API در حال تولید است.`,
+                    autoClose: 3000
+                });
+                
+                this.addLog(`🚀 شروع فرآیند تولید پروژه: ${formData.name}`, 'success');
+                this.addLog(`📋 نوع پروژه: ${this.getProjectTypeLabel(formData.type)}`, 'info');
+                this.addLog(`🛠️ تکنولوژی‌ها: ${formData.languages || 'خودکار'} | ${formData.frameworks || 'خودکار'}`, 'info');
+                this.addLog(`🔌 APIهای فعال: ${connectedAPIs.length} سرویس`, 'info');
+                
+                // Update status
+                document.getElementById('statusText').textContent = 'در حال تحلیل و تولید پروژه...';
+                document.getElementById('statusIndicator').className = 'status-indicator status-working';
+                
+                this.simulateProjectSteps(formData);
             }
 
-            simulateProjectSteps() {
+            startOfflineGeneration() {
+                this.showSmartNotification({
+                    type: 'info',
+                    title: 'حالت آفلاین',
+                    message: 'تولید پروژه با قابلیت‌های محدود شروع می‌شود.',
+                    autoClose: 3000
+                });
+                // Continue with limited functionality
+                this.startProjectGeneration();
+            }
+
+            getFormData() {
+                return {
+                    name: document.getElementById('project-name').value,
+                    type: document.getElementById('project-type').value,
+                    description: document.getElementById('project-desc').value,
+                    languages: document.getElementById('project-lang').value,
+                    frameworks: document.getElementById('project-framework').value,
+                    complexity: document.getElementById('project-complexity').value
+                };
+            }
+
+            validateFormData(formData) {
+                if (!formData.name || !formData.type || !formData.description) {
+                    this.showSmartNotification({
+                        type: 'error',
+                        title: 'اطلاعات ناقص',
+                        message: 'لطفاً تمام فیلدهای اجباری (نام، نوع و توضیحات) را پر کنید.',
+                        autoClose: 4000
+                    });
+                    return false;
+                }
+                
+                if (formData.name.length < 3) {
+                    this.showSmartNotification({
+                        type: 'error',
+                        title: 'نام نامعتبر',
+                        message: 'نام پروژه باید حداقل 3 کاراکتر باشد.',
+                        autoClose: 3000
+                    });
+                    return false;
+                }
+                
+                if (formData.description.length < 10) {
+                    this.showSmartNotification({
+                        type: 'error',
+                        title: 'توضیحات ناکافی',
+                        message: 'توضیحات پروژه باید حداقل 10 کاراکتر باشد تا بتوانیم بهترین کد را تولید کنیم.',
+                        autoClose: 4000
+                    });
+                    return false;
+                }
+                
+                return true;
+            }
+
+            startSystemMonitoring() {
+                // Initialize with realistic starting values
+                this.systemStats.cpuUsage = 45 + Math.random() * 20;
+                this.systemStats.ramUsage = 8 + Math.random() * 4;
+                this.systemStats.apiLatency = 30 + Math.random() * 20;
+                this.systemStats.tokensPerHour = 1.5 + Math.random() * 1;
+                this.systemStats.activeConnections = 100 + Math.random() * 50;
+                this.systemStats.dailyGenerated = 25 + Math.random() * 20;
+                
+                setInterval(() => {
+                    // Realistic system stats with gradual changes
+                    this.systemStats.cpuUsage += (Math.random() - 0.5) * 10;
+                    this.systemStats.cpuUsage = Math.max(20, Math.min(95, this.systemStats.cpuUsage));
+                    
+                    this.systemStats.ramUsage += (Math.random() - 0.5) * 2;
+                    this.systemStats.ramUsage = Math.max(4, Math.min(16, this.systemStats.ramUsage));
+                    
+                    this.systemStats.apiLatency += (Math.random() - 0.5) * 15;
+                    this.systemStats.apiLatency = Math.max(15, Math.min(200, this.systemStats.apiLatency));
+                    
+                    this.systemStats.tokensPerHour += (Math.random() - 0.5) * 0.5;
+                    this.systemStats.tokensPerHour = Math.max(0.5, Math.min(5, this.systemStats.tokensPerHour));
+                    
+                    this.systemStats.activeConnections += Math.floor((Math.random() - 0.5) * 20);
+                    this.systemStats.activeConnections = Math.max(50, Math.min(300, this.systemStats.activeConnections));
+                    
+                    // Update UI
+                    this.updateMonitoringUI();
+                    
+                    // Check for anomalies and notify
+                    this.checkSystemAnomalies();
+                }, 4000);
+                
+                // Re-check API connections periodically
+                setInterval(() => {
+                    this.recheckAPIConnections();
+                }, 30000);
+            }
+
+            updateMonitoringUI() {
+                document.getElementById('cpuUsage').textContent = this.systemStats.cpuUsage.toFixed(0) + '%';
+                document.getElementById('ramUsage').textContent = this.systemStats.ramUsage.toFixed(1) + 'GB';
+                document.getElementById('apiLatency').textContent = this.systemStats.apiLatency.toFixed(0) + 'ms';
+                document.getElementById('tokensPerHour').textContent = this.systemStats.tokensPerHour.toFixed(1) + 'M';
+                document.getElementById('activeConnections').textContent = this.systemStats.activeConnections.toString();
+                document.getElementById('dailyGenerated').textContent = this.systemStats.dailyGenerated.toString();
+            }
+
+            checkSystemAnomalies() {
+                // High CPU warning
+                if (this.systemStats.cpuUsage > 90 && !this.cpuWarningShown) {
+                    this.cpuWarningShown = true;
+                    this.showSmartNotification({
+                        type: 'warning',
+                        title: 'استفاده بالا از پردازنده',
+                        message: `استفاده از CPU به ${this.systemStats.cpuUsage.toFixed(0)}% رسیده است. عملکرد ممکن است کاهش یابد.`,
+                        autoClose: 5000
+                    });
+                    setTimeout(() => { this.cpuWarningShown = false; }, 60000);
+                }
+                
+                // High latency warning
+                if (this.systemStats.apiLatency > 150 && !this.latencyWarningShown) {
+                    this.latencyWarningShown = true;
+                    this.showSmartNotification({
+                        type: 'warning',
+                        title: 'تاخیر بالا در API',
+                        message: `تاخیر API به ${this.systemStats.apiLatency.toFixed(0)}ms رسیده است. پاسخ‌ها کندتر خواهند بود.`,
+                        autoClose: 5000
+                    });
+                    setTimeout(() => { this.latencyWarningShown = false; }, 60000);
+                }
+            }
+
+            async recheckAPIConnections() {
+                const previousConnected = Object.values(this.apiConnections).filter(api => api.status === 'connected').length;
+                
+                for (const [api, connection] of Object.entries(this.apiConnections)) {
+                    if (connection.status === 'disconnected' && Math.random() > 0.7) {
+                        // Sometimes reconnect failed APIs
+                        try {
+                            await this.simulateAPICheck(api);
+                            this.apiConnections[api].status = 'connected';
+                            this.updateAPIProviderStatus(api, 'connected');
+                            
+                            this.showSmartNotification({
+                                type: 'success',
+                                title: 'API دوباره متصل شد',
+                                message: `ارتباط با ${api.toUpperCase()} برقرار شد.`,
+                                autoClose: 3000
+                            });
+                        } catch (error) {
+                            // Still disconnected
+                        }
+                    }
+                }
+                
+                const currentConnected = Object.values(this.apiConnections).filter(api => api.status === 'connected').length;
+                this.systemStats.connectedAPIs = currentConnected;
+                this.updateHeaderStats();
+                
+                if (currentConnected !== previousConnected) {
+                    this.updateConnectionStatus(
+                        currentConnected > 0 ? 'connected' : 'disconnected', 
+                        currentConnected > 0 ? `${currentConnected} API متصل` : 'همه APIها قطع'
+                    );
+                }
+            }
+
+            simulateProjectSteps(projectData) {
                 const steps = [
-                    'تحلیل نیازمندی‌ها',
-                    'طراحی معماری',
-                    'ایجاد ساختار پروژه',
-                    'تولید کد بک‌اند',
-                    'تولید کد فرانت‌اند',
-                    'ایجاد دیتابیس',
-                    'پیاده‌سازی API',
-                    'تست واحد',
-                    'تست یکپارچه‌سازی',
-                    'نهایی‌سازی و بستن بسته'
+                    { name: 'تحلیل نیازمندی‌ها و بررسی امکان‌سنجی', agent: 0 },
+                    { name: 'طراحی معماری سیستم و انتخاب تکنولوژی', agent: 1 },
+                    { name: 'ایجاد ساختار پروژه و تنظیمات اولیه', agent: 1 },
+                    { name: 'طراحی رابط کاربری و تجربه کاربری', agent: 2 },
+                    { name: 'تولید کد بک‌اند و API endpoints', agent: 1 },
+                    { name: 'تولید کد فرانت‌اند و کامپوننت‌ها', agent: 1 },
+                    { name: 'ایجاد و پیکربندی دیتابیس', agent: 1 },
+                    { name: 'پیاده‌سازی امنیت و احراز هویت', agent: 4 },
+                    { name: 'نوشتن تست‌های واحد و یکپارچگی', agent: 3 },
+                    { name: 'بهینه‌سازی عملکرد و تحلیل کیفیت', agent: 5 },
+                    { name: 'تولید مستندات و راهنمای استفاده', agent: 0 },
+                    { name: 'نهایی‌سازی و آماده‌سازی برای استقرار', agent: 0 }
                 ];
 
                 let currentStep = 0;
                 const stepInterval = setInterval(() => {
                     if (currentStep < steps.length) {
-                        this.addLog(`گام ${currentStep + 1}: ${steps[currentStep]}`, 'info');
+                        const step = steps[currentStep];
+                        this.addLog(`⚙️ گام ${currentStep + 1}: ${step.name}`, 'info');
                         this.updateProgress((currentStep + 1) / steps.length * 100);
+                        document.getElementById('stepText').textContent = `گام ${currentStep + 1} از ${steps.length}`;
                         
-                        // Simulate agent work
-                        if (currentStep < this.agents.length) {
-                            this.activateAgent(currentStep);
-                        }
+                        // Activate corresponding agent
+                        this.activateAgent(step.agent);
                         
                         // Simulate file creation
-                        if (currentStep > 2) {
-                            this.addFileToTree(`step_${currentStep}.py`, 'python');
+                        if (currentStep > 1) {
+                            this.addFileToTree(this.generateFileName(projectData, currentStep), this.getFileType(currentStep));
                         }
                         
                         currentStep++;
                     } else {
                         clearInterval(stepInterval);
-                        this.completeProject();
+                        this.completeProject(projectData);
                     }
                 }, 2000);
             }
 
-            completeProject() {
-                this.addLog('پروژه با موفقیت تولید شد!', 'success');
-                this.showNotification('پروژه آماده است!', 'success');
+            generateFileName(projectData, step) {
+                const fileNames = [
+                    'requirements.txt',
+                    'docker-compose.yml',
+                    'src/main.py',
+                    'components/Header.tsx',
+                    'api/routes/auth.py',
+                    'frontend/pages/index.tsx',
+                    'database/migrations/001_init.sql',
+                    'middleware/security.py',
+                    'tests/test_auth.py',
+                    'utils/performance.py',
+                    'README.md',
+                    'deploy/production.yml'
+                ];
+                return fileNames[step] || `file_${step}.py`;
+            }
+
+            getFileType(step) {
+                const types = ['txt', 'yml', 'python', 'typescript', 'python', 'typescript', 'sql', 'python', 'python', 'python', 'markdown', 'yml'];
+                return types[step] || 'text';
+            }
+
+            completeProject(projectData) {
+                this.isGenerating = false;
+                document.getElementById('generateBtn').disabled = false;
+                
+                this.addLog('🎉 پروژه با موفقیت تولید شد!', 'success');
+                this.addLog('✅ تمامی فایل‌ها و تنظیمات آماده است', 'success');
+                this.addLog('📦 پروژه آماده استقرار و استفاده', 'success');
+                
+                this.showSmartNotification({
+                    type: 'success',
+                    title: 'پروژه آماده است!',
+                    message: `پروژه "${projectData.name}" با موفقیت تولید شد و آماده استفاده است.`,
+                    actions: [
+                        { text: 'مشاهده کد', action: () => this.switchToFilesTab(), primary: true },
+                        { text: 'پیش‌نمایش', action: () => this.switchToPreviewTab() },
+                        { text: 'دانلود', action: () => this.downloadProject() }
+                    ]
+                });
+                
                 this.updateProgress(100);
+                
+                // Update status
+                document.getElementById('statusText').textContent = 'تولید پروژه کامل شد - آماده استفاده';
+                document.getElementById('statusIndicator').className = 'status-indicator status-complete';
                 
                 // Reset all agents to ready
                 document.querySelectorAll('.agent-card').forEach(card => {
                     card.classList.remove('active');
                 });
+
+                // Add project to recent projects
+                this.addToRecentProjects(projectData);
+
+                // Generate live preview
+                this.generateLivePreview(projectData);
+                
+                // Update statistics
+                this.updateStatistics();
+            }
+
+            switchToFilesTab() {
+                document.querySelector('[data-tab-target="#files-tab"]').click();
+            }
+
+            switchToPreviewTab() {
+                document.querySelector('[data-tab-target="#preview-tab"]').click();
+            }
+
+            generateLivePreview(projectData) {
+                const previewContainer = document.getElementById('previewContainer');
+                
+                // Create preview content with real preview service
+                const previewURL = this.getPreviewURL(projectData);
+                
+                previewContainer.innerHTML = `
+                    <div class="preview-content">
+                        <div class="preview-header">
+                            <h3 class="preview-title">${projectData.name}</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: var(--space-xl);">
+                                پیش‌نمایش زنده پروژه تولید شده
+                            </p>
+                        </div>
+                        
+                        <div class="preview-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">نوع پروژه</div>
+                                <div class="meta-value">${this.getProjectTypeLabel(projectData.type)}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">پیچیدگی</div>
+                                <div class="meta-value">${this.getComplexityLabel(projectData.complexity)}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">تکنولوژی‌ها</div>
+                                <div class="meta-value">${projectData.languages || 'Multi-tech'}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">فریم‌ورک‌ها</div>
+                                <div class="meta-value">${projectData.frameworks || 'Modern Stack'}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h4 style="margin-bottom: var(--space); color: var(--text-primary);">توضیحات پروژه:</h4>
+                            <div style="background: var(--bg-tertiary); padding: var(--space-lg); border-radius: var(--radius); line-height: 1.7;">
+                                ${projectData.description}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h4 style="margin-bottom: var(--space); color: var(--text-primary);">پیش‌نمایش زنده:</h4>
+                            <iframe 
+                                src="${previewURL}" 
+                                class="preview-iframe"
+                                title="پیش‌نمایش پروژه ${projectData.name}"
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                        
+                        <div style="display: flex; gap: var(--space); justify-content: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="window.open('${previewURL}', '_blank')">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+                                </svg>
+                                باز کردن در تب جدید
+                            </button>
+                            <button class="btn btn-secondary" onclick="aiGenerator.downloadProject()">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M5 20v-5h2v3h10v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1zM9 4h6v7l-2-2-2 2-2-2V4z"/>
+                                </svg>
+                                دانلود کد کامل
+                            </button>
+                            <button class="btn btn-secondary" onclick="aiGenerator.shareProject()">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
+                                </svg>
+                                اشتراک‌گذاری
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            getPreviewURL(projectData) {
+                // Real preview services based on project type
+                const previewServices = {
+                    'web-app': 'https://codesandbox.io/embed/new?template=react-ts',
+                    'mobile-app': 'https://snack.expo.dev/embedded',
+                    'api': 'https://replit.com/@templates/Python-FastAPI',
+                    'ai-ml': 'https://huggingface.co/spaces/gradio/hello_world_4',
+                    'game': 'https://codepen.io/collection/DgYaMj',
+                    'blockchain': 'https://remix.ethereum.org/',
+                    'desktop-app': 'https://stackblitz.com/edit/electron',
+                    'automation': 'https://replit.com/@templates/Python'
+                };
+                
+                return previewServices[projectData.type] || 'https://codepen.io/pen/';
             }
 
             activateAgent(index) {
                 document.querySelectorAll('.agent-card').forEach((card, i) => {
                     card.classList.remove('active');
-                    if (i === index) {
+                    if (i === index && index < this.agents.length) {
                         card.classList.add('active');
-                        const agentName = card.querySelector('.agent-name').textContent;
-                        this.addLog(`عامل "${agentName}" فعال شد`, 'warning');
+                        const agentName = this.agents[index].name;
+                        this.addLog(`🔧 ابزار "${agentName}" فعال شد`, 'warning');
                     }
                 });
             }
@@ -1538,18 +2578,20 @@
                 logEntry.className = `log-entry log-${type}`;
                 logEntry.innerHTML = `<span>[${timestamp}]</span> ${message}`;
                 logsContainer.appendChild(logEntry);
+                
+                // Auto scroll to bottom
                 logsContainer.scrollTop = logsContainer.scrollHeight;
+                
+                // Keep only last 100 logs for performance
+                const logs = logsContainer.querySelectorAll('.log-entry');
+                if (logs.length > 100) {
+                    logs[0].remove();
+                }
             }
 
             updateProgress(percentage) {
                 const progressBar = document.getElementById('progressBar');
-                progressBar.style.width = percentage + '%';
-                
-                const statusText = document.querySelector('.status-text');
-                if (percentage >= 100) {
-                    statusText.textContent = 'تولید پروژه کامل شد';
-                    document.querySelector('.status-indicator').className = 'status-indicator status-complete';
-                }
+                progressBar.style.width = Math.min(percentage, 100) + '%';
             }
 
             addFileToTree(filename, type) {
@@ -1562,17 +2604,47 @@
                 
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
+                fileItem.setAttribute('data-file', filename);
                 
-                const icon = type === 'python' ? 'code' : 'description';
+                const icon = this.getFileIcon(type);
                 fileItem.innerHTML = `
-                    <span class="material-icon">${icon}</span>
+                    ${icon}
                     <div>
                         <div>${filename}</div>
-                        <div class="file-meta">همین الان</div>
+                        <div class="file-meta">همین الان - ${this.getFileSize()}</div>
                     </div>
                 `;
                 
+                fileItem.addEventListener('click', () => {
+                    this.selectFile(fileItem, filename);
+                });
+                
                 fileTree.appendChild(fileItem);
+                this.files.push({ name: filename, type: type, created: new Date(), size: this.getFileSize() });
+            }
+
+            getFileIcon(type) {
+                const icons = {
+                    'python': '<svg class="icon" viewBox="0 0 24 24" fill="#3776ab"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>',
+                    'typescript': '<svg class="icon" viewBox="0 0 24 24" fill="#3178c6"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>',
+                    'javascript': '<svg class="icon" viewBox="0 0 24 24" fill="#f7df1e"><path d="M3 3h18v18H3V3zm16.525 13.707c-.131-.821-.666-1.511-2.252-2.155-.552-.259-1.165-.438-1.349-.854-.068-.248-.078-.382-.034-.529.114-.484.637-.6.719-.9.081-.300.015-.611-.353-.711-.367-.099-.9.015-1.15.381-.249.365-.249.711-.131 1.165.118.454.249.786.552 1.048.302.261.786.375 1.165.375.378 0 .786-.114 1.084-.3.297-.185.431-.431.431-.8 0-.369-.134-.711-.362-1.048-.228-.337-.637-.6-1.165-.731-.529-.131-1.298-.081-1.827.249-.529.33-.8.8-.8 1.299 0 .5.234.931.666 1.233.431.302 1.165.498 1.827.665.662.167 1.298.334 1.827.6.528.266.8.665.8 1.132z"/></svg>',
+                    'sql': '<svg class="icon" viewBox="0 0 24 24" fill="#336791"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+                    'markdown': '<svg class="icon" viewBox="0 0 24 24" fill="#083fa1"><path d="M22.27 19.385H1.73A1.73 1.73 0 010 17.655V6.345a1.73 1.73 0 011.73-1.73h20.54A1.73 1.73 0 0124 6.345v11.31a1.73 1.73 0 01-1.73 1.73zM5.769 15.923v-4.5l2.308 2.885 2.307-2.885v4.5h2.308V8.077H10.38l-2.307 2.885L5.769 8.077H3.46v7.846h2.309zm7.846 0V8.077h2.308v2.308h4.615v2.307h-4.615v3.23h-2.308z"/></svg>',
+                    'yml': '<svg class="icon" viewBox="0 0 24 24" fill="#cb171e"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>',
+                    'txt': '<svg class="icon" viewBox="0 0 24 24" fill="#6b7280"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>'
+                };
+                return icons[type] || icons['txt'];
+            }
+
+            getFileSize() {
+                const sizes = ['2.4KB', '15.7KB', '8.1KB', '45.2KB', '1.2MB', '567B', '12.9KB', '3.8KB'];
+                return sizes[Math.floor(Math.random() * sizes.length)];
+            }
+
+            selectFile(fileItem, filename) {
+                document.querySelectorAll('.file-item').forEach(item => item.classList.remove('active'));
+                fileItem.classList.add('active');
+                this.addLog(`📄 فایل "${filename}" انتخاب شد`, 'info');
             }
 
             sendChatMessage() {
@@ -1583,17 +2655,74 @@
                     this.addChatMessage(message, 'user');
                     chatInput.value = '';
                     
-                    // Simulate AI response
+                    // Simulate typing indicator
+                    this.addTypingIndicator();
+                    
+                    // Simulate AI response with realistic delay
                     setTimeout(() => {
-                        const responses = [
-                            'درخواست شما در حال بررسی است...',
-                            'اطلاعات بیشتری در مورد این قسمت نیاز دارم.',
-                            'این ایده جالبی است! بیایید آن را پیاده‌سازی کنیم.',
-                            'من این کار را انجام می‌دهم.'
-                        ];
-                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                        this.addChatMessage(randomResponse, 'assistant');
-                    }, 1000);
+                        this.removeTypingIndicator();
+                        const response = this.generateAIResponse(message);
+                        this.addChatMessage(response, 'assistant');
+                    }, 1500 + Math.random() * 1000);
+                }
+            }
+
+            generateAIResponse(message) {
+                const responses = {
+                    'سلام': 'سلام! خوشحالم که با شما کار می‌کنم. چه نوع اپلیکیشنی می‌خواهید بسازیم؟',
+                    'help': 'من می‌توانم در تمام مراحل کدنویسی کمک کنم: از تحلیل نیازمندی‌ها تا تولید کد و تست.',
+                    'api': 'برای APIها، من از FastAPI، Django REST، یا Express.js استفاده می‌کنم. کدام را ترجیح می‌دهید؟',
+                    'react': 'React انتخاب عالی است! آیا Next.js برای SSR نیاز دارید؟',
+                    'python': 'Python زبان قدرتمندی است. برای وب Django/FastAPI، برای AI TensorFlow/PyTorch توصیه می‌کنم.',
+                    'موبایل': 'برای اپ موبایل، React Native یا Flutter توصیه می‌کنم. کدام پلتفرم اولویت دارد؟',
+                    'امنیت': 'امنیت اولویت اول است. JWT، OAuth2، HTTPS و validation کامل پیاده‌سازی می‌کنم.',
+                    'دیتابیس': 'برای دیتابیس PostgreSQL، MongoDB یا MySQL توصیه می‌کنم. چه نوع داده‌ای دارید؟',
+                    'تست': 'تست‌های جامع شامل Unit Tests، Integration Tests و E2E Tests نوشته می‌شود.',
+                    'deploy': 'برای استقرار Docker، Kubernetes، AWS، یا Vercel پیشنهاد می‌دهم.',
+                };
+                
+                // Simple keyword matching
+                for (const [keyword, response] of Object.entries(responses)) {
+                    if (message.toLowerCase().includes(keyword.toLowerCase())) {
+                        return response;
+                    }
+                }
+                
+                // Default responses
+                const defaultResponses = [
+                    'این سوال جالبی است! بیشتر توضیح دهید تا بتوانم بهتر کمک کنم.',
+                    'درخواست شما در حال بررسی است. چه نوع کدی نیاز دارید؟',
+                    'این قابلیت را می‌توانم پیاده‌سازی کنم. چه جزئیات بیشتری نیاز دارید؟',
+                    'برای این کار چندین راه‌حل دارم. کدام روش را ترجیح می‌دهید؟',
+                    'اجازه دهید این موضوع را تحلیل کنم و بهترین کد را تولید کنم.'
+                ];
+                
+                return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+            }
+
+            addTypingIndicator() {
+                const chatMessages = document.getElementById('chatMessages');
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'chat-message typing-indicator';
+                typingDiv.innerHTML = `
+                    <div class="message-avatar">
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                        </svg>
+                    </div>
+                    <div class="message-content">
+                        <div class="loading"></div>
+                        <span style="margin-right: 8px; font-size: 0.8rem; color: var(--text-muted);">در حال تایپ...</span>
+                    </div>
+                `;
+                chatMessages.appendChild(typingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            removeTypingIndicator() {
+                const typingIndicator = document.querySelector('.typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
                 }
             }
 
@@ -1602,7 +2731,10 @@
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `chat-message ${sender}`;
                 
-                const avatar = sender === 'user' ? 'U' : '🤖';
+                const avatar = sender === 'user' ? 
+                    '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>' :
+                    '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>';
+                    
                 messageDiv.innerHTML = `
                     <div class="message-avatar">${avatar}</div>
                     <div class="message-content">${message}</div>
@@ -1617,65 +2749,377 @@
                 provider.classList.add('active');
                 
                 const providerName = provider.dataset.provider;
-                this.addLog(`API ${providerName} انتخاب شد`, 'info');
+                const providerLabels = {
+                    'openai': 'OpenAI GPT',
+                    'anthropic': 'Anthropic Claude',
+                    'google': 'Google AI',
+                    'mistral': 'Mistral AI'
+                };
+                
+                this.addLog(`🔌 API ${providerLabels[providerName]} انتخاب شد`, 'info');
+                this.showNotification('تغییر API', `API ${providerLabels[providerName]} فعال شد`, 'info');
             }
 
             selectAgent(agent) {
+                if (this.isGenerating) return;
+                
                 document.querySelectorAll('.agent-card').forEach(a => a.classList.remove('active'));
                 agent.classList.add('active');
                 
                 const agentName = agent.querySelector('.agent-name').textContent;
-                this.addLog(`عامل "${agentName}" انتخاب شد`, 'info');
+                this.addLog(`🔧 ابزار "${agentName}" انتخاب شد`, 'info');
             }
 
-            showNotification(message, type = 'info') {
+            showNotification(title, message, type = 'info') {
                 const notification = document.getElementById('notification');
+                const titleEl = document.getElementById('notificationTitle');
+                const messageEl = document.getElementById('notificationMessage');
+                const iconEl = document.getElementById('notificationIcon');
+                
                 notification.className = `notification ${type}`;
-                notification.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="material-icon">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
-                        <div>
-                            <div style="font-weight: 600;">${message}</div>
-                            <div style="font-size: 0.875rem; opacity: 0.8;">اعلان سیستم</div>
-                        </div>
-                    </div>
-                `;
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+                
+                // Update icon based on type
+                const icons = {
+                    success: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
+                    error: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>',
+                    warning: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
+                    info: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'
+                };
+                
+                iconEl.innerHTML = icons[type] || icons.info;
+                
                 notification.classList.add('show');
                 
                 setTimeout(() => {
                     notification.classList.remove('show');
-                }, 4000);
+                }, 5000);
             }
 
             startSystemMonitoring() {
                 setInterval(() => {
-                    // Update system stats randomly
-                    document.querySelectorAll('.monitor-value').forEach((element, index) => {
-                        if (index === 0) { // CPU
-                            element.textContent = (Math.random() * 40 + 60).toFixed(0) + '%';
-                        } else if (index === 1) { // RAM
-                            element.textContent = (Math.random() * 4 + 10).toFixed(1) + 'GB';
-                        } else if (index === 2) { // Latency
-                            element.textContent = (Math.random() * 30 + 30).toFixed(0) + 'ms';
-                        } else if (index === 3) { // Tokens
-                            element.textContent = (Math.random() * 0.5 + 1).toFixed(1) + 'M';
-                        }
+                    // Realistic system stats simulation
+                    document.getElementById('cpuUsage').textContent = (Math.random() * 40 + 40).toFixed(0) + '%';
+                    document.getElementById('ramUsage').textContent = (Math.random() * 8 + 8).toFixed(1) + 'GB';
+                    document.getElementById('apiLatency').textContent = (Math.random() * 40 + 20).toFixed(0) + 'ms';
+                    document.getElementById('tokensPerHour').textContent = (Math.random() * 2 + 1.5).toFixed(1) + 'M';
+                    document.getElementById('activeConnections').textContent = Math.floor(Math.random() * 100 + 100);
+                    document.getElementById('dailyGenerated').textContent = Math.floor(Math.random() * 20 + 30);
+                }, 3000);
+            }
+
+            startRealTimeUpdates() {
+                setInterval(() => {
+                    // Update header statistics
+                    document.getElementById('activeProjects').textContent = Math.floor(Math.random() * 10 + 20);
+                    document.getElementById('onlineAgents').textContent = Math.floor(Math.random() * 5 + 10);
+                    document.getElementById('connectedAPIs').textContent = Math.floor(Math.random() * 3 + 6);
+                    
+                    // Simulate occasional system events
+                    if (Math.random() < 0.1) { // 10% chance
+                        const events = [
+                            'نسخه جدید API منتشر شد',
+                            'عامل جدید به سیستم اضافه شد',
+                            'بهینه‌سازی سرعت انجام شد',
+                            'پشتیبان‌گیری خودکار کامل شد'
+                        ];
+                        const event = events[Math.floor(Math.random() * events.length)];
+                        this.addLog(`🔔 ${event}`, 'info');
+                    }
+                }, 10000);
+            }
+
+            handleUpload() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.multiple = true;
+                input.accept = '.py,.js,.ts,.json,.md,.txt,.yml,.yaml,.css,.html,.jsx,.tsx';
+                
+                input.onchange = (e) => {
+                    const files = Array.from(e.target.files);
+                    if (files.length === 0) return;
+                    
+                    files.forEach(file => {
+                        this.addLog(`📎 فایل "${file.name}" آپلود شد (${(file.size/1024).toFixed(1)}KB)`, 'success');
+                        this.addFileToTree(file.name, this.getFileTypeFromExtension(file.name));
+                    });
+                    
+                    this.showSmartNotification({
+                        type: 'success',
+                        title: 'آپلود موفق',
+                        message: `${files.length} فایل با موفقیت آپلود شد و به پروژه اضافه شدند.`,
+                        autoClose: 3000
+                    });
+                };
+                
+                input.click();
+            }
+
+            downloadProject() {
+                if (this.files.length === 0) {
+                    this.showSmartNotification({
+                        type: 'error',
+                        title: 'هیچ فایلی موجود نیست',
+                        message: 'ابتدا پروژه‌ای تولید کنید تا بتوانید آن را دانلود کنید.',
+                        autoClose: 4000
+                    });
+                    return;
+                }
+                
+                this.addLog('📦 شروع فرآیند دانلود پروژه...', 'info');
+                
+                const notificationId = this.showSmartNotification({
+                    type: 'info',
+                    title: 'آماده‌سازی دانلود',
+                    message: 'پروژه در حال آماده‌سازی برای دانلود است...',
+                    persistent: true
+                });
+                
+                // Simulate download preparation
+                setTimeout(() => {
+                    this.closeNotification(notificationId);
+                    this.addLog('✅ فایل ZIP آماده شد', 'success');
+                    
+                    this.showSmartNotification({
+                        type: 'success',
+                        title: 'آماده دانلود',
+                        message: `پروژه کامل شامل ${this.files.length} فایل آماده دانلود است.`,
+                        actions: [
+                            { text: 'دانلود ZIP', action: () => this.performDownload(), primary: true },
+                            { text: 'مشاهده فایل‌ها', action: () => this.switchToFilesTab() }
+                        ]
+                    });
+                }, 2000);
+            }
+
+            performDownload() {
+                // Create download link (simulation)
+                const link = document.createElement('a');
+                link.href = 'data:text/plain;charset=utf-8,Project files would be downloaded here';
+                link.download = 'ai-generated-project.zip';
+                link.click();
+                
+                this.showSmartNotification({
+                    type: 'success',
+                    title: 'دانلود شروع شد',
+                    message: 'فایل پروژه در حال دانلود است.',
+                    autoClose: 2000
+                });
+            }
+
+            shareProject() {
+                if (this.files.length === 0) {
+                    this.showSmartNotification({
+                        type: 'error',
+                        title: 'هیچ پروژه‌ای موجود نیست',
+                        message: 'ابتدا پروژه‌ای تولید کنید تا بتوانید آن را به اشتراک بگذارید.',
+                        autoClose: 4000
+                    });
+                    return;
+                }
+                
+                const shareUrl = `https://ai-code-generator.ir/project/${Date.now()}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'پروژه تولید شده توسط AI',
+                        text: 'نگاهی به پروژه‌ای که با هوش مصنوعی ساختم بیندازید!',
+                        url: shareUrl
+                    }).then(() => {
+                        this.showSmartNotification({
+                            type: 'success',
+                            title: 'اشتراک‌گذاری موفق',
+                            message: 'پروژه با موفقیت به اشتراک گذاشته شد.',
+                            autoClose: 3000
+                        });
+                    });
+                } else {
+                    // Fallback to clipboard
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        this.showSmartNotification({
+                            type: 'success',
+                            title: 'لینک کپی شد',
+                            message: 'لینک پروژه در کلیپ‌بورد کپی شد. می‌توانید آن را به اشتراک بگذارید.',
+                            autoClose: 4000
+                        });
+                    }).catch(() => {
+                        this.showSmartNotification({
+                            type: 'info',
+                            title: 'لینک اشتراک‌گذاری',
+                            message: shareUrl,
+                            persistent: true,
+                            actions: [
+                                { text: 'بستن', action: () => {}, primary: true }
+                            ]
+                        });
+                    });
+                }
+                
+                this.addLog(`🔗 لینک اشتراک‌گذاری: ${shareUrl}`, 'info');
+            }
+
+            showTemplates() {
+                this.showSmartNotification({
+                    type: 'info',
+                    title: 'بارگذاری قالب‌ها',
+                    message: 'قالب‌های آماده در حال بارگذاری هستند...',
+                    autoClose: 2000
+                });
+                
+                this.addLog('📋 نمایش قالب‌های آماده', 'info');
+                
+                // Switch to files tab and show templates
+                this.switchToFilesTab();
+                
+                setTimeout(() => {
+                    this.loadTemplateFiles();
+                }, 1000);
+            }
+
+            loadTemplateFiles() {
+                const templates = [
+                    { name: 'react-ecommerce-template.zip', type: 'template', size: '2.4MB' },
+                    { name: 'express-api-template.zip', type: 'template', size: '856KB' },
+                    { name: 'python-ml-template.zip', type: 'template', size: '3.1MB' },
+                    { name: 'flutter-app-template.zip', type: 'template', size: '1.8MB' },
+                    { name: 'nextjs-dashboard-template.zip', type: 'template', size: '2.9MB' }
+                ];
+                
+                templates.forEach(template => {
+                    this.addFileToTree(template.name, template.type);
+                });
+                
+                this.showSmartNotification({
+                    type: 'success',
+                    title: 'قالب‌ها آماده',
+                    message: `${templates.length} قالب آماده بارگذاری شدند. می‌توانید آن‌ها را به عنوان پایه استفاده کنید.`,
+                    autoClose: 4000
+                });
+            }
+
+            backupProject() {
+                if (this.files.length === 0) {
+                    this.showSmartNotification({
+                        type: 'warning',
+                        title: 'هیچ پروژه‌ای موجود نیست',
+                        message: 'پروژه‌ای برای پشتیبان‌گیری موجود نیست.',
+                        autoClose: 3000
+                    });
+                    return;
+                }
+                
+                this.addLog('💾 شروع پشتیبان‌گیری خودکار...', 'info');
+                
+                const notificationId = this.showSmartNotification({
+                    type: 'info',
+                    title: 'در حال پشتیبان‌گیری',
+                    message: 'فرآیند پشتیبان‌گیری خودکار شروع شده است...',
+                    persistent: true
+                });
+                
+                setTimeout(() => {
+                    this.closeNotification(notificationId);
+                    this.addLog('✅ پشتیبان‌گیری با موفقیت کامل شد', 'success');
+                    
+                    this.showSmartNotification({
+                        type: 'success',
+                        title: 'پشتیبان‌گیری موفق',
+                        message: 'پشتیبان از پروژه در فضای ابری ذخیره شد و در صورت نیاز قابل بازیابی است.',
+                        autoClose: 4000
                     });
                 }, 3000);
             }
 
-            simulateProgress() {
-                // Initial welcome message
+            loadProject(projectName) {
+                this.addLog(`📁 بارگذاری پروژه: ${projectName}`, 'info');
+                
+                const notificationId = this.showSmartNotification({
+                    type: 'info',
+                    title: 'بارگذاری پروژه',
+                    message: `در حال بارگذاری پروژه "${projectName}"...`,
+                    persistent: true
+                });
+                
                 setTimeout(() => {
-                    this.addLog('سیستم چند-عامله آماده است', 'success');
-                    this.addLog('برای شروع، لطفاً اطلاعات پروژه را وارد کنید', 'info');
-                }, 1000);
+                    this.closeNotification(notificationId);
+                    this.addLog(`✅ پروژه "${projectName}" با موفقیت بارگذاری شد`, 'success');
+                    
+                    this.showSmartNotification({
+                        type: 'success',
+                        title: 'بارگذاری موفق',
+                        message: `پروژه "${projectName}" بارگذاری شد و آماده ویرایش است.`,
+                        actions: [
+                            { text: 'مشاهده فایل‌ها', action: () => this.switchToFilesTab(), primary: true },
+                            { text: 'ویرایش', action: () => this.editProject(projectName) }
+                        ]
+                    });
+                }, 1500);
+            }
+
+            editProject(projectName) {
+                this.showSmartNotification({
+                    type: 'info',
+                    title: 'ویرایشگر',
+                    message: 'ویرایشگر کد در حال توسعه است. به زودی در دسترس خواهد بود.',
+                    autoClose: 3000
+                });
+            }
+
+            addToRecentProjects(projectData) {
+                // Add to recent projects (simulation)
+                this.recentProjects.unshift({
+                    name: projectData.name,
+                    time: 'همین الان',
+                    tech: `${projectData.languages || 'Auto'} + ${projectData.frameworks || 'Modern'}`,
+                    type: projectData.type
+                });
+                
+                // Keep only last 5 projects
+                if (this.recentProjects.length > 5) {
+                    this.recentProjects.pop();
+                }
+            }
+
+            updateStatistics() {
+                // Update header statistics after project completion
+                const current = parseInt(document.getElementById('activeProjects').textContent);
+                document.getElementById('activeProjects').textContent = current + 1;
+            }
+
+            // Utility Methods
+            getProjectTypeLabel(type) {
+                const labels = {
+                    'web-app': 'وب اپلیکیشن (React/Vue/Angular)',
+                    'mobile-app': 'اپلیکیشن موبایل (React Native/Flutter)',
+                    'desktop-app': 'اپلیکیشن دسکتاپ (Electron/Tauri)',
+                    'api': 'API و بک‌اند (FastAPI/Django/Express)',
+                    'ai-ml': 'هوش مصنوعی/یادگیری ماشین',
+                    'blockchain': 'بلاکچین و Web3',
+                    'game': 'بازی (Unity/Godot)',
+                    'automation': 'اتوماسیون و ربات'
+                };
+                return labels[type] || type;
+            }
+
+            getComplexityLabel(complexity) {
+                const labels = {
+                    'simple': 'ساده - MVP (2-5 روز)',
+                    'medium': 'متوسط - کامل (1-3 هفته)',
+                    'complex': 'پیچیده - پیشرفته (1-3 ماه)',
+                    'enterprise': 'سازمانی - مقیاس‌پذیر (3+ ماه)'
+                };
+                return labels[complexity] || complexity;
             }
         }
 
         // Initialize the enhanced system
+        let aiGenerator;
         document.addEventListener('DOMContentLoaded', () => {
-            new EnhancedAICodeGenerator();
+            aiGenerator = new EnhancedAICodeGenerator();
+            
+            // Make it globally accessible for button clicks
+            window.aiGenerator = aiGenerator;
         });
     </script>
 </body>
