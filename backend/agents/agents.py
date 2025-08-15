@@ -17,12 +17,12 @@ from langchain.llms import OpenAI
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 
-from config import get_settings
-from models import (
+from config.config import get_settings
+from backend.models.models import (
     JobStatus, ProjectType, ComplexityLevel, AgentType, 
     generate_task_id, WebSocketMessage, MessageType
 )
-from db import db_manager
+from backend.database.db import db_manager
 
 
 settings = get_settings()

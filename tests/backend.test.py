@@ -13,17 +13,17 @@ from fastapi.testclient import TestClient
 from unittest.mock import Mock, patch, AsyncMock
 
 # Import the application and modules
-from app import app
-from db import db_manager, DatabaseManager
-from agents import (
+from backend.core.app import app
+from backend.database.db import db_manager, DatabaseManager
+from backend.agents.agents import (
     PlannerAgent, CodeGeneratorAgent, TesterAgent, DocGeneratorAgent,
     MultiAgentWorkflow, create_and_execute_workflow
 )
-from models import (
+from backend.models.models import (
     ProjectGenerationRequest, JobStatus, ProjectType, ComplexityLevel,
     generate_job_id
 )
-from config import get_settings
+from config.config import get_settings
 
 
 # Test configuration

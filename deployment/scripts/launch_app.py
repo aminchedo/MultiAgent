@@ -25,8 +25,8 @@ class AppLauncher:
     def __init__(self):
         self.backend_process = None
         self.backend_url = "http://localhost:8000"
-        self.frontend_file = "front_optimized.html"
-        self.test_file = "test_enhanced_ui.html"
+        self.frontend_file = "frontend/pages/front_optimized.html"
+        self.test_file = "frontend/pages/test_enhanced_ui.html"
         self.health_endpoint = f"{self.backend_url}/health"
         self.max_retries = 30
         self.retry_delay = 2
@@ -99,7 +99,7 @@ class AppLauncher:
             # Start backend process
             if os.name == 'nt':
                 self.backend_process = subprocess.Popen(
-                    [python_cmd, "back.py"],
+                    [python_cmd, "main.py"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
@@ -107,7 +107,7 @@ class AppLauncher:
                 )
             else:
                 self.backend_process = subprocess.Popen(
-                    [python_cmd, "back.py"],
+                    [python_cmd, "main.py"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True

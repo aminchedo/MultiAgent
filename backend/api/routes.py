@@ -29,16 +29,16 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 import structlog
 
-from config import get_settings
-from models import (
+from config.config import get_settings
+from backend.models.models import (
     ProjectGenerationRequest, ProjectGenerationResponse,
     JobStatusResponse, FilePreviewResponse, CodeExecutionRequest,
     CodeExecutionResponse, SystemStatsResponse, AuthRequest,
     AuthResponse, TemplateResponse, JobListResponse, BaseResponse,
     WebSocketMessage, MessageType, JobStatus, generate_job_id
 )
-from db import db_manager
-from agents import create_and_execute_workflow
+from backend.database.db import db_manager
+from backend.agents.agents import create_and_execute_workflow
 
 
 settings = get_settings()

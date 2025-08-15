@@ -115,11 +115,14 @@ alembic upgrade head
 ### 6. Run the Application
 
 ```bash
-# Development mode
-python app.py
+# Development mode with new modular structure
+python main.py
 
-# Or with uvicorn
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+# Or using the deployment launcher
+python deployment/scripts/launch_app.py
+
+# Or with uvicorn directly
+uvicorn backend.core.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 The application will be available at `http://localhost:8000`

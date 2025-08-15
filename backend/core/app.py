@@ -19,9 +19,9 @@ from slowapi.middleware import SlowAPIMiddleware
 import structlog
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from config import get_settings
-from routes import router, limiter
-from db import db_manager
+from config.config import get_settings
+from backend.api.routes import router, limiter
+from backend.database.db import db_manager
 
 
 settings = get_settings()
@@ -262,7 +262,7 @@ app.include_router(router)
 
 
 # Static files - serve the frontend
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 
 # Root endpoint - redirect to frontend

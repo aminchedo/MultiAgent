@@ -20,8 +20,8 @@ from sqlalchemy.sql import select, update, delete, func
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
-from config import get_settings
-from models import JobStatus, ProjectType, ComplexityLevel, AgentType
+from config.config import get_settings
+from backend.models.models import JobStatus, ProjectType, ComplexityLevel, AgentType
 
 
 settings = get_settings()
