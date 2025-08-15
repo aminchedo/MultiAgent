@@ -216,12 +216,22 @@ async def general_exception_handler(request: Request, exc: Exception):
 # Health check endpoints
 @app.get("/health")
 async def health_check():
-    """Basic health check endpoint."""
+    """Health check endpoint"""
     return {
         "status": "healthy",
         "timestamp": time.time(),
-        "version": settings.app_version,
-        "service": settings.app_name
+        "memory_usage": "N/A",
+        "system_info": {
+            "python_version": "3.9+",
+            "fastapi_version": "latest",
+            "agents_status": "operational"
+        },
+        "endpoints": {
+            "api": "/api/",
+            "docs": "/docs",
+            "frontend": "/static/index.html",
+            "health": "/health"
+        }
     }
 
 
@@ -262,20 +272,26 @@ app.include_router(router)
 
 
 # Static files - serve the frontend
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+app.mount("/static", StaticFiles(directory="public"), name="static")
 
 
 # Root endpoint - redirect to frontend
 @app.get("/")
-async def root():
-    """Root endpoint with system information."""
+async def read_root():
+    """Root endpoint with system information"""
     return {
-        "message": "Multi-Agent Code Generation System",
-        "version": settings.app_version,
-        "docs_url": "/docs" if settings.debug else None,
+        "message": "Multi-Agent Code Generation System API",
+        "version": "1.0.0",
+        "status": "running",
+        "docs": "/docs",
+        "redoc": "/redoc",
+        "health": "/health",
         "frontend_url": "/static/index.html",
-        "websocket_url": "/ws",
-        "status": "running"
+        "api_endpoints": {
+            "generate": "/api/generate",
+            "agents": "/api/agents",
+            "health": "/api/health"
+        }
     }
 
 

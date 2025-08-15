@@ -3,11 +3,11 @@
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "dest": "/public/$1"
     },
     {
       "src": "/favicon.ico",
-      "dest": "/static/assets/favicon.ico"
+      "dest": "/public/assets/favicon.ico"
     },
     {
       "src": "/api/(.*)",
