@@ -18,3 +18,5 @@
 2025-08-15 00:39:25,533 - __main__ - INFO - ✅ System startup completed successfully
 2025-08-15 00:43:24,558 - __main__ - INFO - 🔄 Shutting down Multi-Agent Code Generation System...
 2025-08-15 00:43:24,563 - __main__ - INFO - ✅ System shutdown completed
+2025-08-15 00:45:24,842 - back - INFO - Database initialized successfully
+2025-08-15 00:45:32,530 - back - INFO - Database initialized successfully
