@@ -1,0 +1,36 @@
+{
+  "name": "multi-agent-code-generation-system",
+  "version": "1.0.0",
+  "description": "A multi-agent code generation system with intelligent AI agents",
+  "main": "static/index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000 --directory static",
+    "build": "echo 'Static files ready for deployment'",
+    "start": "python3 -m http.server 8000 --directory static",
+    "test": "echo 'No tests specified'",
+    "deploy": "./deploy-vercel.sh",
+    "lint": "echo 'No linting configured'",
+    "validate": "python3 -m py_compile api/index.py && python3 -m py_compile api/vercel_app.py"
+  },
+  "keywords": [
+    "ai",
+    "code-generation",
+    "multi-agent",
+    "fastapi",
+    "vercel",
+    "python",
+    "frontend"
+  ],
+  "author": "Multi-Agent Code Generation Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "python": ">=3.9.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

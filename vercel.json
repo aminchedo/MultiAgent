@@ -12,6 +12,30 @@
       "dest": "/static/$1"
     },
     {
+      "src": "/favicon.ico",
+      "dest": "/static/assets/favicon.ico"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/health(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/info",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/docs(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/redoc(.*)",
+      "dest": "/api/index.py"
+    },
+    {
       "src": "/(.*)",
       "dest": "/api/index.py"
     }

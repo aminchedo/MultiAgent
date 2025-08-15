@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Multi-Agent Code Generation System - AI-powered code generation with multiple intelligent agents">
+    <meta name="keywords" content="AI, code generation, multi-agent, artificial intelligence, programming">
+    <meta name="author" content="Multi-Agent Code Generation System">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Performance and SEO -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#6366f1">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Multi-Agent Code Generation System">
+    <meta property="og:description" content="AI-powered code generation with multiple intelligent agents">
+    <meta property="og:url" content="">
+    
+    <title>سیستم چند-عامله هوشمند تولید کد</title>
+    
+    <!-- Enhanced Font Loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Enhanced Color Palette */
+            --primary: #6366f1;
+            --primary-light: #8b5cf6;
+            --primary-dark: #4f46e5;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            /* Advanced Background System */
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #151b2e;
+            --bg-tertiary: #1e2a42;
+            --bg-quaternary: #283548;
+            --bg-glass: rgba(15, 23, 42, 0.7);
+            --bg-glass-light: rgba(255, 255, 255, 0.05);
+            --bg-card: rgba(30, 42, 66, 0.8);
+            
+            /* Enhanced Text Colors */
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-accent: #a855f7;
+            
+            /* Border System */
+            --border-primary: #475569;
+            --border-secondary: #64748b;
+            --border-accent: rgba(168, 85, 247, 0.3);
+            --border-glow: rgba(99, 102, 241, 0.4);
+            
+            /* Advanced Effects */
+            --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.2);
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 40px 80px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 50px rgba(99, 102, 241, 0.3);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            --gradient-secondary: linear-gradient(145deg, #0a0e1a 0%, #151b2e 50%, #1e2a42 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #facc15 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            --blur: blur(32px);
+            --blur-strong: blur(48px);
+            
+            /* Enhanced Border Radius */
+            --radius-xs: 8px;
+            --radius-sm: 16px;
+            --radius: 24px;
+            --radius-lg: 32px;
+            --radius-xl: 48px;
+            
+            /* Animation System */
+            --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            /* Enhanced Typography */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-persian: 'Vazirmatn', sans-serif;
+            --font-icon: 'Material Symbols Outlined';
+            
+            /* Spacing System */
+            --space-xs: 8px;
+            --space-sm: 16px;
+            --space: 24px;
+            --space-lg: 32px;
+            --space-xl: 48px;
+            --space-2xl: 64px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-persian);
+            background: var(--gradient-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-weight: 400;
+            position: relative;
+        }
+
+        /* Enhanced Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 50% 100%, rgba(217, 70, 239, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 100% 50%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -2;
+            animation: backgroundMove 20s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.01) 2px, rgba(255,255,255,0.01) 4px),
+                repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(99,102,241,0.02) 1px, rgba(99,102,241,0.02) 2px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes backgroundMove {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(90deg); }
+        }
+
+        /* Enhanced Container */
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: var(--space-xl);
+            position: relative;
+        }
+
+        /* Floating Particles Effect */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Enhanced Header */
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            margin-bottom: var(--space-2xl);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 1.2s var(--bounce);
+        }
+
+        .header:hover::before {
+            transform: scaleX(1);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-title {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space);
+            letter-spacing: -0.02em;
+            font-family: var(--font-primary);
+            line-height: 1.1;
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(1.125rem, 3vw, 1.75rem);
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto var(--space-lg);
+            opacity: 0.9;
+            font-family: var(--font-persian);
+            line-height: 1.7;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+            margin-top: var(--space-lg);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: var(--space) var(--space-lg);
+            background: var(--bg-glass-light);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            font-family: var(--font-primary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        /* Main Layout Enhancement */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 450px 1fr 350px;
+            gap: var(--space-xl);
+            min-height: calc(100vh - 400px);
+        }
+
+        /* Enhanced Sidebar */
+        .sidebar, .right-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        /* Enhanced Card System */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            position: relative;
+            transition: var(--transition-slow);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space);
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            font-family: var(--font-primary);
+        }
+
+        /* Enhanced Form Elements */
+        .form-group {
+            margin-bottom: var(--space-lg);
+            position: relative;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            margin-bottom: var(--space-sm);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-family: var(--font-primary);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: var(--space) var(--space-lg);
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: var(--font-persian);
+            font-size: 1rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            background: var(--bg-secondary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            font-family: var(--font-mono);
+            resize: vertical;
+        }
+
+        /* Enhanced Button System */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space) var(--space-lg);
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-sm {
+            padding: var(--space-xs) var(--space);
+            font-size: 0.875rem;
+        }
+
+        /* API Configuration Section */
+        .api-config {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .api-provider {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-sm);
+            border: 1px solid var(--border-primary);
+            transition: var(--transition);
+        }
+
+        .api-provider:hover {
+            border-color: var(--border-glow);
+        }
+
+        .api-provider.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .api-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+        }
+
+        .api-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-xs);
+        }
+
+        .api-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .api-status.disconnected {
+            background: var(--danger);
+        }
+
+        /* Enhanced Agent Cards */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space);
+        }
+
+        .agent-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            text-align: center;
+            transition: var(--transition-slow);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-accent);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .agent-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .agent-card.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.15);
+            transform: scale(1.05);
+        }
+
+        .agent-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin: 0 auto var(--space);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: var(--gradient-primary);
+            color: white;
+            position: relative;
+        }
+
+        .agent-avatar::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Status Bar */
+        .status-bar {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+        }
+
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .status-working { background: var(--warning); }
+        .status-complete { background: var(--success); }
+        .status-error { background: var(--danger); }
+
+        /* Enhanced Progress Bar */
+        .progress-container {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: var(--space-lg);
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.8s ease-in-out;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Enhanced Tabs */
+        .tabs {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            padding: 8px;
+            margin-bottom: var(--space-lg);
+            gap: 4px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: var(--space) var(--space-lg);
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-family: var(--font-primary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+        }
+
+        .tab:hover {
+            background: var(--bg-glass-light);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        /* Enhanced Tab Content */
+        .tab-content {
+            display: none;
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            height: 700px;
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Real-time Logs */
+        .logs-container {
+            padding: var(--space-lg);
+            height: 100%;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            padding: var(--space) var(--space-lg);
+            margin-bottom: var(--space-sm);
+            border-radius: var(--radius-sm);
+            border-left: 4px solid;
+            background: rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.4s ease;
+            transition: var(--transition);
+        }
+
+        .log-entry:hover {
+            transform: translateX(8px);
+        }
+
+        .log-info { border-color: var(--info); }
+        .log-success { border-color: var(--success); }
+        .log-warning { border-color: var(--warning); }
+        .log-error { border-color: var(--danger); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* File Tree Enhancement */
+        .file-tree {
+            padding: var(--space-lg);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: var(--space) var(--space-lg);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-xs);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+            font-family: var(--font-mono);
+        }
+
+        .file-item:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(8px);
+        }
+
+        .file-item.active {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        /* Monitor Cards */
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space);
+        }
+
+        .monitor-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .monitor-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: var(--space-xs);
+            font-family: var(--font-primary);
+        }
+
+        .monitor-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space);
+        }
+
+        .chat-message {
+            display: flex;
+            gap: var(--space);
+            animation: slideIn 0.3s ease;
+        }
+
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: var(--bg-tertiary);
+            padding: var(--space) var(--space-lg);
+            border-radius: var(--radius);
+            max-width: 70%;
+            border: 1px solid var(--border-primary);
+        }
+
+        .chat-message.user .message-content {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .chat-input-container {
+            padding: var(--space-lg);
+            border-top: 1px solid var(--border-primary);
+            display: flex;
+            gap: var(--space);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: var(--space) var(--space-lg);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            font-family: var(--font-persian);
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            min-width: 350px;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.4s var(--bounce);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { border-color: var(--success); }
+        .notification.error { border-color: var(--danger); }
+        .notification.warning { border-color: var(--warning); }
+
+        /* Enhanced Empty States */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: var(--space-xl);
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: var(--space-lg);
+            opacity: 0.6;
+            animation: pulse 2s infinite;
+        }
+
+        /* Material Icons */
+        .material-icon {
+            font-family: var(--font-icon);
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+        }
+
+        /* Loading Animations */
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .main-layout {
+                grid-template-columns: 400px 1fr 300px;
+                gap: var(--space-lg);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: var(--space-lg);
+            }
+            
+            .sidebar { order: 2; }
+            .main-content { order: 1; }
+            .right-sidebar { order: 3; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space);
+            }
+            
+            .header {
+                padding: var(--space-lg);
+                margin-bottom: var(--space-lg);
+            }
+            
+            .card {
+                padding: var(--space);
+            }
+            
+            .header-stats {
+                flex-direction: column;
+                gap: var(--space);
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .btn:focus-visible,
+        .form-input:focus-visible,
+        .tab:focus-visible {
+            outline: 3px solid var(--primary-light);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Enhanced Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="header-title">
+                    🚀 سیستم چند-عامله هوشمند تولید کد
+                </h1>
+                <p class="header-subtitle">
+                    پلتفرم پیشرفته تولید پروژه با هوش مصنوعی و چندین عامل هوشمند برای ساخت اپلیکیشن‌های کامل و حرفه‌ای با قابلیت‌های سفارشی‌سازی بی‌شتر و یکپارچگی API
+                </p>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">15</div>
+                        <div class="stat-label">پروژه فعال</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">عامل آنلاین</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">42</div>
+                        <div class="stat-label">API متصل</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">99.9%</div>
+                        <div class="stat-label">آپتایم</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Left Sidebar -->
+            <aside class="sidebar">
+                <!-- Project Generation -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">rocket_launch</span>
+                        <h3 class="card-title">تولید پروژه جدید</h3>
+                    </div>
+                    
+                    <form id="projectForm">
+                        <div class="form-group">
+                            <label for="project-name" class="form-label">
+                                <span class="material-icon">badge</span>
+                                نام پروژه
+                            </label>
+                            <input type="text" id="project-name" class="form-input" placeholder="مثال: اپلیکیشن فروشگاهی هوشمند" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-type" class="form-label">
+                                <span class="material-icon">category</span>
+                                نوع پروژه
+                            </label>
+                            <select id="project-type" class="form-select" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="web-app">وب اپلیکیشن</option>
+                                <option value="mobile-app">اپلیکیشن موبایل</option>
+                                <option value="desktop-app">اپلیکیشن دسکتاپ</option>
+                                <option value="api">API و بک‌اند</option>
+                                <option value="ai-ml">هوش مصنوعی/یادگیری ماشین</option>
+                                <option value="blockchain">بلاکچین</option>
+                                <option value="game">بازی</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-desc" class="form-label">
+                                <span class="material-icon">description</span>
+                                توضیحات پروژه
+                            </label>
+                            <textarea id="project-desc" class="form-textarea" placeholder="توضیح کامل در مورد پروژه، نیازمندی‌ها، قابلیت‌های مورد نظر و جزئیات تکنیکی..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-lang" class="form-label">
+                                <span class="material-icon">code</span>
+                                زبان‌های برنامه نویسی
+                            </label>
+                            <input type="text" id="project-lang" class="form-input" placeholder="مثال: Python, JavaScript, TypeScript, Rust">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-framework" class="form-label">
+                                <span class="material-icon">extension</span>
+                                فریم‌ورک‌ها و کتابخانه‌ها
+                            </label>
+                            <input type="text" id="project-framework" class="form-input" placeholder="مثال: Django, React, FastAPI, TensorFlow">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-complexity" class="form-label">
+                                <span class="material-icon">tune</span>
+                                سطح پیچیدگی
+                            </label>
+                            <select id="project-complexity" class="form-select">
+                                <option value="simple">ساده (1-3 روز)</option>
+                                <option value="medium" selected>متوسط (1-2 هفته)</option>
+                                <option value="complex">پیچیده (1-2 ماه)</option>
+                                <option value="enterprise">سازمانی (3+ ماه)</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <span class="material-icon">play_arrow</span>
+                            شروع تولید
+                        </button>
+                    </form>
+                </div>
+
+                <!-- API Configuration -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">api</span>
+                        <h3 class="card-title">تنظیمات API</h3>
+                    </div>
+                    
+                    <div class="api-config">
+                        <div class="api-provider active" data-provider="openai">
+                            <div class="api-info">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'%3E%3Cpath d='M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z'/%3E%3C/svg%3E" alt="OpenAI" class="api-logo">
+                                <div>
+                                    <div style="font-weight: 600;">OpenAI GPT</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">GPT-4, GPT-3.5</div>
+                                </div>
+                            </div>
+                            <div class="api-status"></div>
+                        </div>
+                        
+                        <div class="api-provider" data-provider="anthropic">
+                            <div class="api-info">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b5cf6'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E" alt="Anthropic" class="api-logo">
+                                <div>
+                                    <div style="font-weight: 600;">Anthropic Claude</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Claude-3, Claude-2</div>
+                                </div>
+                            </div>
+                            <div class="api-status"></div>
+                        </div>
+                        
+                        <div class="api-provider" data-provider="google">
+                            <div class="api-info">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z'/%3E%3Cpath d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z'/%3E%3Cpath d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z'/%3E%3Cpath d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z'/%3E%3C/svg%3E" alt="Google" class="api-logo">
+                                <div>
+                                    <div style="font-weight: 600;">Google AI</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Gemini, PaLM</div>
+                                </div>
+                            </div>
+                            <div class="api-status disconnected"></div>
+                        </div>
+                        
+                        <button class="btn btn-secondary btn-full" style="margin-top: 16px;">
+                            <span class="material-icon">settings</span>
+                            تنظیمات پیشرفته API
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Agent Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">group</span>
+                        <h3 class="card-title">وضعیت عامل‌ها</h3>
+                    </div>
+                    <div class="agents-grid">
+                        <div class="agent-card active">
+                            <div class="agent-avatar">🤖</div>
+                            <div class="agent-name">مدیر پروژه</div>
+                            <div class="agent-status">در حال کار</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">👨‍💻</div>
+                            <div class="agent-name">برنامه نویس</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">🎨</div>
+                            <div class="agent-name">طراح UI/UX</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">🧪</div>
+                            <div class="agent-name">تستر</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">🔒</div>
+                            <div class="agent-name">امنیت</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">📊</div>
+                            <div class="agent-name">تحلیلگر</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Status Bar -->
+                <div class="status-bar">
+                    <div class="status-info">
+                        <div class="status-indicator status-working"></div>
+                        <span class="status-text">در حال تولید پروژه...</span>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-text">گام 1 از 10</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 10%;" id="progressBar"></div>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" data-tab-target="#logs-tab">
+                        <span class="material-icon">terminal</span>
+                        لاگ‌ها
+                    </button>
+                    <button class="tab" data-tab-target="#files-tab">
+                        <span class="material-icon">folder</span>
+                        فایل‌ها
+                    </button>
+                    <button class="tab" data-tab-target="#preview-tab">
+                        <span class="material-icon">preview</span>
+                        پیش‌نمایش
+                    </button>
+                    <button class="tab" data-tab-target="#chat-tab">
+                        <span class="material-icon">chat</span>
+                        چت با عامل‌ها
+                    </button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div id="logs-tab" class="tab-content active">
+                    <div class="logs-container" id="logsContainer">
+                        <div class="log-entry log-info">
+                            <span>[00:00:01]</span> سیستم با موفقیت راه‌اندازی شد
+                        </div>
+                        <div class="log-entry log-success">
+                            <span>[00:00:02]</span> اتصال به APIهای هوش مصنوعی برقرار شد
+                        </div>
+                        <div class="log-entry log-warning">
+                            <span>[00:00:05]</span> عامل "مدیر پروژه" در حال بررسی نیازمندی‌ها
+                        </div>
+                    </div>
+                </div>
+
+                <div id="files-tab" class="tab-content">
+                    <div class="file-tree" id="fileTree">
+                        <div class="empty-state">
+                            <span class="material-icon" style="font-size: 80px;">folder_open</span>
+                            <h3>هنوز فایلی ایجاد نشده</h3>
+                            <p>پس از شروع فرآیند تولید، فایل‌های پروژه اینجا نمایش داده خواهند شد.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="preview-tab" class="tab-content">
+                    <div class="empty-state">
+                        <span class="material-icon" style="font-size: 80px;">visibility</span>
+                        <h3>پیش‌نمایشی برای نمایش وجود ندارد</h3>
+                        <p>پس از تولید کد، می‌توانید پیش‌نمایش آن را در اینجا مشاهده کنید.</p>
+                    </div>
+                </div>
+
+                <div id="chat-tab" class="tab-content">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-message">
+                                <div class="message-avatar">🤖</div>
+                                <div class="message-content">
+                                    سلام! من مدیر پروژه هستم. چه پروژه‌ای می‌خواهید بسازیم؟
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <textarea class="chat-input" placeholder="پیام خود را بنویسید..." id="chatInput"></textarea>
+                            <button class="btn btn-primary" id="sendChatBtn">
+                                <span class="material-icon">send</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="right-sidebar">
+                <!-- System Monitor -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">monitor_heart</span>
+                        <h3 class="card-title">مانیتور سیستم</h3>
+                    </div>
+                    <div class="monitor-grid">
+                        <div class="monitor-card">
+                            <div class="monitor-value">87%</div>
+                            <div class="monitor-label">CPU</div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-value">12.4GB</div>
+                            <div class="monitor-label">RAM</div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-value">42ms</div>
+                            <div class="monitor-label">API Latency</div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-value">1.2M</div>
+                            <div class="monitor-label">Tokens/hr</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Projects -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">history</span>
+                        <h3 class="card-title">پروژه‌های اخیر</h3>
+                    </div>
+                    <div class="file-tree">
+                        <div class="file-item">
+                            <span class="material-icon">web</span>
+                            <div>
+                                <div>فروشگاه آنلاین</div>
+                                <div class="file-meta">2 ساعت پیش</div>
+                            </div>
+                        </div>
+                        <div class="file-item">
+                            <span class="material-icon">smartphone</span>
+                            <div>
+                                <div>اپ موبایل</div>
+                                <div class="file-meta">1 روز پیش</div>
+                            </div>
+                        </div>
+                        <div class="file-item">
+                            <span class="material-icon">psychology</span>
+                            <div>
+                                <div>AI Chatbot</div>
+                                <div class="file-meta">3 روز پیش</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">flash_on</span>
+                        <h3 class="card-title">اقدامات سریع</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button class="btn btn-secondary btn-full btn-sm">
+                            <span class="material-icon">upload_file</span>
+                            آپلود فایل
+                        </button>
+                        <button class="btn btn-secondary btn-full btn-sm">
+                            <span class="material-icon">file_download</span>
+                            دانلود پروژه
+                        </button>
+                        <button class="btn btn-secondary btn-full btn-sm">
+                            <span class="material-icon">share</span>
+                            اشتراک‌گذاری
+                        </button>
+                        <button class="btn btn-secondary btn-full btn-sm">
+                            <span class="material-icon">backup</span>
+                            پشتیبان‌گیری
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification success" id="notification">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="material-icon">check_circle</span>
+            <div>
+                <div style="font-weight: 600;">عملیات موفق</div>
+                <div style="font-size: 0.875rem; opacity: 0.8;">پروژه با موفقیت ایجاد شد!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced JavaScript functionality
+        class EnhancedAICodeGenerator {
+            constructor() {
+                this.init();
+                this.setupEventListeners();
+                this.createParticles();
+                this.startSystemMonitoring();
+                this.simulateProgress();
+            }
+
+            init() {
+                this.currentStep = 0;
+                this.totalSteps = 10;
+                this.agents = [
+                    { name: 'مدیر پروژه', status: 'active', emoji: '🤖' },
+                    { name: 'برنامه نویس', status: 'ready', emoji: '👨‍💻' },
+                    { name: 'طراح UI/UX', status: 'ready', emoji: '🎨' },
+                    { name: 'تستر', status: 'ready', emoji: '🧪' },
+                    { name: 'امنیت', status: 'ready', emoji: '🔒' },
+                    { name: 'تحلیلگر', status: 'ready', emoji: '📊' }
+                ];
+                this.apis = {
+                    openai: { connected: true, latency: 42 },
+                    anthropic: { connected: true, latency: 38 },
+                    google: { connected: false, latency: 0 }
+                };
+            }
+
+            setupEventListeners() {
+                // Tab functionality
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => this.switchTab(tab));
+                });
+
+                // Form submission
+                document.getElementById('projectForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.startProjectGeneration();
+                });
+
+                // Chat functionality
+                document.getElementById('sendChatBtn').addEventListener('click', () => {
+                    this.sendChatMessage();
+                });
+
+                document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendChatMessage();
+                    }
+                });
+
+                // API provider selection
+                document.querySelectorAll('.api-provider').forEach(provider => {
+                    provider.addEventListener('click', () => this.selectAPIProvider(provider));
+                });
+
+                // Agent card interactions
+                document.querySelectorAll('.agent-card').forEach(card => {
+                    card.addEventListener('click', () => this.selectAgent(card));
+                });
+            }
+
+            createParticles() {
+                const particlesContainer = document.getElementById('particles');
+                const particleCount = 50;
+
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 10 + 's';
+                    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                    particlesContainer.appendChild(particle);
+                }
+            }
+
+            switchTab(activeTab) {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding content
+                activeTab.classList.add('active');
+                const targetContent = document.querySelector(activeTab.dataset.tabTarget);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            }
+
+            startProjectGeneration() {
+                const formData = new FormData(document.getElementById('projectForm'));
+                const projectName = formData.get('project-name') || document.getElementById('project-name').value;
+                
+                this.showNotification('شروع تولید پروژه...', 'info');
+                this.addLog('شروع فرآیند تولید پروژه: ' + projectName, 'info');
+                
+                // Simulate project generation steps
+                this.simulateProjectSteps();
+            }
+
+            simulateProjectSteps() {
+                const steps = [
+                    'تحلیل نیازمندی‌ها',
+                    'طراحی معماری',
+                    'ایجاد ساختار پروژه',
+                    'تولید کد بک‌اند',
+                    'تولید کد فرانت‌اند',
+                    'ایجاد دیتابیس',
+                    'پیاده‌سازی API',
+                    'تست واحد',
+                    'تست یکپارچه‌سازی',
+                    'نهایی‌سازی و بستن بسته'
+                ];
+
+                let currentStep = 0;
+                const stepInterval = setInterval(() => {
+                    if (currentStep < steps.length) {
+                        this.addLog(`گام ${currentStep + 1}: ${steps[currentStep]}`, 'info');
+                        this.updateProgress((currentStep + 1) / steps.length * 100);
+                        
+                        // Simulate agent work
+                        if (currentStep < this.agents.length) {
+                            this.activateAgent(currentStep);
+                        }
+                        
+                        // Simulate file creation
+                        if (currentStep > 2) {
+                            this.addFileToTree(`step_${currentStep}.py`, 'python');
+                        }
+                        
+                        currentStep++;
+                    } else {
+                        clearInterval(stepInterval);
+                        this.completeProject();
+                    }
+                }, 2000);
+            }
+
+            completeProject() {
+                this.addLog('پروژه با موفقیت تولید شد!', 'success');
+                this.showNotification('پروژه آماده است!', 'success');
+                this.updateProgress(100);
+                
+                // Reset all agents to ready
+                document.querySelectorAll('.agent-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+            }
+
+            activateAgent(index) {
+                document.querySelectorAll('.agent-card').forEach((card, i) => {
+                    card.classList.remove('active');
+                    if (i === index) {
+                        card.classList.add('active');
+                        const agentName = card.querySelector('.agent-name').textContent;
+                        this.addLog(`عامل "${agentName}" فعال شد`, 'warning');
+                    }
+                });
+            }
+
+            addLog(message, type = 'info') {
+                const logsContainer = document.getElementById('logsContainer');
+                const timestamp = new Date().toLocaleTimeString('fa-IR');
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.innerHTML = `<span>[${timestamp}]</span> ${message}`;
+                logsContainer.appendChild(logEntry);
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+
+            updateProgress(percentage) {
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = percentage + '%';
+                
+                const statusText = document.querySelector('.status-text');
+                if (percentage >= 100) {
+                    statusText.textContent = 'تولید پروژه کامل شد';
+                    document.querySelector('.status-indicator').className = 'status-indicator status-complete';
+                }
+            }
+
+            addFileToTree(filename, type) {
+                const fileTree = document.getElementById('fileTree');
+                const emptyState = fileTree.querySelector('.empty-state');
+                
+                if (emptyState) {
+                    emptyState.remove();
+                }
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const icon = type === 'python' ? 'code' : 'description';
+                fileItem.innerHTML = `
+                    <span class="material-icon">${icon}</span>
+                    <div>
+                        <div>${filename}</div>
+                        <div class="file-meta">همین الان</div>
+                    </div>
+                `;
+                
+                fileTree.appendChild(fileItem);
+            }
+
+            sendChatMessage() {
+                const chatInput = document.getElementById('chatInput');
+                const message = chatInput.value.trim();
+                
+                if (message) {
+                    this.addChatMessage(message, 'user');
+                    chatInput.value = '';
+                    
+                    // Simulate AI response
+                    setTimeout(() => {
+                        const responses = [
+                            'درخواست شما در حال بررسی است...',
+                            'اطلاعات بیشتری در مورد این قسمت نیاز دارم.',
+                            'این ایده جالبی است! بیایید آن را پیاده‌سازی کنیم.',
+                            'من این کار را انجام می‌دهم.'
+                        ];
+                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                        this.addChatMessage(randomResponse, 'assistant');
+                    }, 1000);
+                }
+            }
+
+            addChatMessage(message, sender) {
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${sender}`;
+                
+                const avatar = sender === 'user' ? 'U' : '🤖';
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">${avatar}</div>
+                    <div class="message-content">${message}</div>
+                `;
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            selectAPIProvider(provider) {
+                document.querySelectorAll('.api-provider').forEach(p => p.classList.remove('active'));
+                provider.classList.add('active');
+                
+                const providerName = provider.dataset.provider;
+                this.addLog(`API ${providerName} انتخاب شد`, 'info');
+            }
+
+            selectAgent(agent) {
+                document.querySelectorAll('.agent-card').forEach(a => a.classList.remove('active'));
+                agent.classList.add('active');
+                
+                const agentName = agent.querySelector('.agent-name').textContent;
+                this.addLog(`عامل "${agentName}" انتخاب شد`, 'info');
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.getElementById('notification');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="material-icon">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
+                        <div>
+                            <div style="font-weight: 600;">${message}</div>
+                            <div style="font-size: 0.875rem; opacity: 0.8;">اعلان سیستم</div>
+                        </div>
+                    </div>
+                `;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            startSystemMonitoring() {
+                setInterval(() => {
+                    // Update system stats randomly
+                    document.querySelectorAll('.monitor-value').forEach((element, index) => {
+                        if (index === 0) { // CPU
+                            element.textContent = (Math.random() * 40 + 60).toFixed(0) + '%';
+                        } else if (index === 1) { // RAM
+                            element.textContent = (Math.random() * 4 + 10).toFixed(1) + 'GB';
+                        } else if (index === 2) { // Latency
+                            element.textContent = (Math.random() * 30 + 30).toFixed(0) + 'ms';
+                        } else if (index === 3) { // Tokens
+                            element.textContent = (Math.random() * 0.5 + 1).toFixed(1) + 'M';
+                        }
+                    });
+                }, 3000);
+            }
+
+            simulateProgress() {
+                // Initial welcome message
+                setTimeout(() => {
+                    this.addLog('سیستم چند-عامله آماده است', 'success');
+                    this.addLog('برای شروع، لطفاً اطلاعات پروژه را وارد کنید', 'info');
+                }, 1000);
+            }
+        }
+
+        // Initialize the enhanced system
+        document.addEventListener('DOMContentLoaded', () => {
+            new EnhancedAICodeGenerator();
+        });
+    </script>
+</body>
+</html>

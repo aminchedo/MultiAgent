@@ -219,7 +219,7 @@ async def liveness_check(request: Request):
     }
 
 # Static files - serve the frontend
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Root endpoint - serve the main frontend
 @app.get("/")
@@ -227,16 +227,26 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 async def root(request: Request):
     """Root endpoint - serve the main frontend."""
     try:
-        return FileResponse("frontend/pages/index.html")
+        # Try to serve the main index.html from static directory
+        return FileResponse("static/index.html")
     except FileNotFoundError:
-        return {
-            "message": "Multi-Agent Code Generation System",
-            "version": settings.app_version,
-            "docs_url": "/docs" if settings.debug else None,
-            "frontend_url": "/static/pages/index.html",
-            "status": "running",
-            "deployment": "vercel"
-        }
+        try:
+            # Fallback to frontend/pages/index.html
+            return FileResponse("frontend/pages/index.html")
+        except FileNotFoundError:
+            # Final fallback - return API info
+            return {
+                "message": "Multi-Agent Code Generation System",
+                "version": settings.app_version,
+                "docs_url": "/docs" if settings.debug else None,
+                "frontend_available_at": [
+                    "/static/index.html",
+                    "/static/pages/index.html"
+                ],
+                "status": "running",
+                "deployment": "vercel",
+                "note": "Frontend files should be available at /static/ endpoints"
+            }
 
 # System information endpoint
 @app.get("/info")
@@ -261,7 +271,8 @@ async def system_info(request: Request):
         "endpoints": {
             "health": "/health",
             "docs": "/docs" if settings.debug else None,
-            "frontend": "/static/pages/index.html",
+            "frontend": "/",
+            "static_files": "/static/",
             "api": "/api/*",
         },
         "limits": {
@@ -311,6 +322,24 @@ async def startup_message():
         deployment="vercel",
         openai_configured=bool(settings.openai_api_key),
     )
+
+# Catch-all route for SPA routing (must be after specific routes)
+@app.get("/{path:path}")
+@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
+async def catch_all(request: Request, path: str):
+    """Catch-all route for SPA routing - serves the frontend for unmatched routes."""
+    # Don't handle API routes
+    if path.startswith("api/") or path.startswith("health") or path.startswith("docs") or path.startswith("redoc"):
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+    
+    # For frontend routes, serve the main index.html
+    try:
+        return FileResponse("static/index.html")
+    except FileNotFoundError:
+        try:
+            return FileResponse("frontend/pages/index.html")
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="Frontend files not found")
 
 # Basic code generation endpoint
 @app.post("/api/generate")
