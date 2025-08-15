@@ -26,10 +26,14 @@ def validate_env_vars():
         if not os.getenv(var):
             missing_vars.append(var)
     
-    # Use the new security module for JWT_SECRET_KEY handling
+    # Enhanced JWT_SECRET_KEY handling with production security
     try:
         from config.security import JWT_SECRET_KEY
         logger.info("JWT_SECRET_KEY loaded from security module")
+        # Validate that it's not the default secret in production
+        if os.getenv("VERCEL_ENV") == "production" and JWT_SECRET_KEY == "default-secret-key-for-development-only":
+            logger.error("JWT_SECRET_KEY is set to default secret in production - this is insecure!")
+            raise ValueError("JWT_SECRET_KEY must be a secure secret in production environment")
     except Exception as e:
         logger.error(f"Failed to load JWT_SECRET_KEY from security module: {e}")
         # Fallback to environment variable
@@ -41,6 +45,9 @@ def validate_env_vars():
             else:
                 logger.warning("JWT_SECRET_KEY not set, using default secret for development")
                 os.environ["JWT_SECRET_KEY"] = "default-secret-key-for-development-only"
+        elif os.getenv("VERCEL_ENV") == "production" and jwt_secret == "default-secret-key-for-development-only":
+            logger.error("JWT_SECRET_KEY is set to default secret in production - this is insecure!")
+            raise ValueError("JWT_SECRET_KEY must be a secure secret in production environment")
     
     if missing_vars:
         logger.warning(f"Missing environment variables: {missing_vars}")
@@ -98,10 +105,81 @@ try:
 except Exception as e:
     logger.error(f"Failed to mount static files: {e}")
 
-# Root endpoint for "/" - this fixes the 404 error for root path
+# Root endpoint for "/" - now serves the UI instead of JSON
 @app.get("/")
 async def root_path():
-    """Root endpoint that returns a welcome message"""
+    """Root endpoint that serves the user interface"""
+    try:
+        # Serve the index.html file from public directory
+        index_path = os.path.join(project_root, "public", "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path, media_type="text/html")
+        else:
+            # Fallback to a simple HTML response if file doesn't exist
+            return Response(
+                content="""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Multi-Agent Code Generation System</title>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; background: #0a0e1a; color: #f8fafc; }
+                        .container { max-width: 800px; margin: 0 auto; }
+                        .header { text-align: center; margin-bottom: 40px; }
+                        .api-info { background: #151b2e; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                        .endpoint { background: #1e2a42; padding: 10px; margin: 5px 0; border-radius: 4px; }
+                        .status { color: #10b981; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Multi-Agent Code Generation System</h1>
+                            <p>AI-powered code generation with multiple intelligent agents</p>
+                        </div>
+                        <div class="api-info">
+                            <h2>API Status: <span class="status">Operational</span></h2>
+                            <p>Version: 1.0.0</p>
+                            <p>Environment: """ + ("vercel" if os.getenv("VERCEL") else "local") + """</p>
+                        </div>
+                        <div class="api-info">
+                            <h3>Available Endpoints:</h3>
+                            <div class="endpoint">Health Check: <a href="/health" style="color: #6366f1;">/health</a></div>
+                            <div class="endpoint">API Info: <a href="/api/info" style="color: #6366f1;">/api/info</a></div>
+                            <div class="endpoint">API Health: <a href="/api/health" style="color: #6366f1;">/api/health</a></div>
+                            <div class="endpoint">Test Endpoint: <a href="/api/test" style="color: #6366f1;">/api/test</a></div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """,
+                media_type="text/html"
+            )
+    except Exception as e:
+        logger.error(f"Root path error: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return Response(
+            content=f"""
+            <!DOCTYPE html>
+            <html>
+            <head><title>Error - Multi-Agent API</title></head>
+            <body style="font-family: Arial, sans-serif; margin: 40px; background: #0a0e1a; color: #f8fafc;">
+                <h1>Error Loading Application</h1>
+                <p>An error occurred while loading the application: {str(e)}</p>
+                <p>Please try again or contact support.</p>
+            </body>
+            </html>
+            """,
+            media_type="text/html",
+            status_code=500
+        )
+
+# API info endpoint - moved from root
+@app.get("/api/info")
+async def api_info():
+    """API information endpoint"""
     try:
         return {
             "message": "Welcome to the MultiAgent API",
@@ -111,12 +189,12 @@ async def root_path():
             "endpoints": {
                 "health": "/health",
                 "api_health": "/api/health",
-                "root": "/api",
+                "api_info": "/api/info",
                 "test": "/api/test"
             }
         }
     except Exception as e:
-        logger.error(f"Root path error: {e}")
+        logger.error(f"API info error: {e}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         return {
             "error": "Internal server error",

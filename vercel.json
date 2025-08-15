@@ -8,28 +8,36 @@
   },
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
       "src": "/health",
       "dest": "/api/index.py"
     },
     {
       "src": "/favicon.ico",
-      "dest": "/static/favicon.ico"
+      "dest": "/favicon.ico"
     },
     {
       "src": "/favicon.png",
-      "dest": "/static/favicon.png"
+      "dest": "/favicon.png"
     },
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.py"
+      "src": "/assets/(.*)",
+      "dest": "/public/assets/$1"
+    },
+    {
+      "src": "/pages/(.*)",
+      "dest": "/public/pages/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.py"
+      "dest": "/public/index.html"
     }
   ],
   "headers": [
@@ -53,6 +61,33 @@
     },
     {
       "source": "/favicon.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/pages/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
