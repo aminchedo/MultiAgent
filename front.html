@@ -86,6 +86,30 @@
             --space-lg: 32px;
             --space-xl: 48px;
             --space-2xl: 64px;
+            
+            /* Zoom Control System - 30% zoom out */
+            --zoom-scale: 0.7;
+            --zoom-scale-hover: 0.75;
+            --zoom-scale-active: 0.65;
+            
+            /* Enhanced Typography Scale */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --text-4xl: 2.25rem;
+            --text-5xl: 3rem;
+            --text-6xl: 3.75rem;
+            
+            /* Line Heights */
+            --leading-tight: 1.25;
+            --leading-snug: 1.375;
+            --leading-normal: 1.5;
+            --leading-relaxed: 1.625;
+            --leading-loose: 2;
         }
 
         * {
@@ -94,15 +118,42 @@
             box-sizing: border-box;
         }
 
+        /* Global Zoom Application */
         body {
+            transform: scale(var(--zoom-scale));
+            transform-origin: top center;
+            width: calc(100% / var(--zoom-scale));
+            height: calc(100vh / var(--zoom-scale));
             font-family: var(--font-persian);
             background: var(--gradient-secondary);
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: var(--leading-relaxed);
             min-height: 100vh;
             overflow-x: hidden;
             font-weight: 400;
             position: relative;
+            font-size: var(--text-base);
+        }
+
+        /* Enhanced Typography Improvements */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            line-height: var(--leading-tight);
+            letter-spacing: -0.025em;
+        }
+
+        h1 { font-size: var(--text-5xl); }
+        h2 { font-size: var(--text-4xl); }
+        h3 { font-size: var(--text-3xl); }
+        h4 { font-size: var(--text-2xl); }
+        h5 { font-size: var(--text-xl); }
+        h6 { font-size: var(--text-lg); }
+
+        p {
+            font-size: var(--text-base);
+            line-height: var(--leading-relaxed);
+            margin-bottom: var(--space-sm);
         }
 
         /* Enhanced Animated Background */
@@ -142,9 +193,9 @@
             50% { filter: hue-rotate(90deg); }
         }
 
-        /* Enhanced Container */
+        /* Enhanced Container with Better Spacing */
         .container {
-            max-width: 1800px;
+            max-width: 2000px;
             margin: 0 auto;
             padding: var(--space-xl);
             position: relative;
@@ -178,7 +229,7 @@
             100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
         }
 
-        /* Enhanced Header */
+        /* Enhanced Header with Better Typography */
         .header {
             background: var(--bg-glass);
             backdrop-filter: var(--blur);
@@ -223,7 +274,7 @@
             margin-bottom: var(--space);
             letter-spacing: -0.02em;
             font-family: var(--font-primary);
-            line-height: 1.1;
+            line-height: var(--leading-tight);
         }
 
         .header-subtitle {
@@ -234,7 +285,7 @@
             margin: 0 auto var(--space-lg);
             opacity: 0.9;
             font-family: var(--font-persian);
-            line-height: 1.7;
+            line-height: var(--leading-relaxed);
         }
 
         .header-stats {
@@ -253,22 +304,22 @@
         }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: var(--text-3xl);
             font-weight: 700;
             color: var(--primary-light);
             font-family: var(--font-primary);
         }
 
         .stat-label {
-            font-size: 0.875rem;
+            font-size: var(--text-sm);
             color: var(--text-muted);
             margin-top: var(--space-xs);
         }
 
-        /* Main Layout Enhancement */
+        /* Main Layout Enhancement with Better Grid */
         .main-layout {
             display: grid;
-            grid-template-columns: 450px 1fr 350px;
+            grid-template-columns: 500px 1fr 400px;
             gap: var(--space-xl);
             min-height: calc(100vh - 400px);
         }
@@ -325,14 +376,14 @@
         }
 
         .card-title {
-            font-size: 1.5rem;
+            font-size: var(--text-2xl);
             font-weight: 700;
             color: var(--text-primary);
             margin: 0;
             font-family: var(--font-primary);
         }
 
-        /* Enhanced Form Elements */
+        /* Enhanced Form Elements with Better Typography */
         .form-group {
             margin-bottom: var(--space-lg);
             position: relative;
@@ -345,7 +396,7 @@
             margin-bottom: var(--space-sm);
             font-weight: 600;
             color: var(--text-secondary);
-            font-size: 1rem;
+            font-size: var(--text-base);
             font-family: var(--font-primary);
         }
 
@@ -357,7 +408,7 @@
             border-radius: var(--radius);
             color: var(--text-primary);
             font-family: var(--font-persian);
-            font-size: 1rem;
+            font-size: var(--text-base);
             transition: var(--transition);
             position: relative;
         }
@@ -373,6 +424,7 @@
             min-height: 120px;
             font-family: var(--font-mono);
             resize: vertical;
+            line-height: var(--leading-relaxed);
         }
 
         /* Enhanced Button System */
@@ -385,7 +437,7 @@
             border: none;
             border-radius: var(--radius);
             font-family: var(--font-primary);
-            font-size: 1rem;
+            font-size: var(--text-base);
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
@@ -433,7 +485,7 @@
 
         .btn-sm {
             padding: var(--space-xs) var(--space);
-            font-size: 0.875rem;
+            font-size: var(--text-sm);
         }
 
         /* API Configuration Section */
@@ -492,7 +544,7 @@
         /* Enhanced Agent Cards */
         .agents-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: var(--space);
         }
 
@@ -538,7 +590,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: var(--text-3xl);
             background: var(--gradient-primary);
             color: white;
             position: relative;
@@ -1142,6 +1194,266 @@
             }
         }
 
+        /* Enhanced Communication System */
+        .communication-status {
+            position: fixed;
+            bottom: var(--space-lg);
+            left: var(--space-lg);
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: var(--text-sm);
+            transition: var(--transition);
+            transform: translateY(100px);
+            opacity: 0;
+        }
+
+        .communication-status.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .communication-status.connected {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .communication-status.disconnected {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .communication-status.reconnecting {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .connection-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: pulse 2s infinite;
+        }
+
+        .connection-indicator.connected {
+            background: var(--success);
+        }
+
+        .connection-indicator.disconnected {
+            background: var(--danger);
+        }
+
+        .connection-indicator.reconnecting {
+            background: var(--warning);
+        }
+
+        /* Enhanced Error Handling */
+        .error-boundary {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            display: none;
+        }
+
+        .error-boundary.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .error-title {
+            color: var(--danger);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .error-message {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            line-height: var(--leading-relaxed);
+        }
+
+        .retry-button {
+            margin-top: var(--space);
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: var(--space-sm) var(--space);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: var(--text-sm);
+            transition: var(--transition);
+        }
+
+        .retry-button:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced Loading States */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 26, 0.8);
+            backdrop-filter: var(--blur);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition-slow);
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(99, 102, 241, 0.3);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: var(--space-lg);
+            color: var(--text-primary);
+            font-size: var(--text-lg);
+            font-weight: 500;
+        }
+
+        /* Enhanced Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .toast {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(100%);
+            transition: transform 0.3s var(--bounce);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .toast.warning {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .toast.info {
+            border-color: var(--info);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .toast.success .toast-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .toast.error .toast-icon {
+            background: var(--danger);
+            color: white;
+        }
+
+        .toast.warning .toast-icon {
+            background: var(--warning);
+            color: white;
+        }
+
+        .toast.info .toast-icon {
+            background: var(--info);
+            color: white;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            color: var(--text-primary);
+        }
+
+        .toast-message {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            color: var(--text-primary);
+            background: var(--bg-glass-light);
+        }
+
         /* Responsive API Key Management */
         @media (max-width: 768px) {
             .api-key-actions {
@@ -1162,6 +1474,38 @@
     </style>
 </head>
 <body>
+    <!-- Enhanced Communication System -->
+    <div class="communication-status" id="communicationStatus">
+        <div class="connection-indicator" id="connectionIndicator"></div>
+        <span id="connectionText">بررسی اتصال...</span>
+    </div>
+
+    <!-- Enhanced Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">در حال بارگذاری...</div>
+        </div>
+    </div>
+
+    <!-- Enhanced Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Enhanced Error Boundary -->
+    <div class="error-boundary" id="errorBoundary">
+        <div class="error-title">
+            <span class="material-icon">error</span>
+            خطا در ارتباط با سرور
+        </div>
+        <div class="error-message" id="errorMessage">
+            مشکلی در ارتباط با سرور پیش آمده است. لطفاً دوباره تلاش کنید.
+        </div>
+        <button class="retry-button" onclick="app.retryConnection()">
+            <span class="material-icon">refresh</span>
+            تلاش مجدد
+        </button>
+    </div>
+
     <!-- Floating Particles -->
     <div class="particles" id="particles"></div>
 
@@ -1617,6 +1961,7 @@
                 this.createParticles();
                 this.startSystemMonitoring();
                 this.simulateProgress();
+                this.initializeCommunicationSystem();
             }
 
             init() {
@@ -1718,6 +2063,7 @@
                 this.checkAuthenticationStatus();
             }
 
+            // Enhanced Communication System
             async validateAPIKey() {
                 const apiKeyInput = document.getElementById('api-key');
                 const validateBtn = document.getElementById('validateApiKey');
@@ -1726,16 +2072,17 @@
                 const apiKey = apiKeyInput.value.trim();
                 
                 if (!apiKey) {
-                    this.showAPIKeyStatus('error', 'لطفاً کلید API را وارد کنید');
+                    this.showToast('error', 'خطا', 'لطفاً کلید API را وارد کنید');
                     return;
                 }
 
                 // Show loading state
                 validateBtn.classList.add('loading');
                 validateBtn.disabled = true;
+                this.showLoading('در حال بررسی کلید API...');
 
                 try {
-                    const response = await fetch('/api/validate-key', {
+                    const response = await this.makeRequest('/api/validate-key', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1744,23 +2091,242 @@
                         body: JSON.stringify({ api_key: apiKey })
                     });
 
-                    const result = await response.json();
-
-                    if (response.ok && result.valid) {
-                        this.showAPIKeyStatus('success', 'کلید API معتبر است ✓');
+                    if (response.valid) {
+                        this.showToast('success', 'موفقیت', 'کلید API معتبر است ✓');
                         this.updateAuthStatus('connected', 'احراز هویت موفق');
+                        this.showAPIKeyStatus('success', 'کلید API معتبر است ✓');
                     } else {
-                        this.showAPIKeyStatus('error', result.message || 'کلید API نامعتبر است');
+                        this.showToast('error', 'خطا', response.message || 'کلید API نامعتبر است');
                         this.updateAuthStatus('error', 'خطا در احراز هویت');
+                        this.showAPIKeyStatus('error', response.message || 'کلید API نامعتبر است');
                     }
                 } catch (error) {
                     console.error('API key validation error:', error);
-                    this.showAPIKeyStatus('error', 'خطا در اتصال به سرور');
+                    this.showToast('error', 'خطا در اتصال', 'خطا در اتصال به سرور');
                     this.updateAuthStatus('error', 'خطا در اتصال');
+                    this.showAPIKeyStatus('error', 'خطا در اتصال به سرور');
                 } finally {
                     validateBtn.classList.remove('loading');
                     validateBtn.disabled = false;
+                    this.hideLoading();
                 }
+            }
+
+            // Enhanced Request Handler with Retry Logic
+            async makeRequest(url, options = {}, retries = 3) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    this.updateConnectionStatus('connected');
+                    return data;
+
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    
+                    if (error.name === 'AbortError') {
+                        throw new Error('درخواست به دلیل تاخیر لغو شد');
+                    }
+
+                    if (retries > 0) {
+                        this.showToast('warning', 'تلاش مجدد', `تلاش مجدد در 2 ثانیه... (${4 - retries}/3)`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        return this.makeRequest(url, options, retries - 1);
+                    }
+
+                    this.updateConnectionStatus('disconnected');
+                    throw error;
+                }
+            }
+
+            // Enhanced Connection Status Management
+            updateConnectionStatus(status) {
+                const statusEl = document.getElementById('communicationStatus');
+                const indicatorEl = document.getElementById('connectionIndicator');
+                const textEl = document.getElementById('connectionText');
+
+                if (statusEl && indicatorEl && textEl) {
+                    statusEl.className = `communication-status ${status} show`;
+                    indicatorEl.className = `connection-indicator ${status}`;
+
+                    switch (status) {
+                        case 'connected':
+                            textEl.textContent = 'اتصال برقرار';
+                            break;
+                        case 'disconnected':
+                            textEl.textContent = 'اتصال قطع شد';
+                            break;
+                        case 'reconnecting':
+                            textEl.textContent = 'در حال اتصال مجدد...';
+                            break;
+                        default:
+                            textEl.textContent = 'بررسی اتصال...';
+                    }
+                }
+            }
+
+            // Enhanced Loading Management
+            showLoading(message = 'در حال بارگذاری...') {
+                const overlay = document.getElementById('loadingOverlay');
+                const text = document.getElementById('loadingText');
+                
+                if (overlay && text) {
+                    text.textContent = message;
+                    overlay.classList.add('show');
+                }
+            }
+
+            hideLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    overlay.classList.remove('show');
+                }
+            }
+
+            // Enhanced Toast Notification System
+            showToast(type, title, message, duration = 5000) {
+                const container = document.getElementById('toastContainer');
+                if (!container) return;
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const iconMap = {
+                    success: 'check_circle',
+                    error: 'error',
+                    warning: 'warning',
+                    info: 'info'
+                };
+
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <span class="material-icon">${iconMap[type] || 'info'}</span>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <span class="material-icon">close</span>
+                    </button>
+                `;
+
+                container.appendChild(toast);
+
+                // Show animation
+                setTimeout(() => toast.classList.add('show'), 100);
+
+                // Auto remove
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+
+            // Enhanced Error Handling
+            showError(message, retryCallback = null) {
+                const errorEl = document.getElementById('errorBoundary');
+                const messageEl = document.getElementById('errorMessage');
+                
+                if (errorEl && messageEl) {
+                    messageEl.textContent = message;
+                    errorEl.classList.add('show');
+                    
+                    if (retryCallback) {
+                        const retryBtn = errorEl.querySelector('.retry-button');
+                        if (retryBtn) {
+                            retryBtn.onclick = retryCallback;
+                        }
+                    }
+                }
+            }
+
+            hideError() {
+                const errorEl = document.getElementById('errorBoundary');
+                if (errorEl) {
+                    errorEl.classList.remove('show');
+                }
+            }
+
+            // Retry Connection Method
+            retryConnection() {
+                this.hideError();
+                this.updateConnectionStatus('reconnecting');
+                this.checkAuthenticationStatus();
+            }
+
+            // Initialize Enhanced Communication System
+            initializeCommunicationSystem() {
+                // Initial connection check
+                this.checkInitialConnection();
+                
+                // Set up periodic health checks
+                setInterval(() => {
+                    this.performHealthCheck();
+                }, 30000); // Check every 30 seconds
+                
+                // Set up connection status monitoring
+                this.startConnectionMonitoring();
+            }
+
+            // Initial Connection Check
+            async checkInitialConnection() {
+                try {
+                    await this.makeRequest('/health');
+                    this.updateConnectionStatus('connected');
+                    this.hideError();
+                } catch (error) {
+                    this.updateConnectionStatus('disconnected');
+                    this.showError('خطا در اتصال اولیه به سرور', () => this.retryConnection());
+                }
+            }
+
+            // Periodic Health Check
+            async performHealthCheck() {
+                try {
+                    await this.makeRequest('/health');
+                    this.updateConnectionStatus('connected');
+                } catch (error) {
+                    this.updateConnectionStatus('disconnected');
+                }
+            }
+
+            // Connection Monitoring
+            startConnectionMonitoring() {
+                // Monitor online/offline status
+                window.addEventListener('online', () => {
+                    this.updateConnectionStatus('reconnecting');
+                    this.checkInitialConnection();
+                });
+
+                window.addEventListener('offline', () => {
+                    this.updateConnectionStatus('disconnected');
+                    this.showToast('warning', 'اتصال اینترنت', 'اتصال اینترنت قطع شد');
+                });
+
+                // Monitor page visibility for better resource management
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        // Page is hidden, reduce monitoring frequency
+                        this.isPageHidden = true;
+                    } else {
+                        // Page is visible, resume normal monitoring
+                        this.isPageHidden = false;
+                        this.performHealthCheck();
+                    }
+                });
             }
 
             saveAPIKey() {
@@ -1814,34 +2380,31 @@
                 
                 testBtn.classList.add('loading');
                 testBtn.disabled = true;
+                this.showLoading('در حال آزمایش اتصال...');
 
                 try {
-                    const response = await fetch('/health');
-                    const result = await response.json();
+                    const result = await this.makeRequest('/health');
 
-                    if (response.ok) {
-                        this.showNotification('success', 'اتصال موفق', 'اتصال به سرور با موفقیت برقرار شد');
-                        this.updateAPIStatus('avalai', true);
-                    } else {
-                        this.showNotification('error', 'خطا در اتصال', 'عدم دسترسی به سرور');
-                        this.updateAPIStatus('avalai', false);
-                    }
+                    this.showToast('success', 'اتصال موفق', 'اتصال به سرور با موفقیت برقرار شد');
+                    this.updateAPIStatus('avalai', true);
+                    this.updateConnectionStatus('connected');
                 } catch (error) {
                     console.error('Connection test error:', error);
-                    this.showNotification('error', 'خطا در اتصال', 'خطا در برقراری ارتباط با سرور');
+                    this.showToast('error', 'خطا در اتصال', 'خطا در برقراری ارتباط با سرور');
                     this.updateAPIStatus('avalai', false);
+                    this.updateConnectionStatus('disconnected');
                 } finally {
                     testBtn.classList.remove('loading');
                     testBtn.disabled = false;
+                    this.hideLoading();
                 }
             }
 
             async checkAuthenticationStatus() {
                 try {
-                    const response = await fetch('/health');
-                    const result = await response.json();
+                    const result = await this.makeRequest('/health');
 
-                    if (response.ok && result.authentication) {
+                    if (result.authentication) {
                         const isEnabled = result.authentication.enabled;
                         const totalKeys = result.authentication.total_keys;
                         
@@ -1920,26 +2483,26 @@
                 
                 // Validation
                 if (!projectName) {
-                    this.showNotification('error', 'خطا', 'نام پروژه الزامی است');
+                    this.showToast('error', 'خطا', 'نام پروژه الزامی است');
                     return;
                 }
                 
                 if (!projectDesc || projectDesc.length < 10) {
-                    this.showNotification('error', 'خطا', 'توضیحات پروژه باید حداقل 10 کاراکتر باشد');
+                    this.showToast('error', 'خطا', 'توضیحات پروژه باید حداقل 10 کاراکتر باشد');
                     return;
                 }
 
                 // Check API key if authentication is enabled
                 try {
-                    const healthResponse = await fetch('/health');
-                    const healthData = await healthResponse.json();
+                    const healthData = await this.makeRequest('/health');
                     
                     if (healthData.authentication && healthData.authentication.enabled && !apiKey) {
-                        this.showNotification('error', 'خطا', 'کلید API برای ادامه الزامی است');
+                        this.showToast('error', 'خطا', 'کلید API برای ادامه الزامی است');
                         return;
                     }
                 } catch (error) {
                     console.error('Error checking authentication status:', error);
+                    this.showToast('warning', 'هشدار', 'نمی‌توان وضعیت احراز هویت را بررسی کرد');
                 }
                 
                 // Prepare request data
@@ -1958,71 +2521,81 @@
                     headers['X-API-Key'] = apiKey;
                 }
                 
-                this.showNotification('info', 'شروع تولید پروژه', 'در حال ارسال درخواست...');
+                this.showToast('info', 'شروع تولید پروژه', 'در حال ارسال درخواست...');
                 this.addLog('شروع فرآیند تولید پروژه: ' + projectName, 'info');
+                this.showLoading('در حال ایجاد پروژه...');
                 
                 try {
-                    const response = await fetch('/api/generate', {
+                    const result = await this.makeRequest('/api/generate', {
                         method: 'POST',
                         headers: headers,
                         body: JSON.stringify(requestData)
                     });
                     
-                    const result = await response.json();
+                    this.showToast('success', 'درخواست ثبت شد', `شناسه پروژه: ${result.job_id}`);
+                    this.addLog(`پروژه با شناسه ${result.job_id} ایجاد شد`, 'success');
                     
-                    if (response.ok) {
-                        this.showNotification('success', 'درخواست ثبت شد', `شناسه پروژه: ${result.job_id}`);
-                        this.addLog(`پروژه با شناسه ${result.job_id} ایجاد شد`, 'success');
-                        
-                        // Start monitoring the job progress
-                        this.monitorJobProgress(result.job_id);
-                    } else {
-                        this.showNotification('error', 'خطا در ایجاد پروژه', result.detail || 'خطای ناشناخته');
-                        this.addLog('خطا در ایجاد پروژه: ' + (result.detail || 'خطای ناشناخته'), 'error');
-                    }
+                    // Start monitoring the job progress
+                    this.monitorJobProgress(result.job_id);
                 } catch (error) {
                     console.error('Project generation error:', error);
-                    this.showNotification('error', 'خطا در اتصال', 'عدم دسترسی به سرور');
+                    this.showToast('error', 'خطا در اتصال', 'عدم دسترسی به سرور');
                     this.addLog('خطا در اتصال به سرور', 'error');
+                    this.showError('خطا در ایجاد پروژه. لطفاً دوباره تلاش کنید.', () => this.startProjectGeneration());
+                } finally {
+                    this.hideLoading();
                 }
             }
 
             async monitorJobProgress(jobId) {
                 const maxAttempts = 100;
                 let attempts = 0;
+                let consecutiveErrors = 0;
                 
                 const checkProgress = async () => {
                     if (attempts >= maxAttempts) {
                         this.addLog('زمان بررسی پروژه به پایان رسید', 'warning');
+                        this.showToast('warning', 'زمان به پایان رسید', 'زمان بررسی پروژه به پایان رسید');
                         return;
                     }
                     
                     try {
-                        const response = await fetch(`/api/status/${jobId}`);
-                        const status = await response.json();
+                        const status = await this.makeRequest(`/api/status/${jobId}`);
                         
-                        if (response.ok) {
-                            this.updateProgress(status.progress, status.message);
-                            this.addLog(`${status.message} (${status.progress}%)`, 'info');
-                            
-                            if (status.status === 'completed') {
-                                this.showNotification('success', 'پروژه تکمیل شد', 'فایل‌های پروژه آماده دانلود است');
-                                this.addLog('پروژه با موفقیت تکمیل شد', 'success');
-                                return;
-                            } else if (status.status === 'failed') {
-                                this.showNotification('error', 'خطا در تولید پروژه', status.message);
-                                this.addLog('خطا در تولید پروژه: ' + status.message, 'error');
-                                return;
-                            }
-                            
-                            // Continue monitoring
-                            setTimeout(checkProgress, 2000);
-                        } else {
-                            this.addLog('خطا در دریافت وضعیت پروژه', 'error');
+                        this.updateProgress(status.progress, status.message);
+                        this.addLog(`${status.message} (${status.progress}%)`, 'info');
+                        consecutiveErrors = 0; // Reset error counter on success
+                        
+                        if (status.status === 'completed') {
+                            this.showToast('success', 'پروژه تکمیل شد', 'فایل‌های پروژه آماده دانلود است');
+                            this.addLog('پروژه با موفقیت تکمیل شد', 'success');
+                            this.hideLoading();
+                            return;
+                        } else if (status.status === 'failed') {
+                            this.showToast('error', 'خطا در تولید پروژه', status.message);
+                            this.addLog('خطا در تولید پروژه: ' + status.message, 'error');
+                            this.hideLoading();
+                            return;
                         }
+                        
+                        // Continue monitoring with adaptive interval
+                        const interval = Math.min(2000 + (attempts * 100), 10000); // Increase interval gradually
+                        setTimeout(checkProgress, interval);
+                        
                     } catch (error) {
                         console.error('Error monitoring job progress:', error);
                         this.addLog('خطا در بررسی پیشرفت پروژه', 'error');
+                        consecutiveErrors++;
+                        
+                        if (consecutiveErrors >= 3) {
+                            this.showToast('error', 'خطا در نظارت', 'خطاهای متوالی در بررسی پیشرفت پروژه');
+                            this.hideLoading();
+                            return;
+                        }
+                        
+                        // Retry with exponential backoff
+                        const retryDelay = Math.min(2000 * Math.pow(2, consecutiveErrors - 1), 10000);
+                        setTimeout(checkProgress, retryDelay);
                     }
                     
                     attempts++;
@@ -2084,7 +2657,7 @@
 
             completeProject() {
                 this.addLog('پروژه با موفقیت تولید شد!', 'success');
-                this.showNotification('پروژه آماده است!', 'success');
+                this.showToast('success', 'پروژه تکمیل شد', 'پروژه با موفقیت تولید شد!');
                 this.updateProgress(100);
                 
                 // Reset all agents to ready
@@ -2202,22 +2775,8 @@
             }
 
             showNotification(message, type = 'info') {
-                const notification = document.getElementById('notification');
-                notification.className = `notification ${type}`;
-                notification.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="material-icon">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
-                        <div>
-                            <div style="font-weight: 600;">${message}</div>
-                            <div style="font-size: 0.875rem; opacity: 0.8;">اعلان سیستم</div>
-                        </div>
-                    </div>
-                `;
-                notification.classList.add('show');
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 4000);
+                // Legacy method - now uses enhanced toast system
+                this.showToast(type, 'اعلان سیستم', message);
             }
 
             startSystemMonitoring() {
