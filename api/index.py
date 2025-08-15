@@ -89,24 +89,33 @@ def create_minimal_app():
 def import_main_app():
     """Import main app with comprehensive error handling"""
     try:
-        logger.info("Attempting to import vercel_app...")
+        logger.info("Attempting to import vercel_app using lazy loading...")
         
-        # Try relative import first
+        # Try using the startup module for lazy loading
         try:
-            from .vercel_app import app
-            logger.info("Successfully imported vercel_app using relative import")
+            from .startup import init_app
+            app = init_app()
+            logger.info("Successfully imported vercel_app using lazy loading")
             return app
         except ImportError as e:
-            logger.warning(f"Relative import failed: {e}")
+            logger.warning(f"Lazy loading failed: {e}")
             
-            # Try absolute import
+            # Fallback to direct import
             try:
-                from api.vercel_app import app
-                logger.info("Successfully imported vercel_app using absolute import")
+                from .vercel_app import app
+                logger.info("Successfully imported vercel_app using relative import")
                 return app
             except ImportError as e2:
-                logger.error(f"Absolute import also failed: {e2}")
-                raise ImportError(f"Both relative and absolute imports failed: {e}, {e2}")
+                logger.warning(f"Relative import failed: {e2}")
+                
+                # Try absolute import
+                try:
+                    from api.vercel_app import app
+                    logger.info("Successfully imported vercel_app using absolute import")
+                    return app
+                except ImportError as e3:
+                    logger.error(f"Absolute import also failed: {e3}")
+                    raise ImportError(f"All import methods failed: {e}, {e2}, {e3}")
                 
     except ImportError as e:
         logger.error(f"Module import failed: {str(e)}")
@@ -132,7 +141,8 @@ if hasattr(app, 'get'):
         return {
             'status': 'ok',
             'environment': 'vercel',
-            'app_loaded': True
+            'app_loaded': True,
+            'python_path': sys.path[:5]  # Show first 5 entries of Python path
         }
 
 # Export for Vercel - this is the correct way to export a FastAPI app

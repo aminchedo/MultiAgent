@@ -26,22 +26,21 @@ def validate_env_vars():
         if not os.getenv(var):
             missing_vars.append(var)
     
-    # Enhanced JWT_SECRET_KEY handling with security warnings
-    jwt_secret = os.getenv("JWT_SECRET_KEY")
-    is_production = os.getenv("VERCEL") == "1" or os.getenv("NODE_ENV") == "production"
-    
-    if not jwt_secret:
-        if is_production:
-            logger.error("JWT_SECRET_KEY is required in production environment")
-            logger.error("Set JWT_SECRET_KEY in Vercel dashboard environment variables")
-            raise ValueError("JWT_SECRET_KEY environment variable is required in production")
-        else:
-            logger.warning("JWT_SECRET_KEY not set, using default secret for development")
-            logger.warning("This is insecure for production - set JWT_SECRET_KEY in Vercel dashboard")
-            os.environ["JWT_SECRET_KEY"] = "default-secret-key-for-development-only"
-    elif jwt_secret == "default-secret-key-for-development-only":
-        logger.warning("Using default JWT secret - insecure for production!")
-        logger.warning("Set JWT_SECRET_KEY environment variable in Vercel dashboard")
+    # Use the new security module for JWT_SECRET_KEY handling
+    try:
+        from config.security import JWT_SECRET_KEY
+        logger.info("JWT_SECRET_KEY loaded from security module")
+    except Exception as e:
+        logger.error(f"Failed to load JWT_SECRET_KEY from security module: {e}")
+        # Fallback to environment variable
+        jwt_secret = os.getenv("JWT_SECRET_KEY")
+        if not jwt_secret:
+            if os.getenv("VERCEL_ENV") == "production":
+                logger.error("JWT_SECRET_KEY is required in production environment")
+                raise ValueError("JWT_SECRET_KEY environment variable is required in production")
+            else:
+                logger.warning("JWT_SECRET_KEY not set, using default secret for development")
+                os.environ["JWT_SECRET_KEY"] = "default-secret-key-for-development-only"
     
     if missing_vars:
         logger.warning(f"Missing environment variables: {missing_vars}")
@@ -73,7 +72,8 @@ app.add_middleware(
 
 # Import settings safely with enhanced error handling
 try:
-    from config.vercel_config import get_vercel_settings, JWT_SECRET_KEY
+    from config.vercel_config import get_vercel_settings
+    from config.security import JWT_SECRET_KEY
     settings = get_vercel_settings()
     logger.info("Settings loaded successfully")
     logger.info(f"JWT secret configured: {bool(JWT_SECRET_KEY and JWT_SECRET_KEY != 'default-secret-key-for-development-only')}")
@@ -84,6 +84,7 @@ except Exception as e:
     logger.error(f"Traceback: {traceback.format_exc()}")
     settings = None
     UPLOAD_ENABLED = False
+    # Fallback to environment variable
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default-secret-key-for-development-only")
 
 # Mount static files directory
