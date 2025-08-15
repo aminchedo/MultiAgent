@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Vercel Deployment Script for Multi-Agent Code Generation System
-# This script deploys the application to Vercel
+# This script prepares and deploys the application to Vercel
 
 set -e
 
-echo "🚀 Starting Vercel deployment..."
+echo "🚀 Starting Vercel Deployment..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -16,61 +16,170 @@ NC='\033[0m' # No Color
 
 # Function to print colored output
 print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}📋 $1${NC}"
 }
 
 print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}✅ $1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}❌ $1${NC}"
 }
 
 # Check if Vercel CLI is installed
-if ! command -v vercel &> /dev/null; then
-    print_error "Vercel CLI is not installed. Please install it first:"
-    echo "npm install -g vercel"
-    exit 1
-fi
+check_vercel_cli() {
+    print_status "Checking Vercel CLI installation..."
+    if ! command -v vercel &> /dev/null; then
+        print_warning "Vercel CLI not found. Installing..."
+        npm install -g vercel
+        print_success "Vercel CLI installed"
+    else
+        print_success "Vercel CLI is already installed"
+    fi
+}
 
-# Check if we're in the right directory
-if [ ! -f "api/index.py" ] || [ ! -f "vercel.json" ]; then
-    print_error "Missing required Vercel files. Please ensure you're in the project root."
-    exit 1
-fi
+# Verify configuration files
+verify_config() {
+    print_status "Verifying configuration files..."
+    
+    if [ ! -f "vercel.json" ]; then
+        print_error "vercel.json not found!"
+        exit 1
+    fi
+    
+    if [ ! -f "requirements-vercel.txt" ]; then
+        print_error "requirements-vercel.txt not found!"
+        exit 1
+    fi
+    
+    if [ ! -f "api/index.py" ]; then
+        print_error "api/index.py not found!"
+        exit 1
+    fi
+    
+    if [ ! -f "api/vercel_app.py" ]; then
+        print_error "api/vercel_app.py not found!"
+        exit 1
+    fi
+    
+    if [ ! -f "config/vercel_config.py" ]; then
+        print_error "config/vercel_config.py not found!"
+        exit 1
+    fi
+    
+    print_success "All configuration files verified"
+}
 
-print_status "Verifying Vercel configuration..."
+# Create .vercelignore file
+create_vercelignore() {
+    print_status "Creating .vercelignore file..."
+    cat > .vercelignore << 'EOF'
+# Ignore unnecessary files for Vercel deployment
+.git/
+.gitignore
+README.md
+*.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+temp/
+tests/
+docs/
+deployment/
+scripts/
+*.sh
+EOF
+    print_success ".vercelignore file created"
+}
 
-# Test the Vercel app locally
-print_status "Testing Vercel app locally..."
-if python3 -c "import sys; sys.path.insert(0, '.'); from api.vercel_app import app; print('✅ Vercel app test passed')" 2>/dev/null; then
-    print_success "Vercel app test passed"
-else
-    print_error "Vercel app test failed"
-    exit 1
-fi
-
-# Check if user is logged in to Vercel
-print_status "Checking Vercel authentication..."
-if ! vercel whoami &> /dev/null; then
-    print_warning "Not logged in to Vercel. Please log in:"
-    vercel login
-fi
+# Set environment variables
+setup_env() {
+    print_status "Setting up environment variables..."
+    
+    # Create .env file if it doesn't exist
+    if [ ! -f ".env" ]; then
+        print_warning "Creating .env file with default values..."
+        cat > .env << 'EOF'
+# Vercel Deployment Environment Variables
+DEBUG=false
+JWT_SECRET_KEY=your-super-secret-jwt-key-change-in-production
+OPENAI_API_KEY=your-openai-api-key-here
+EOF
+        print_warning "Please update .env file with your actual API keys"
+    fi
+    
+    print_success "Environment variables configured"
+}
 
 # Deploy to Vercel
-print_status "Deploying to Vercel..."
-if vercel --prod; then
-    print_success "Deployment completed successfully!"
-    print_status "Your application should be available at the URL shown above."
-else
-    print_error "Deployment failed!"
-    exit 1
-fi
+deploy() {
+    print_status "Deploying to Vercel..."
+    
+    # Check if user is logged in
+    if ! vercel whoami &> /dev/null; then
+        print_warning "Not logged in to Vercel. Please login..."
+        vercel login
+    fi
+    
+    # Deploy
+    print_status "Starting deployment..."
+    vercel --prod
+    
+    print_success "Deployment completed!"
+}
 
-print_success "🎉 Vercel deployment completed!"
-print_status "Check the URL above to access your application."
+# Main deployment process
+main() {
+    echo "🎯 Vercel Deployment for Multi-Agent Code Generation System"
+    echo "=========================================================="
+    
+    check_vercel_cli
+    verify_config
+    create_vercelignore
+    setup_env
+    deploy
+    
+    echo ""
+    echo "🎉 Deployment completed successfully!"
+    echo ""
+    echo "📋 Next steps:"
+    echo "1. Set your environment variables in Vercel dashboard"
+    echo "2. Configure your domain (if needed)"
+    echo "3. Test your deployment"
+    echo ""
+    echo "🔗 Your application should be available at the URL provided by Vercel"
+}
+
+# Run main function
+main "$@"

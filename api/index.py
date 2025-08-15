@@ -14,3 +14,4 @@ sys.path.insert(0, str(project_root))
 from api.vercel_app import app
 
 # Export the app for Vercel
+handler = app
