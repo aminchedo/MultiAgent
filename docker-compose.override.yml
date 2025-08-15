@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Development overrides for docker-compose.yml
+services:
+  app:
+    build:
+      target: builder  # Use builder stage for development
+    environment:
+      - DEBUG=true
+      - APP_ENV=development
+    volumes:
+      - .:/app  # Mount source code for live reload
+      - /app/__pycache__  # Exclude cache
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    ports:
+      - "8000:8000"  # Direct access to app
+
+  postgres:
+    ports:
+      - "5432:5432"  # Expose PostgreSQL for external access
+    environment:
+      - POSTGRES_PASSWORD=dev123  # Simpler password for dev
+
+  redis:
+    ports:
+      - "6379:6379"  # Expose Redis for external access
+
+  # Remove nginx, prometheus, and grafana for development
+  nginx:
+    profiles:
+      - production
+
+  prometheus:
+    profiles:
+      - production
+
+  grafana:
+    profiles:
+      - production
