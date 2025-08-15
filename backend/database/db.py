@@ -102,7 +102,7 @@ class LogModel(Base):
     agent = Column(String(100), nullable=False)
     level = Column(String(20), nullable=False, default="INFO")
     message = Column(Text, nullable=False)
-    metadata = Column(JSON, nullable=False, default=dict)
+    log_metadata = Column(JSON, nullable=False, default=dict)
     timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
     
     # Relationships

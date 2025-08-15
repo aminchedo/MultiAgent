@@ -13,7 +13,7 @@ from pathlib import Path
 
 from crewai import Agent, Task, Crew, Process
 from crewai.tools import BaseTool
-from langchain.llms import OpenAI
+from langchain_community.llms import OpenAI
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 

@@ -5,7 +5,8 @@ Handles environment variables and application settings.
 
 import os
 from typing import Optional, List
-from pydantic import BaseSettings, validator
+from pydantic_settings import BaseSettings
+from pydantic import validator
 from pathlib import Path
 
 
@@ -21,6 +22,11 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     workers: int = 1
+    server_host: str = "0.0.0.0"
+    server_port: int = 8000
+    server_workers: int = 1
+    server_reload: bool = True
+    server_log_level: str = "info"
     
     # Database settings
     database_url: str = "postgresql+asyncpg://user:password@localhost:5432/multiagent"
@@ -73,6 +79,9 @@ class Settings(BaseSettings):
     cors_allow_credentials: bool = True
     cors_allow_methods: List[str] = ["*"]
     cors_allow_headers: List[str] = ["*"]
+    
+    # Backend URL (for frontend)
+    backend_url: str = "http://localhost:8000"
     
     @validator("upload_dir")
     def create_upload_dir(cls, v):
