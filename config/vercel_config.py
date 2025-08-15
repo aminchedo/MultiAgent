@@ -44,6 +44,10 @@ class VercelSettings(BaseSettings):
             upload_path = kwargs.get('upload_dir', 'uploads')
             try:
                 if upload_path:
+                    # Use /tmp for Vercel compatibility, fallback to local path
+                    if os.getenv("VERCEL") == "1":
+                        upload_path = "/tmp/uploads"
+                    
                     Path(upload_path).mkdir(parents=True, exist_ok=True)
                     kwargs['upload_dir'] = str(upload_path)
             except (OSError, PermissionError):

@@ -11,6 +11,7 @@ import zipfile
 import tempfile
 import subprocess
 import psutil
+import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from pathlib import Path
@@ -358,10 +359,11 @@ async def execute_code(
         start_time = datetime.utcnow()
         
         if execution_request.language.lower() == "python":
-            # Execute Python code
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            # Execute Python code - Use Vercel-safe temp file
+            from backend.utils.vercel_utils import create_temp_file_vercel_safe
+            temp_file = create_temp_file_vercel_safe(suffix='.py', prefix='temp_code_')
+            with open(temp_file, 'w', encoding='utf-8') as f:
                 f.write(execution_request.code)
-                temp_file = f.name
             
             try:
                 result = subprocess.run(

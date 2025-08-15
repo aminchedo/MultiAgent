@@ -86,8 +86,24 @@ class Settings(BaseSettings):
     @validator("upload_dir")
     def create_upload_dir(cls, v):
         """Ensure upload directory exists."""
-        Path(v).mkdir(parents=True, exist_ok=True)
-        return v
+        try:
+            # Use /tmp for Vercel compatibility
+            if os.getenv("VERCEL") == "1":
+                v = "/tmp/uploads"
+            
+            Path(v).mkdir(parents=True, exist_ok=True)
+            return v
+        except (OSError, PermissionError) as e:
+            # If we can't create the directory, use /tmp as fallback
+            if os.getenv("VERCEL") == "1":
+                fallback_path = "/tmp/uploads"
+                try:
+                    Path(fallback_path).mkdir(parents=True, exist_ok=True)
+                    return fallback_path
+                except:
+                    return None
+            else:
+                raise e
     
     @validator("openai_api_key", pre=True)
     def validate_openai_key(cls, v):

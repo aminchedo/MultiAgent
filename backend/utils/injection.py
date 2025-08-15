@@ -37,13 +37,26 @@ class SystemInjector:
             "jinja2>=3.1.0"
         ]
         
-        # ایجاد فایل requirements.txt
-        with open(self.requirements_file, 'w', encoding='utf-8') as f:
-            f.write("# Multi-Agent Code Generation System Dependencies\n")
-            for package in required_packages:
-                f.write(f"{package}\n")
+        # ایجاد فایل requirements.txt - Use /tmp for Vercel
+        if os.getenv("VERCEL") == "1":
+            self.requirements_file = Path("/tmp") / "requirements.txt"
         
-        print(f"✅ فایل {self.requirements_file} ایجاد شد")
+        try:
+            with open(self.requirements_file, 'w', encoding='utf-8') as f:
+                f.write("# Multi-Agent Code Generation System Dependencies\n")
+                for package in required_packages:
+                    f.write(f"{package}\n")
+            print(f"✅ فایل {self.requirements_file} ایجاد شد")
+        except (OSError, PermissionError) as e:
+            print(f"⚠️ Warning: Could not write requirements: {e}")
+            # Try /tmp as fallback
+            if not os.getenv("VERCEL") == "1":
+                self.requirements_file = Path("/tmp") / "requirements.txt"
+                with open(self.requirements_file, 'w', encoding='utf-8') as f:
+                    f.write("# Multi-Agent Code Generation System Dependencies\n")
+                    for package in required_packages:
+                        f.write(f"{package}\n")
+                print(f"✅ فایل {self.requirements_file} created in /tmp")
         
         # نصب خودکار
         try:
@@ -136,10 +149,22 @@ app.add_middleware(
         shutil.copy2(self.back_file, backup_file)
         print(f"💾 نسخه پشتیبان در {backup_file} ذخیره شد")
         
-        with open(self.back_file, 'w', encoding='utf-8') as f:
-            f.write(modified_content)
+        # Use /tmp for Vercel compatibility
+        if os.getenv("VERCEL") == "1":
+            self.back_file = Path("/tmp") / "back.py"
         
-        print("✅ اصلاحات اعمال شد")
+        try:
+            with open(self.back_file, 'w', encoding='utf-8') as f:
+                f.write(modified_content)
+            print("✅ اصلاحات اعمال شد")
+        except (OSError, PermissionError) as e:
+            print(f"⚠️ Warning: Could not write backend file: {e}")
+            # Try /tmp as fallback
+            if not os.getenv("VERCEL") == "1":
+                self.back_file = Path("/tmp") / "back.py"
+                with open(self.back_file, 'w', encoding='utf-8') as f:
+                    f.write(modified_content)
+                print("✅ اصلاحات اعمال شد in /tmp")
         return True
     
     def create_complete_backend(self):
@@ -161,9 +186,21 @@ app.add_middleware(
         """راه‌اندازی فرانت‌اند"""
         print("\n🎨 راه‌اندازی فرانت‌اند...")
         
-        # ایجاد پوشه public
-        self.static_dir.mkdir(exist_ok=True)
-        print(f"📁 پوشه {self.static_dir} ایجاد شد")
+        # ایجاد پوشه public - use /tmp for Vercel
+        try:
+            if os.getenv("VERCEL") == "1":
+                # Use /tmp for Vercel compatibility
+                self.static_dir = Path("/tmp/static")
+            
+            self.static_dir.mkdir(exist_ok=True)
+            print(f"📁 پوشه {self.static_dir} ایجاد شد")
+        except (OSError, PermissionError) as e:
+            print(f"⚠️ Warning: Could not create static directory: {e}")
+            # Use /tmp as fallback
+            if os.getenv("VERCEL") == "1":
+                self.static_dir = Path("/tmp/static")
+                self.static_dir.mkdir(exist_ok=True)
+                print(f"📁 Using fallback directory: {self.static_dir}")
 
         # کپی فایل HTML به public در صورت وجود
         if self.front_file and self.front_file.exists():
@@ -197,10 +234,24 @@ ALLOWED_ORIGINS=["http://localhost:3000", "http://127.0.0.1:3000"]
 API_KEY_REQUIRED=false
 """
         
-        env_file = self.project_dir / ".env"
-        with open(env_file, 'w', encoding='utf-8') as f:
-            f.write(env_content)
-        print(f"⚙️ فایل {env_file} ایجاد شد")
+        # Use /tmp for Vercel compatibility
+        if os.getenv("VERCEL") == "1":
+            env_file = Path("/tmp") / ".env"
+        else:
+            env_file = self.project_dir / ".env"
+        
+        try:
+            with open(env_file, 'w', encoding='utf-8') as f:
+                f.write(env_content)
+            print(f"⚙️ فایل {env_file} ایجاد شد")
+        except (OSError, PermissionError) as e:
+            print(f"⚠️ Warning: Could not write env file: {e}")
+            # Try /tmp as fallback
+            if not os.getenv("VERCEL") == "1":
+                env_file = Path("/tmp") / ".env"
+                with open(env_file, 'w', encoding='utf-8') as f:
+                    f.write(env_content)
+                print(f"⚙️ فایل {env_file} created in /tmp")
         
         # اسکریپت راه‌اندازی سریع
         start_script = """#!/bin/bash
@@ -227,17 +278,31 @@ echo "📚 API Docs: http://127.0.0.1:8000/docs"
 echo "🔌 WebSocket: ws://127.0.0.1:8000/ws"
 """
         
-        start_file = self.project_dir / "start.sh"
-        with open(start_file, 'w', encoding='utf-8') as f:
-            f.write(start_script)
+        # Use /tmp for Vercel compatibility
+        if os.getenv("VERCEL") == "1":
+            start_file = Path("/tmp") / "start.sh"
+        else:
+            start_file = self.project_dir / "start.sh"
         
-        # اجازه اجرا برای Linux/Mac
         try:
-            os.chmod(start_file, 0o755)
-        except:
-            pass
-        
-        print(f"🚀 اسکریپت راه‌اندازی {start_file} ایجاد شد")
+            with open(start_file, 'w', encoding='utf-8') as f:
+                f.write(start_script)
+            
+            # اجازه اجرا برای Linux/Mac
+            try:
+                os.chmod(start_file, 0o755)
+            except:
+                pass
+            
+            print(f"🚀 اسکریپت راه‌اندازی {start_file} ایجاد شد")
+        except (OSError, PermissionError) as e:
+            print(f"⚠️ Warning: Could not write start script: {e}")
+            # Try /tmp as fallback
+            if not os.getenv("VERCEL") == "1":
+                start_file = Path("/tmp") / "start.sh"
+                with open(start_file, 'w', encoding='utf-8') as f:
+                    f.write(start_script)
+                print(f"🚀 اسکریپت راه‌اندازی {start_file} created in /tmp")
         
         # فایل README
         readme_content = """# 🤖 سیستم چند-عامله تولید کد
@@ -281,10 +346,24 @@ curl "http://127.0.0.1:8000/health"
 - وضعیت سلامت: http://127.0.0.1:8000/health
 """
         
-        readme_file = self.project_dir / "README.md"
-        with open(readme_file, 'w', encoding='utf-8') as f:
-            f.write(readme_content)
-        print(f"📖 فایل {readme_file} ایجاد شد")
+        # Use /tmp for Vercel compatibility
+        if os.getenv("VERCEL") == "1":
+            readme_file = Path("/tmp") / "README.md"
+        else:
+            readme_file = self.project_dir / "README.md"
+        
+        try:
+            with open(readme_file, 'w', encoding='utf-8') as f:
+                f.write(readme_content)
+            print(f"📖 فایل {readme_file} ایجاد شد")
+        except (OSError, PermissionError) as e:
+            print(f"⚠️ Warning: Could not write README: {e}")
+            # Try /tmp as fallback
+            if not os.getenv("VERCEL") == "1":
+                readme_file = Path("/tmp") / "README.md"
+                with open(readme_file, 'w', encoding='utf-8') as f:
+                    f.write(readme_content)
+                print(f"📖 فایل {readme_file} created in /tmp")
     
     def validate_system(self):
         """اعتبارسنجی سیستم"""

@@ -35,10 +35,9 @@ class AgentTools:
     def write_file(file_path: str, content: str) -> str:
         """Write content to a file."""
         try:
-            path = Path(file_path)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content, encoding='utf-8')
-            return f"Successfully wrote file: {file_path}"
+            from backend.utils.vercel_utils import write_file_vercel_safe
+            actual_path, message = write_file_vercel_safe(file_path, content)
+            return message
         except Exception as e:
             return f"Error writing file {file_path}: {str(e)}"
     
