@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from typing import Dict, Any
 from datetime import datetime
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse, RedirectResponse
@@ -18,7 +18,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 import structlog
 
-from config.vercel_config import get_vercel_settings
+from config.vercel_config import get_vercel_settings, is_vercel_environment
 
 settings = get_vercel_settings()
 
@@ -54,6 +54,13 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Vercel Multi-Agent Code Generation System")
     
     try:
+        # Log environment status
+        logger.info(
+            "Environment check",
+            is_vercel=is_vercel_environment(),
+            uploads_enabled=settings.uploads_enabled,
+            upload_dir=settings.upload_dir
+        )
         logger.info("Application startup completed")
         yield
         
@@ -191,6 +198,11 @@ async def health_check(request: Request):
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "service": "Multi-Agent Code Generation System",
+        "environment": {
+            "is_vercel": is_vercel_environment(),
+            "uploads_enabled": settings.uploads_enabled,
+            "upload_dir": settings.upload_dir
+        },
         "available_endpoints": [
             "/",
             "/health",
@@ -204,7 +216,7 @@ async def health_check(request: Request):
             "/api/agents",
             "/static/index.html",
             "/static/pages/index.html"
-        ],
+        ] + (["/api/upload"] if settings.uploads_enabled else []),
         "note": "Frontend files should be available at /static/ endpoints"
     }
 
@@ -218,7 +230,8 @@ async def readiness_check(request: Request):
         "version": settings.app_version,
         "deployment": "vercel",
         "database": "disabled",
-        "redis": "disabled"
+        "redis": "disabled",
+        "uploads": "enabled" if settings.uploads_enabled else "disabled"
     }
 
 @app.get("/health/live")
@@ -233,7 +246,10 @@ async def liveness_check(request: Request):
     }
 
 # Static files - serve the frontend
-app.mount("/static", StaticFiles(directory="public"), name="static")
+try:
+    app.mount("/static", StaticFiles(directory="public"), name="static")
+except Exception as e:
+    logger.warning("Could not mount static files", error=str(e))
 
 # Root endpoint - serve the main frontend
 @app.get("/")
@@ -257,10 +273,10 @@ async def info(request: Request):
         "description": "An intelligent code generation system with specialized AI agents",
         "features": [
             "Multi-agent architecture",
-            "Intelligent code generation",
+            "Intelligent code generation", 
             "Real-time collaboration",
             "Advanced AI capabilities"
-        ],
+        ] + (["File uploads"] if settings.uploads_enabled else []),
         "endpoints": {
             "api": "/api/",
             "docs": "/docs",
@@ -268,9 +284,79 @@ async def info(request: Request):
             "static_files": "/static/",
             "frontend": "/"
         },
+        "environment": {
+            "deployment": "vercel",
+            "is_vercel": is_vercel_environment(),
+            "uploads_enabled": settings.uploads_enabled,
+            "upload_dir": settings.upload_dir if settings.uploads_enabled else "disabled"
+        },
         "status": "operational",
         "timestamp": datetime.now().isoformat()
     }
+
+# Upload endpoint (conditional)
+if settings.uploads_enabled:
+    @app.post("/api/upload")
+    @limiter.limit(f"{settings.rate_limit_requests}/hour")
+    async def upload_file(request: Request, file: UploadFile = File(...)):
+        """Upload a file to the server (only available when uploads are enabled)."""
+        try:
+            import os
+            from pathlib import Path
+            
+            # Validate file extension
+            file_ext = Path(file.filename).suffix.lower()
+            if file_ext not in settings.allowed_extensions:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"File type {file_ext} not allowed. Allowed types: {settings.allowed_extensions}"
+                )
+            
+            # Check file size
+            content = await file.read()
+            if len(content) > settings.max_file_size:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"File too large. Maximum size: {settings.max_file_size} bytes"
+                )
+            
+            # Save file to upload directory
+            upload_path = Path(settings.upload_dir) / file.filename
+            upload_path.write_bytes(content)
+            
+            logger.info(
+                "File uploaded successfully",
+                filename=file.filename,
+                size=len(content),
+                path=str(upload_path)
+            )
+            
+            return {
+                "success": True,
+                "message": "File uploaded successfully",
+                "filename": file.filename,
+                "size": len(content),
+                "path": str(upload_path),
+                "timestamp": time.time()
+            }
+            
+        except Exception as e:
+            logger.error("File upload failed", error=str(e))
+            raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+else:
+    @app.post("/api/upload")
+    @limiter.limit(f"{settings.rate_limit_requests}/hour")
+    async def upload_disabled(request: Request):
+        """Upload endpoint when uploads are disabled."""
+        return JSONResponse(
+            status_code=503,
+            content={
+                "success": False,
+                "message": "File uploads are disabled in this environment",
+                "reason": "Read-only filesystem or upload directory not available",
+                "timestamp": time.time()
+            }
+        )
 
 # Development utilities
 if settings.debug:
@@ -312,6 +398,8 @@ async def startup_message():
             debug=settings.debug,
             deployment="vercel",
             openai_configured=bool(settings.openai_api_key),
+            uploads_enabled=settings.uploads_enabled,
+            is_vercel_env=is_vercel_environment(),
         )
     except Exception as e:
         logger.error("Failed during startup", error=str(e), exc_info=True)
@@ -339,6 +427,10 @@ async def generate_code(request: Request):
             "message": "Code generation endpoint ready",
             "timestamp": time.time(),
             "deployment": "vercel",
+            "environment": {
+                "is_vercel": is_vercel_environment(),
+                "uploads_enabled": settings.uploads_enabled
+            },
             "note": "This is a simplified version for serverless deployment"
         }
     except Exception as e:
@@ -355,10 +447,16 @@ async def api_status(request: Request):
         "timestamp": time.time(),
         "version": settings.app_version,
         "deployment": "vercel",
+        "environment": {
+            "is_vercel": is_vercel_environment(),
+            "upload_dir": settings.upload_dir,
+            "uploads_enabled": settings.uploads_enabled
+        },
         "features": {
             "code_generation": "basic",
             "database": "disabled",
             "redis": "disabled",
-            "rate_limiting": "enabled"
+            "rate_limiting": "enabled",
+            "file_uploads": "enabled" if settings.uploads_enabled else "disabled"
         }
     }

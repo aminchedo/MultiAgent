@@ -8,6 +8,10 @@ from pathlib import Path
 import traceback
 import logging
 
+# Set VERCEL environment variable to identify Vercel deployment
+os.environ["VERCEL"] = "1"
+os.environ["VERCEL_ENV"] = os.environ.get("VERCEL_ENV", "production")
+
 # Set up logging for debugging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,6 +23,8 @@ try:
     
     logger.info(f"Project root: {project_root}")
     logger.info(f"Python path: {sys.path}")
+    logger.info(f"VERCEL environment set: {os.environ.get('VERCEL')}")
+    logger.info(f"VERCEL_ENV: {os.environ.get('VERCEL_ENV')}")
     
     # Import the Vercel-specific FastAPI app
     from api.vercel_app import app
@@ -47,7 +53,8 @@ except Exception as e:
             content={
                 "error": "Serverless function failed to initialize",
                 "details": str(e),
-                "status": "error"
+                "status": "error",
+                "vercel_env": os.environ.get("VERCEL_ENV", "unknown")
             }
         )
     
@@ -58,7 +65,8 @@ except Exception as e:
             content={
                 "error": "Serverless function failed to initialize",
                 "details": str(e),
-                "status": "error"
+                "status": "error",
+                "vercel_env": os.environ.get("VERCEL_ENV", "unknown")
             }
         )
     

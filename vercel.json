@@ -35,6 +35,19 @@
     }
   ],
   "env": {
-    "PYTHONPATH": "."
+    "PYTHONPATH": ".",
+    "VERCEL": "1",
+    "VERCEL_ENV": "@vercel-env"
+  },
+  "build": {
+    "env": {
+      "PYTHONPATH": ".",
+      "VERCEL": "1"
+    }
+  },
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30
+    }
   }
 }

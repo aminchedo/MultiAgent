@@ -10,6 +10,11 @@ from pydantic import validator
 from pathlib import Path
 
 
+def is_vercel_environment() -> bool:
+    """Check if running in Vercel serverless environment."""
+    return bool(os.getenv("VERCEL") or os.getenv("VERCEL_ENV"))
+
+
 class VercelSettings(BaseSettings):
     """Vercel-specific application settings for serverless deployment."""
     
@@ -54,13 +59,16 @@ class VercelSettings(BaseSettings):
     max_iter: int = 5  # Reduced for serverless
     max_execution_time: int = 60  # Reduced for serverless
     
-    # File storage settings (disabled for serverless)
+    # File storage settings (conditional based on environment)
     upload_dir: str = "/tmp"  # Use temp directory
     max_file_size: int = 5 * 1024 * 1024  # Reduced to 5MB
     allowed_extensions: List[str] = [
         ".py", ".js", ".ts", ".jsx", ".tsx", ".html", ".css", ".json", 
         ".md", ".txt", ".yml", ".yaml", ".toml", ".ini", ".env"
     ]
+    
+    # Upload functionality control
+    uploads_enabled: bool = True
     
     # Rate limiting settings (reduced for serverless)
     rate_limit_requests: int = 50
@@ -85,8 +93,40 @@ class VercelSettings(BaseSettings):
     
     @validator("upload_dir")
     def create_upload_dir(cls, v):
-        """Ensure upload directory exists."""
-        Path(v).mkdir(parents=True, exist_ok=True)
+        """Ensure upload directory exists, but only if not in Vercel environment."""
+        if not is_vercel_environment():
+            # Only try to create directory if not in Vercel (read-only filesystem)
+            try:
+                Path(v).mkdir(parents=True, exist_ok=True)
+            except OSError as e:
+                # If we can't create the directory, log and continue
+                import logging
+                logging.warning(f"Could not create upload directory {v}: {e}")
+        else:
+            # In Vercel, ensure we're using /tmp which should be writable
+            if not v.startswith("/tmp"):
+                v = "/tmp"
+        return v
+    
+    @validator("uploads_enabled")
+    def validate_uploads_enabled(cls, v, values):
+        """Disable uploads in Vercel if directory creation fails."""
+        if is_vercel_environment():
+            upload_dir = values.get("upload_dir", "/tmp")
+            try:
+                # Test if we can write to the upload directory
+                test_path = Path(upload_dir)
+                test_path.mkdir(parents=True, exist_ok=True)
+                # Test write access
+                test_file = test_path / ".write_test"
+                test_file.touch()
+                test_file.unlink()
+                return True
+            except (OSError, PermissionError):
+                # If we can't write, disable uploads
+                import logging
+                logging.warning(f"Upload directory {upload_dir} not writable, disabling uploads")
+                return False
         return v
     
     @validator("openai_api_key", pre=True)
