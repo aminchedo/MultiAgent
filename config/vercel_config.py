@@ -7,6 +7,9 @@ import os
 from pathlib import Path
 from pydantic_settings import BaseSettings
 from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 class VercelSettings(BaseSettings):
     """Settings for Vercel deployment with read-only filesystem handling"""
@@ -55,18 +58,20 @@ class VercelSettings(BaseSettings):
             upload_path = "/tmp/uploads"
             try:
                 Path(upload_path).mkdir(parents=True, exist_ok=True)
+                logger.info(f"Created temporary upload directory: {upload_path}")
                 return upload_path
             except (OSError, PermissionError) as e:
-                print(f"Warning: Could not create upload directory {upload_path}: {e}")
+                logger.warning(f"Could not create upload directory {upload_path}: {e}")
                 return None
         else:
             # Local development
             if self.upload_dir:
                 try:
                     Path(self.upload_dir).mkdir(parents=True, exist_ok=True)
+                    logger.info(f"Created upload directory: {self.upload_dir}")
                     return self.upload_dir
                 except (OSError, PermissionError) as e:
-                    print(f"Warning: Could not create upload directory {self.upload_dir}: {e}")
+                    logger.warning(f"Could not create upload directory {self.upload_dir}: {e}")
                     return None
             return None
     
@@ -74,13 +79,15 @@ class VercelSettings(BaseSettings):
         env_file = ".env"
         case_sensitive = False
 
-# Create settings instance safely
+# Create settings instance safely - no directory operations at module level
 def get_vercel_settings():
     """Get settings instance with error handling"""
     try:
-        return VercelSettings()
+        settings = VercelSettings()
+        logger.info("Vercel settings created successfully")
+        return settings
     except Exception as e:
-        print(f"Warning: Failed to create settings: {e}")
+        logger.error(f"Failed to create settings: {e}")
         # Return minimal safe settings for Vercel
         return VercelSettings(
             upload_dir=None,
@@ -91,4 +98,5 @@ def get_vercel_settings():
         )
 
 # Global settings instance - created without directory operations
+# This prevents read-only filesystem errors during import
 vercel_settings = get_vercel_settings()

@@ -1,11 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 import os
 import sys
 import logging
 import traceback
+from pathlib import Path
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -25,10 +26,17 @@ def validate_env_vars():
         if not os.getenv(var):
             missing_vars.append(var)
     
-    # Handle JWT_SECRET_KEY separately - use default if missing
-    if not os.getenv("JWT_SECRET_KEY"):
-        logger.warning("JWT_SECRET_KEY not set, using default secret")
-        os.environ["JWT_SECRET_KEY"] = "default-secret-key-for-development"
+    # Handle JWT_SECRET_KEY securely
+    jwt_secret = os.getenv("JWT_SECRET_KEY")
+    is_production = os.getenv("VERCEL") == "1" or os.getenv("NODE_ENV") == "production"
+    
+    if not jwt_secret:
+        if is_production:
+            logger.error("JWT_SECRET_KEY is required in production environment")
+            raise ValueError("JWT_SECRET_KEY environment variable is required in production")
+        else:
+            logger.warning("JWT_SECRET_KEY not set, using default secret for development")
+            os.environ["JWT_SECRET_KEY"] = "default-secret-key-for-development-only"
     
     if missing_vars:
         logger.warning(f"Missing environment variables: {missing_vars}")
@@ -36,7 +44,11 @@ def validate_env_vars():
     return True
 
 # Check environment variables
-env_valid = validate_env_vars()
+try:
+    env_valid = validate_env_vars()
+except ValueError as e:
+    logger.error(f"Environment validation failed: {e}")
+    env_valid = False
 
 # Create FastAPI app
 app = FastAPI(
@@ -67,6 +79,17 @@ except Exception as e:
     settings = None
     UPLOAD_ENABLED = False
 
+# Mount static files directory
+try:
+    static_dir = os.path.join(project_root, "static")
+    if os.path.exists(static_dir):
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+        logger.info(f"Static files mounted at /static from {static_dir}")
+    else:
+        logger.warning(f"Static directory not found: {static_dir}")
+except Exception as e:
+    logger.error(f"Failed to mount static files: {e}")
+
 # Root endpoint for "/" - this fixes the 404 error for root path
 @app.get("/")
 async def root_path():
@@ -75,6 +98,7 @@ async def root_path():
         return {
             "message": "Welcome to the MultiAgent API",
             "version": "1.0.0",
+            "status": "operational",
             "environment": "vercel" if os.getenv("VERCEL") else "local",
             "endpoints": {
                 "health": "/api/health",
@@ -98,25 +122,23 @@ async def favicon_ico():
     try:
         # Try to serve favicon from static directory first
         favicon_path = os.path.join(project_root, "static", "favicon.ico")
-        if os.path.exists(favicon_path):
-            return FileResponse(favicon_path)
+        if os.path.exists(favicon_path) and os.path.getsize(favicon_path) > 0:
+            return FileResponse(favicon_path, media_type="image/x-icon")
         
         # Try to serve favicon from public directory
         favicon_path = os.path.join(project_root, "public", "favicon.ico")
-        if os.path.exists(favicon_path):
-            return FileResponse(favicon_path)
+        if os.path.exists(favicon_path) and os.path.getsize(favicon_path) > 0:
+            return FileResponse(favicon_path, media_type="image/x-icon")
         
         # Try root directory
         favicon_path = os.path.join(project_root, "favicon.ico")
-        if os.path.exists(favicon_path):
-            return FileResponse(favicon_path)
+        if os.path.exists(favicon_path) and os.path.getsize(favicon_path) > 0:
+            return FileResponse(favicon_path, media_type="image/x-icon")
         
         # Return 204 No Content if no favicon found
-        from fastapi.responses import Response
         return Response(status_code=204)
     except Exception as e:
         logger.error(f"Favicon.ico error: {e}")
-        from fastapi.responses import Response
         return Response(status_code=204)
 
 @app.get("/favicon.png")
@@ -125,25 +147,23 @@ async def favicon_png():
     try:
         # Try to serve favicon from static directory first
         favicon_path = os.path.join(project_root, "static", "favicon.png")
-        if os.path.exists(favicon_path):
-            return FileResponse(favicon_path)
+        if os.path.exists(favicon_path) and os.path.getsize(favicon_path) > 0:
+            return FileResponse(favicon_path, media_type="image/png")
         
         # Try to serve favicon from public directory
         favicon_path = os.path.join(project_root, "public", "favicon.png")
-        if os.path.exists(favicon_path):
-            return FileResponse(favicon_path)
+        if os.path.exists(favicon_path) and os.path.getsize(favicon_path) > 0:
+            return FileResponse(favicon_path, media_type="image/png")
         
         # Try root directory
         favicon_path = os.path.join(project_root, "favicon.png")
-        if os.path.exists(favicon_path):
-            return FileResponse(favicon_path)
+        if os.path.exists(favicon_path) and os.path.getsize(favicon_path) > 0:
+            return FileResponse(favicon_path, media_type="image/png")
         
         # Return 204 No Content if no favicon found
-        from fastapi.responses import Response
         return Response(status_code=204)
     except Exception as e:
         logger.error(f"Favicon.png error: {e}")
-        from fastapi.responses import Response
         return Response(status_code=204)
 
 # Health check endpoint
@@ -156,7 +176,8 @@ async def health_check():
             "environment": "vercel" if os.getenv("VERCEL") else "local",
             "upload_enabled": UPLOAD_ENABLED,
             "settings_loaded": settings is not None,
-            "env_vars_valid": env_valid
+            "env_vars_valid": env_valid,
+            "jwt_configured": bool(os.getenv("JWT_SECRET_KEY") and os.getenv("JWT_SECRET_KEY") != "default-secret-key-for-development-only")
         }
     except Exception as e:
         logger.error(f"Health check error: {e}")
@@ -191,7 +212,7 @@ async def test_endpoint():
     try:
         return {
             "message": "Test endpoint working",
-            "timestamp": "2025-08-15",
+            "timestamp": "2025-01-15",
             "environment_vars": {
                 "VERCEL": os.getenv("VERCEL"),
                 "AWS_LAMBDA_FUNCTION_NAME": os.getenv("AWS_LAMBDA_FUNCTION_NAME"),

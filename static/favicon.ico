@@ -1,7 +1,3 @@
-# Multi-Agent Code Generation System Dependencies
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-websockets>=12.0
-pydantic>=2.5.0
-python-multipart>=0.0.6
-jinja2>=3.1.0
+# Placeholder favicon.ico - replace with actual ICO binary data
+# This file should contain proper ICO format binary data
+# For now, returning 204 No Content for favicon requests
