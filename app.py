@@ -24,23 +24,37 @@ def setup_gradio_interface():
         """Generate code using the multi-agent system"""
         try:
             # Import the main application components
-            from backend.agents.manager import AgentManager
-            from backend.models.requests import CodeGenerationRequest
+            from backend.agents.agents import MultiAgentWorkflow
+            from backend.models.models import ProjectGenerationRequest, ProjectType
+            import uuid
             
             # Create request
-            request = CodeGenerationRequest(
-                prompt=prompt,
-                project_type=project_type,
-                user_id="huggingface_user"
+            request = ProjectGenerationRequest(
+                name=f"Generated Project {uuid.uuid4().hex[:8]}",
+                description=prompt,
+                project_type=ProjectType.WEB_APP if project_type == "web_app" else ProjectType.API,
+                languages=["python"],
+                mode="full"
             )
             
-            # Initialize agent manager
-            manager = AgentManager()
+            # Generate job ID
+            job_id = str(uuid.uuid4())
+            
+            # Initialize workflow
+            workflow = MultiAgentWorkflow(job_id)
             
             # Generate code
-            result = await manager.generate_code(request)
+            result = await workflow.execute_workflow(request.dict())
             
-            return result.generated_code, result.explanation
+            # Extract code and explanation from result
+            code_files = result.get("code_files", [])
+            plan = result.get("plan", {})
+            
+            # Combine all code files into one string
+            generated_code = "\n\n".join([f"# {f['filename']}\n{f['content']}" for f in code_files])
+            explanation = f"Generated {len(code_files)} files based on plan: {plan.get('summary', 'No plan available')}"
+            
+            return generated_code, explanation
             
         except Exception as e:
             return f"Error: {str(e)}", "Code generation failed"
