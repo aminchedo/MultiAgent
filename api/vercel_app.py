@@ -8,10 +8,10 @@ from contextlib import asynccontextmanager
 from typing import Dict, Any
 from datetime import datetime
 
-from fastapi import FastAPI, Request, HTTPException, RedirectResponse
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, RedirectResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -184,7 +184,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 # Health check endpoints
 @app.get("/health")
-@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
+@limiter.limit(f"{settings.rate_limit_requests}/hour")
 async def health_check(request: Request):
     """Basic health check endpoint."""
     return {
@@ -209,7 +209,7 @@ async def health_check(request: Request):
     }
 
 @app.get("/health/ready")
-@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
+@limiter.limit(f"{settings.rate_limit_requests}/hour")
 async def readiness_check(request: Request):
     """Readiness check for serverless deployment."""
     return {
@@ -222,7 +222,7 @@ async def readiness_check(request: Request):
     }
 
 @app.get("/health/live")
-@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
+@limiter.limit(f"{settings.rate_limit_requests}/hour")
 async def liveness_check(request: Request):
     """Liveness check for container orchestration."""
     return {
@@ -237,8 +237,8 @@ app.mount("/static", StaticFiles(directory="public"), name="static")
 
 # Root endpoint - serve the main frontend
 @app.get("/")
-@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
-async def root():
+@limiter.limit(f"{settings.rate_limit_requests}/hour")
+async def root(request: Request):
     """Root endpoint that serves the main application"""
     try:
         # Try to serve the main index.html from public directory
@@ -248,8 +248,8 @@ async def root():
 
 # System information endpoint
 @app.get("/info")
-@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
-async def info():
+@limiter.limit(f"{settings.rate_limit_requests}/hour")
+async def info(request: Request):
     """Information endpoint"""
     return {
         "name": "Multi-Agent Code Generation System",
@@ -275,7 +275,7 @@ async def info():
 # Development utilities
 if settings.debug:
     @app.get("/debug/config")
-    @limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
+    @limiter.limit(f"{settings.rate_limit_requests}/hour")
     async def debug_config(request: Request):
         """Debug endpoint to view current configuration (only in debug mode)."""
         config_dict = settings.dict()
@@ -288,7 +288,7 @@ if settings.debug:
         return config_dict
     
     @app.get("/debug/routes")
-    @limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
+    @limiter.limit(f"{settings.rate_limit_requests}/hour")
     async def debug_routes(request: Request):
         """Debug endpoint to list all available routes."""
         routes = []
@@ -305,18 +305,21 @@ if settings.debug:
 @app.on_event("startup")
 async def startup_message():
     """Log startup message with configuration info."""
-    logger.info(
-        "🚀 Vercel Multi-Agent Code Generation System Started",
-        version=settings.app_version,
-        debug=settings.debug,
-        deployment="vercel",
-        openai_configured=bool(settings.openai_api_key),
-    )
+    try:
+        logger.info(
+            "🚀 Vercel Multi-Agent Code Generation System Started",
+            version=settings.app_version,
+            debug=settings.debug,
+            deployment="vercel",
+            openai_configured=bool(settings.openai_api_key),
+        )
+    except Exception as e:
+        logger.error("Failed during startup", error=str(e), exc_info=True)
 
 # Catch-all route for SPA routing (must be after specific routes)
 @app.get("/{full_path:path}")
-@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
-async def catch_all(full_path: str):
+@limiter.limit(f"{settings.rate_limit_requests}/hour")
+async def catch_all(request: Request, full_path: str):
     """Catch-all route to serve the frontend for any unmatched routes"""
     try:
         return FileResponse("public/index.html")
@@ -325,7 +328,7 @@ async def catch_all(full_path: str):
 
 # Basic code generation endpoint
 @app.post("/api/generate")
-@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
+@limiter.limit(f"{settings.rate_limit_requests}/hour")
 async def generate_code(request: Request):
     """Basic code generation endpoint for Vercel deployment."""
     try:
@@ -344,7 +347,7 @@ async def generate_code(request: Request):
 
 # API status endpoint
 @app.get("/api/status")
-@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
+@limiter.limit(f"{settings.rate_limit_requests}/hour")
 async def api_status(request: Request):
     """API status endpoint."""
     return {
