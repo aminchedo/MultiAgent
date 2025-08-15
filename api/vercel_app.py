@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import os
 import sys
 import logging
@@ -16,12 +18,17 @@ sys.path.insert(0, project_root)
 # Validate required environment variables
 def validate_env_vars():
     """Validate that required environment variables are present"""
-    required_vars = ["OPENAI_API_KEY", "JWT_SECRET_KEY"]
+    required_vars = ["OPENAI_API_KEY"]
     missing_vars = []
     
     for var in required_vars:
         if not os.getenv(var):
             missing_vars.append(var)
+    
+    # Handle JWT_SECRET_KEY separately - use default if missing
+    if not os.getenv("JWT_SECRET_KEY"):
+        logger.warning("JWT_SECRET_KEY not set, using default secret")
+        os.environ["JWT_SECRET_KEY"] = "default-secret-key-for-development"
     
     if missing_vars:
         logger.warning(f"Missing environment variables: {missing_vars}")
@@ -59,6 +66,85 @@ except Exception as e:
     logger.error(f"Traceback: {traceback.format_exc()}")
     settings = None
     UPLOAD_ENABLED = False
+
+# Root endpoint for "/" - this fixes the 404 error for root path
+@app.get("/")
+async def root_path():
+    """Root endpoint that returns a welcome message"""
+    try:
+        return {
+            "message": "Welcome to the MultiAgent API",
+            "version": "1.0.0",
+            "environment": "vercel" if os.getenv("VERCEL") else "local",
+            "endpoints": {
+                "health": "/api/health",
+                "root": "/api",
+                "test": "/api/test"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Root path error: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return {
+            "error": "Internal server error",
+            "message": str(e),
+            "environment": "vercel" if os.getenv("VERCEL") else "local"
+        }
+
+# Favicon endpoints to handle 404 errors
+@app.get("/favicon.ico")
+async def favicon_ico():
+    """Handle favicon.ico requests"""
+    try:
+        # Try to serve favicon from static directory first
+        favicon_path = os.path.join(project_root, "static", "favicon.ico")
+        if os.path.exists(favicon_path):
+            return FileResponse(favicon_path)
+        
+        # Try to serve favicon from public directory
+        favicon_path = os.path.join(project_root, "public", "favicon.ico")
+        if os.path.exists(favicon_path):
+            return FileResponse(favicon_path)
+        
+        # Try root directory
+        favicon_path = os.path.join(project_root, "favicon.ico")
+        if os.path.exists(favicon_path):
+            return FileResponse(favicon_path)
+        
+        # Return 204 No Content if no favicon found
+        from fastapi.responses import Response
+        return Response(status_code=204)
+    except Exception as e:
+        logger.error(f"Favicon.ico error: {e}")
+        from fastapi.responses import Response
+        return Response(status_code=204)
+
+@app.get("/favicon.png")
+async def favicon_png():
+    """Handle favicon.png requests"""
+    try:
+        # Try to serve favicon from static directory first
+        favicon_path = os.path.join(project_root, "static", "favicon.png")
+        if os.path.exists(favicon_path):
+            return FileResponse(favicon_path)
+        
+        # Try to serve favicon from public directory
+        favicon_path = os.path.join(project_root, "public", "favicon.png")
+        if os.path.exists(favicon_path):
+            return FileResponse(favicon_path)
+        
+        # Try root directory
+        favicon_path = os.path.join(project_root, "favicon.png")
+        if os.path.exists(favicon_path):
+            return FileResponse(favicon_path)
+        
+        # Return 204 No Content if no favicon found
+        from fastapi.responses import Response
+        return Response(status_code=204)
+    except Exception as e:
+        logger.error(f"Favicon.png error: {e}")
+        from fastapi.responses import Response
+        return Response(status_code=204)
 
 # Health check endpoint
 @app.get("/api/health")
