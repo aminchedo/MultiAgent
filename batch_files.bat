@@ -30,7 +30,10 @@ if not exist "static" mkdir static
 echo ✅ پوشه static ایجاد شد
 
 REM کپی فایل HTML
-if exist "front.html" (
+if exist "front_optimized.html" (
+    copy "front_optimized.html" "static\index.html" >nul
+    echo ✅ فایل HTML بهینه شده کپی شد
+) else if exist "front.html" (
     copy "front.html" "static\index.html" >nul
     echo ✅ فایل HTML کپی شد
 )
@@ -93,7 +96,10 @@ mkdir -p static
 echo "✅ پوشه static ایجاد شد"
 
 # کپی فایل HTML
-if [ -f "front.html" ]; then
+if [ -f "front_optimized.html" ]; then
+    cp "front_optimized.html" "static/index.html"
+    echo "✅ فایل HTML بهینه شده کپی شد"
+elif [ -f "front.html" ]; then
     cp "front.html" "static/index.html"
     echo "✅ فایل HTML کپی شد"
 fi
@@ -161,7 +167,10 @@ if (!(Test-Path "static")) {
 Write-Host "✅ پوشه static ایجاد شد" -ForegroundColor Green
 
 # کپی فایل HTML
-if (Test-Path "front.html") {
+if (Test-Path "front_optimized.html") {
+    Copy-Item "front_optimized.html" "static/index.html"
+    Write-Host "✅ فایل HTML بهینه شده کپی شد" -ForegroundColor Green
+} elseif (Test-Path "front.html") {
     Copy-Item "front.html" "static/index.html"
     Write-Host "✅ فایل HTML کپی شد" -ForegroundColor Green
 }

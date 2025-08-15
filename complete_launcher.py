@@ -134,10 +134,16 @@ class CompleteLauncher:
             print(f"📁 {directory}/")
         
         # کپی فایل HTML به static
-        front_file = self.project_dir / "front.html"
+        front_file = self.project_dir / "front_optimized.html"
         if front_file.exists():
             shutil.copy2(front_file, self.project_dir / "static" / "index.html")
-            print("📄 front.html → static/index.html")
+            print("📄 front_optimized.html → static/index.html")
+        else:
+            # Fallback to original front.html if optimized version doesn't exist
+            front_file = self.project_dir / "front.html"
+            if front_file.exists():
+                shutil.copy2(front_file, self.project_dir / "static" / "index.html")
+                print("📄 front.html → static/index.html")
         
         # ایجاد فایل‌های کمکی
         self.create_helper_files()

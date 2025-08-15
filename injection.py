@@ -17,7 +17,7 @@ class SystemInjector:
     def __init__(self):
         self.project_dir = Path.cwd()
         self.back_file = self.project_dir / "back.py"
-        self.front_file = self.project_dir / "front.html"
+        self.front_file = self.project_dir / "front_optimized.html"
         self.static_dir = self.project_dir / "static"
         self.requirements_file = self.project_dir / "requirements.txt"
         

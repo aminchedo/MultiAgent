@@ -25,7 +25,7 @@ class AppLauncher:
     def __init__(self):
         self.backend_process = None
         self.backend_url = "http://localhost:8000"
-        self.frontend_file = "front.html"
+        self.frontend_file = "front_optimized.html"
         self.test_file = "test_enhanced_ui.html"
         self.health_endpoint = f"{self.backend_url}/health"
         self.max_retries = 30

@@ -7,7 +7,7 @@ REM Script to launch backend server and open frontend
 
 REM Configuration
 set BACKEND_URL=http://localhost:8000
-set FRONTEND_FILE=front.html
+set FRONTEND_FILE=front_optimized.html
 set TEST_FILE=test_enhanced_ui.html
 set MAX_RETRIES=30
 set RETRY_DELAY=2

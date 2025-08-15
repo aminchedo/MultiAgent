@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 BACKEND_URL="http://localhost:8000"
-FRONTEND_FILE="front.html"
+FRONTEND_FILE="front_optimized.html"
 TEST_FILE="test_enhanced_ui.html"
 MAX_RETRIES=30
 RETRY_DELAY=2
