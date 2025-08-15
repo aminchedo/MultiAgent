@@ -1,57 +1,19 @@
 {
   "version": 2,
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
   "routes": [
     {
-      "src": "/static/(.*)",
-      "dest": "/public/$1"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/public/assets/favicon.ico"
-    },
-    {
       "src": "/api/(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/health(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/info",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/docs(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/redoc(.*)",
       "dest": "/api/index.py"
     },
     {
       "src": "/(.*)",
       "dest": "/api/index.py"
     }
-  ],
-  "env": {
-    "PYTHONPATH": ".",
-    "VERCEL": "1",
-    "VERCEL_ENV": "production",
-    "OPENAI_API_KEY": "@openai-api-key",
-    "JWT_SECRET_KEY": "@jwt-secret-key"
-  },
-  "build": {
-    "env": {
-      "PYTHONPATH": ".",
-      "VERCEL": "1"
-    }
-  },
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 30,
-      "memory": 512
-    }
-  },
-  "regions": ["iad1"]
+  ]
 }

@@ -52,7 +52,8 @@ try:
     from config.vercel_config import get_vercel_settings
     settings = get_vercel_settings()
     logger.info("Settings loaded successfully")
-    UPLOAD_ENABLED = settings.upload_dir is not None
+    # Don't create upload directory at import time - use lazy initialization
+    UPLOAD_ENABLED = not settings.is_vercel  # Disable uploads on Vercel by default
 except Exception as e:
     logger.error(f"Failed to load settings: {e}")
     logger.error(f"Traceback: {traceback.format_exc()}")
@@ -123,17 +124,34 @@ async def test_endpoint():
             "environment": "vercel" if os.getenv("VERCEL") else "local"
         }
 
-# Conditional upload endpoint
-if UPLOAD_ENABLED:
-    @app.post("/api/upload")
-    async def upload_file():
-        return {"message": "Upload functionality available"}
-else:
-    @app.post("/api/upload")
-    async def upload_disabled():
+# Conditional upload endpoint with lazy directory creation
+@app.post("/api/upload")
+async def upload_file():
+    try:
+        if settings and not settings.is_vercel:
+            # Local development - try to create upload directory
+            upload_dir = settings.ensure_upload_dir()
+            if upload_dir:
+                return {
+                    "message": "Upload functionality available",
+                    "upload_dir": upload_dir
+                }
+            else:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Could not create upload directory"
+                )
+        else:
+            # Vercel environment - uploads disabled
+            raise HTTPException(
+                status_code=503,
+                detail="File upload is disabled in serverless environment. Use /tmp for temporary storage if needed."
+            )
+    except Exception as e:
+        logger.error(f"Upload endpoint error: {e}")
         raise HTTPException(
-            status_code=503,
-            detail="File upload is disabled in serverless environment"
+            status_code=500,
+            detail=f"Upload endpoint error: {str(e)}"
         )
 
 # Error handlers

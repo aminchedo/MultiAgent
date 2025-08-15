@@ -34,7 +34,7 @@ class VercelSettings(BaseSettings):
         
         if is_vercel_env:
             # Running on Vercel - read-only filesystem
-            kwargs.setdefault('upload_dir', None)  # Disable uploads
+            kwargs.setdefault('upload_dir', None)  # Disable uploads by default
             kwargs.setdefault('is_vercel', True)
             kwargs.setdefault('is_local', False)
             kwargs.setdefault('database_url', 'sqlite:///:memory:')
@@ -42,22 +42,33 @@ class VercelSettings(BaseSettings):
         else:
             # Running locally - can create directories
             upload_path = kwargs.get('upload_dir', 'uploads')
-            try:
-                if upload_path:
-                    # Use /tmp for Vercel compatibility, fallback to local path
-                    if os.getenv("VERCEL") == "1":
-                        upload_path = "/tmp/uploads"
-                    
-                    Path(upload_path).mkdir(parents=True, exist_ok=True)
-                    kwargs['upload_dir'] = str(upload_path)
-            except (OSError, PermissionError):
-                # If can't create directory, disable uploads
-                kwargs['upload_dir'] = None
-            
+            kwargs.setdefault('upload_dir', upload_path)
             kwargs.setdefault('is_vercel', False)
             kwargs.setdefault('is_local', True)
         
         super().__init__(**kwargs)
+    
+    def ensure_upload_dir(self) -> Optional[str]:
+        """Lazily create upload directory when needed (only for local development)"""
+        if self.is_vercel:
+            # On Vercel, use /tmp for temporary uploads
+            upload_path = "/tmp/uploads"
+            try:
+                Path(upload_path).mkdir(parents=True, exist_ok=True)
+                return upload_path
+            except (OSError, PermissionError) as e:
+                print(f"Warning: Could not create upload directory {upload_path}: {e}")
+                return None
+        else:
+            # Local development
+            if self.upload_dir:
+                try:
+                    Path(self.upload_dir).mkdir(parents=True, exist_ok=True)
+                    return self.upload_dir
+                except (OSError, PermissionError) as e:
+                    print(f"Warning: Could not create upload directory {self.upload_dir}: {e}")
+                    return None
+            return None
     
     class Config:
         env_file = ".env"
@@ -79,5 +90,5 @@ def get_vercel_settings():
             is_local=False
         )
 
-# Global settings instance
+# Global settings instance - created without directory operations
 vercel_settings = get_vercel_settings()
