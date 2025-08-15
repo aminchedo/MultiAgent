@@ -1,5 +1,15 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.11"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/static/(.*)",
@@ -37,12 +47,21 @@
   "env": {
     "PYTHONPATH": ".",
     "VERCEL": "1",
-    "VERCEL_ENV": "@vercel-env"
+    "VERCEL_ENV": "@vercel-env",
+    "OPENAI_API_KEY": "@openai-api-key",
+    "JWT_SECRET_KEY": "@jwt-secret-key"
   },
   "build": {
     "env": {
       "PYTHONPATH": ".",
       "VERCEL": "1"
     }
-  }
+  },
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30,
+      "memory": 512
+    }
+  },
+  "regions": ["iad1"]
 }

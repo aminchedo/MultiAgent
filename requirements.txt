@@ -8,3 +8,4 @@ pydantic-settings==2.1.0
 structlog==23.2.0
 slowapi==0.1.9
 prometheus-fastapi-instrumentator==6.1.0
+gradio==4.8.0
