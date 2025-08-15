@@ -246,9 +246,11 @@ class DatabaseManager:
 # ==============================================================================
 
 class BaseAgent:
-    def __init__(self, name: str, db_manager: DatabaseManager):
+    def __init__(self, name: str, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
         self.name = name
         self.db = db_manager
+        self.api_key_primary = api_key_primary
+        self.api_key_backup = api_key_backup
     
     async def log(self, job_id: str, message: str, log_type: str = "info"):
         """ثبت لاگ عامل"""
@@ -269,9 +271,13 @@ class BaseAgent:
         """تاخیر غیرهمزمان"""
         await asyncio.sleep(seconds)
 
+    def get_api_key(self, override: Optional[str] = None) -> Optional[str]:
+        """Returns the best-available API key, preferring an explicit override, then primary, then backup."""
+        return override or self.api_key_primary or self.api_key_backup
+
 class PlannerAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager):
-        super().__init__("برنامه‌ریز", db_manager)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
+        super().__init__("برنامه‌ریز", db_manager, api_key_primary, api_key_backup)
     
     async def generate_plan(self, job_id: str, description: str) -> Dict:
         """تولید طرح پروژه"""
@@ -421,8 +427,8 @@ class PlannerAgent(BaseAgent):
         return time_map.get(complexity, "3-5 دقیقه")
 
 class CoderAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager):
-        super().__init__("کدنویس", db_manager)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
+        super().__init__("کدنویس", db_manager, api_key_primary, api_key_backup)
     
     async def generate_code(self, job_id: str, plan: Dict, description: str) -> Dict:
         """تولید کد پروژه"""
@@ -1487,8 +1493,8 @@ document.head.appendChild(style);''',
         }
 
 class ReviewerAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager):
-        super().__init__("بازبین", db_manager)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
+        super().__init__("بازبین", db_manager, api_key_primary, api_key_backup)
     
     async def review_code(self, job_id: str, files: Dict) -> Dict:
         """بررسی کیفیت کد"""
@@ -1564,8 +1570,8 @@ class ReviewerAgent(BaseAgent):
         return review_result
 
 class OptimizerAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager):
-        super().__init__("بهینه‌ساز", db_manager)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
+        super().__init__("بهینه‌ساز", db_manager, api_key_primary, api_key_backup)
     
     async def optimize_code(self, job_id: str, files: Dict) -> Dict:
         """بهینه‌سازی کد"""
@@ -1652,8 +1658,8 @@ window.addEventListener('error', (event) => {
         return optimization_comment + performance_code + content
 
 class TesterAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager):
-        super().__init__("تست‌کننده", db_manager)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
+        super().__init__("تست‌کننده", db_manager, api_key_primary, api_key_backup)
     
     async def generate_tests(self, job_id: str, files: Dict) -> Dict:
         """تولید تست‌ها"""
@@ -2154,12 +2160,21 @@ window.addEventListener('load', () => {
 class MultiAgentOrchestrator:
     def __init__(self, db_manager: DatabaseManager):
         self.db = db_manager
+        # Prefer environment variables, fall back to config.json
+        self.api_key_primary = os.getenv("AGENTS_API_KEY_PRIMARY") or os.getenv("AGENTS_API_KEY")
+        self.api_key_backup = os.getenv("AGENTS_API_KEY_BACKUP") or os.getenv("AGENTS_API_KEY_FALLBACK")
+        if not self.api_key_primary or not self.api_key_backup:
+            cfg_primary, cfg_backup = load_config_keys_from_file()
+            if not self.api_key_primary and cfg_primary:
+                self.api_key_primary = cfg_primary
+            if not self.api_key_backup and cfg_backup:
+                self.api_key_backup = cfg_backup
         self.agents = {
-            'planner': PlannerAgent(db_manager),
-            'coder': CoderAgent(db_manager),
-            'reviewer': ReviewerAgent(db_manager),
-            'optimizer': OptimizerAgent(db_manager),
-            'tester': TesterAgent(db_manager)
+            'planner': PlannerAgent(db_manager, self.api_key_primary, self.api_key_backup),
+            'coder': CoderAgent(db_manager, self.api_key_primary, self.api_key_backup),
+            'reviewer': ReviewerAgent(db_manager, self.api_key_primary, self.api_key_backup),
+            'optimizer': OptimizerAgent(db_manager, self.api_key_primary, self.api_key_backup),
+            'tester': TesterAgent(db_manager, self.api_key_primary, self.api_key_backup)
         }
     
     async def generate_project(self, job_id: str, request: ProjectRequest):
