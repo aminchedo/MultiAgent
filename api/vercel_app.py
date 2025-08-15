@@ -219,7 +219,7 @@ async def liveness_check(request: Request):
     }
 
 # Static files - serve the frontend
-app.mount("/static", StaticFiles(directory="../frontend"), name="static")
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 # Root endpoint - serve the main frontend
 @app.get("/")
@@ -227,7 +227,7 @@ app.mount("/static", StaticFiles(directory="../frontend"), name="static")
 async def root(request: Request):
     """Root endpoint - serve the main frontend."""
     try:
-        return FileResponse("../frontend/pages/index.html")
+        return FileResponse("frontend/pages/index.html")
     except FileNotFoundError:
         return {
             "message": "Multi-Agent Code Generation System",
