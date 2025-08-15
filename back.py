@@ -25,11 +25,12 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 # FastAPI و وابستگی‌ها
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, BackgroundTasks, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, BackgroundTasks, Request, Depends, Header, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse, FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import uvicorn
 from pydantic import BaseModel, Field
 
@@ -43,6 +44,149 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+# ==============================================================================
+# Configuration Helper Functions
+# ==============================================================================
+
+def load_config_keys_from_file():
+    """Load API keys from config.json file"""
+    try:
+        with open('config.json', 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        
+        api_config = config.get('api', {})
+        auth_config = api_config.get('authentication', {})
+        valid_keys = auth_config.get('valid_keys', [])
+        
+        primary_key = valid_keys[0] if len(valid_keys) > 0 else None
+        backup_key = valid_keys[1] if len(valid_keys) > 1 else None
+        
+        return primary_key, backup_key
+    except Exception as e:
+        logger.warning(f"Could not load API keys from config.json: {e}")
+        return None, None
+
+def load_base_url_from_config():
+    """Load base URL from config.json file"""
+    try:
+        with open('config.json', 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        
+        api_config = config.get('api', {})
+        base_url = api_config.get('base_url', 'https://api.avalai.ir/v1')
+        
+        return base_url
+    except Exception as e:
+        logger.warning(f"Could not load base URL from config.json: {e}")
+        return None
+
+# ==============================================================================
+# API Key Validation System
+# ==============================================================================
+
+security = HTTPBearer(auto_error=False)
+
+class APIKeyValidator:
+    def __init__(self):
+        self.config = self.load_config()
+        self.authentication_enabled = self.config.get('api', {}).get('authentication', {}).get('enabled', False)
+        self.valid_keys = set(self.config.get('api', {}).get('authentication', {}).get('valid_keys', []))
+        self.api_key_header = self.config.get('api', {}).get('authentication', {}).get('api_key_header', 'X-API-Key')
+    
+    def load_config(self):
+        try:
+            with open('config.json', 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            logger.warning(f"Could not load config.json: {e}")
+            return {}
+    
+    def is_valid_key(self, api_key: str) -> bool:
+        """Check if the provided API key is valid"""
+        if not api_key:
+            return False
+        return api_key in self.valid_keys
+    
+    def validate_api_key(self, api_key: str = None) -> bool:
+        """Validate API key if authentication is enabled"""
+        if not self.authentication_enabled:
+            return True
+        
+        if not api_key:
+            return False
+            
+        return self.is_valid_key(api_key)
+
+# Global API key validator instance
+api_key_validator = APIKeyValidator()
+
+def get_api_key_from_header(x_api_key: str = Header(None, alias="X-API-Key")) -> str:
+    """Extract API key from X-API-Key header"""
+    return x_api_key
+
+def get_api_key_from_auth(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+    """Extract API key from Authorization Bearer header"""
+    if credentials:
+        return credentials.credentials
+    return None
+
+def validate_api_key_dependency(
+    x_api_key: str = Depends(get_api_key_from_header),
+    auth_key: str = Depends(get_api_key_from_auth),
+    request: Request = None
+) -> str:
+    """Dependency to validate API key from multiple sources"""
+    
+    # Skip validation if authentication is disabled
+    if not api_key_validator.authentication_enabled:
+        return "authentication_disabled"
+    
+    # Try to get API key from different sources
+    api_key = x_api_key or auth_key
+    
+    # Also try to get from query parameters
+    if not api_key and request:
+        api_key = request.query_params.get('api_key')
+    
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="API key is required. Provide it via X-API-Key header, Authorization Bearer token, or api_key query parameter.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not api_key_validator.is_valid_key(api_key):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return api_key
+
+def optional_api_key_validation(
+    x_api_key: str = Depends(get_api_key_from_header),
+    auth_key: str = Depends(get_api_key_from_auth),
+    request: Request = None
+) -> Optional[str]:
+    """Optional API key validation for endpoints that can work without authentication"""
+    
+    if not api_key_validator.authentication_enabled:
+        return None
+    
+    api_key = x_api_key or auth_key
+    if not api_key and request:
+        api_key = request.query_params.get('api_key')
+    
+    if api_key and not api_key_validator.is_valid_key(api_key):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return api_key
 
 # ==============================================================================
 # مدل‌های داده (Data Models)
@@ -2362,11 +2506,41 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0",
         "database": "connected",
-        "active_jobs": len(active_jobs)
+        "active_jobs": len(active_jobs),
+        "authentication": {
+            "enabled": api_key_validator.authentication_enabled,
+            "total_keys": len(api_key_validator.valid_keys)
+        }
+    }
+
+@app.post("/api/validate-key")
+async def validate_api_key_endpoint(
+    api_key_data: dict,
+    current_api_key: str = Depends(optional_api_key_validation)
+):
+    """اعتبارسنجی کلید API"""
+    api_key = api_key_data.get('api_key', '')
+    
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="API key is required"
+        )
+    
+    is_valid = api_key_validator.is_valid_key(api_key)
+    
+    return {
+        "valid": is_valid,
+        "authentication_enabled": api_key_validator.authentication_enabled,
+        "message": "API key is valid" if is_valid else "Invalid API key"
     }
 
 @app.post("/api/generate")
-async def generate_project(request: ProjectRequest, background_tasks: BackgroundTasks):
+async def generate_project(
+    request: ProjectRequest, 
+    background_tasks: BackgroundTasks,
+    api_key: str = Depends(validate_api_key_dependency)
+):
     """شروع تولید پروژه"""
     job_id = str(uuid.uuid4())
     
@@ -2393,7 +2567,10 @@ async def generate_project(request: ProjectRequest, background_tasks: Background
     }
 
 @app.get("/api/status/{job_id}")
-async def get_job_status(job_id: str):
+async def get_job_status(
+    job_id: str,
+    api_key: str = Depends(optional_api_key_validation)
+):
     """دریافت وضعیت job"""
     status = db_manager.get_job_status(job_id)
     
@@ -2429,7 +2606,10 @@ async def get_all_jobs(limit: int = 50, offset: int = 0):
         return {"jobs": jobs, "total": len(jobs)}
 
 @app.get("/download/{job_id}")
-async def download_project(job_id: str):
+async def download_project(
+    job_id: str,
+    api_key: str = Depends(optional_api_key_validation)
+):
     """دانلود فایل ZIP پروژه"""
     files = db_manager.get_job_files(job_id)
     
@@ -2744,7 +2924,10 @@ async def admin_get_jobs(status: Optional[str] = None, limit: int = 100):
         return {"jobs": jobs}
 
 @app.delete("/admin/jobs/{job_id}")
-async def admin_delete_job(job_id: str):
+async def admin_delete_job(
+    job_id: str,
+    api_key: str = Depends(validate_api_key_dependency)
+):
     """مدیریت: حذف job"""
     with sqlite3.connect(db_manager.db_path) as conn:
         cursor = conn.cursor()

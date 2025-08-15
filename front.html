@@ -973,6 +973,192 @@
             outline: 3px solid var(--primary-light);
             outline-offset: 2px;
         }
+
+        /* API Key Management Styles */
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: 0.875rem;
+        }
+
+        .auth-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        .auth-indicator.connected {
+            background: var(--success);
+        }
+
+        .auth-indicator.error {
+            background: var(--danger);
+        }
+
+        .auth-indicator.warning {
+            background: var(--warning);
+        }
+
+        .api-key-management {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group .form-input {
+            padding-right: 50px;
+        }
+
+        .btn-toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-toggle-password:hover {
+            color: var(--text-primary);
+            background: var(--bg-glass-light);
+        }
+
+        .api-key-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: var(--space-sm);
+        }
+
+        .api-key-actions .btn {
+            font-size: 0.875rem;
+            padding: var(--space-sm) var(--space);
+        }
+
+        .api-key-status {
+            padding: var(--space);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .api-key-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+            display: block;
+        }
+
+        .api-key-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+            display: block;
+        }
+
+        .api-key-status.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+            display: block;
+        }
+
+        .security-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            padding: var(--space);
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .security-notice .material-icon {
+            color: var(--primary);
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .form-help {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        .required {
+            color: var(--danger);
+            margin-left: 4px;
+        }
+
+        /* Enhanced Form Styles */
+        .form-input:invalid {
+            border-color: var(--danger);
+        }
+
+        .form-input:valid {
+            border-color: var(--success);
+        }
+
+        /* Loading States */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive API Key Management */
+        @media (max-width: 768px) {
+            .api-key-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-status {
+                justify-self: flex-start;
+                margin-top: var(--space-xs);
+            }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-sm);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1090,6 +1276,62 @@
                     </form>
                 </div>
 
+                <!-- API Key Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">vpn_key</span>
+                        <h3 class="card-title">مدیریت کلید API</h3>
+                        <div class="auth-status" id="authStatus">
+                            <span class="auth-indicator" id="authIndicator"></span>
+                            <span class="auth-text" id="authText">بررسی...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="api-key-management">
+                        <div class="form-group">
+                            <label for="api-key" class="form-label">
+                                <span class="material-icon">key</span>
+                                کلید API
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="password" id="api-key" class="form-input" placeholder="کلید API خود را وارد کنید" autocomplete="off">
+                                <button type="button" class="btn-toggle-password" id="toggleApiKey">
+                                    <span class="material-icon">visibility</span>
+                                </button>
+                            </div>
+                            <div class="form-help">
+                                کلید API برای احراز هویت و دسترسی به سرویس مورد نیاز است
+                            </div>
+                        </div>
+                        
+                        <div class="api-key-actions">
+                            <button type="button" class="btn btn-primary" id="validateApiKey">
+                                <span class="material-icon">verified</span>
+                                اعتبارسنجی کلید
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="saveApiKey">
+                                <span class="material-icon">save</span>
+                                ذخیره محلی
+                            </button>
+                            <button type="button" class="btn btn-danger" id="clearApiKey">
+                                <span class="material-icon">delete</span>
+                                پاک کردن
+                            </button>
+                        </div>
+                        
+                        <div class="api-key-status" id="apiKeyStatus"></div>
+                        
+                        <div class="security-notice">
+                            <span class="material-icon">security</span>
+                            <div>
+                                <strong>توجه امنیتی:</strong>
+                                کلید API شما به صورت محلی ذخیره می‌شود و هیچ‌گاه به سرورهای خارجی ارسال نمی‌شود.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- API Configuration -->
                 <div class="card">
                     <div class="card-header">
@@ -1098,42 +1340,39 @@
                     </div>
                     
                     <div class="api-config">
-                        <div class="api-provider active" data-provider="openai">
+                        <div class="api-provider active" data-provider="avalai">
                             <div class="api-info">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'%3E%3Cpath d='M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z'/%3E%3C/svg%3E" alt="OpenAI" class="api-logo">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E" alt="Aval AI" class="api-logo">
                                 <div>
-                                    <div style="font-weight: 600;">OpenAI GPT</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">GPT-4, GPT-3.5</div>
+                                    <div style="font-weight: 600;">Aval AI</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">سرویس هوش مصنوعی محلی</div>
                                 </div>
                             </div>
-                            <div class="api-status"></div>
+                            <div class="api-status" id="avalApiStatus"></div>
                         </div>
                         
-                        <div class="api-provider" data-provider="anthropic">
-                            <div class="api-info">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b5cf6'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E" alt="Anthropic" class="api-logo">
-                                <div>
-                                    <div style="font-weight: 600;">Anthropic Claude</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Claude-3, Claude-2</div>
-                                </div>
-                            </div>
-                            <div class="api-status"></div>
+                        <div class="form-group">
+                            <label for="api-base-url" class="form-label">
+                                <span class="material-icon">link</span>
+                                آدرس پایه API
+                            </label>
+                            <input type="url" id="api-base-url" class="form-input" value="https://api.avalai.ir/v1" readonly>
                         </div>
                         
-                        <div class="api-provider" data-provider="google">
-                            <div class="api-info">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z'/%3E%3Cpath d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z'/%3E%3Cpath d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z'/%3E%3Cpath d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z'/%3E%3C/svg%3E" alt="Google" class="api-logo">
-                                <div>
-                                    <div style="font-weight: 600;">Google AI</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Gemini, PaLM</div>
-                                </div>
-                            </div>
-                            <div class="api-status disconnected"></div>
+                        <div class="form-group">
+                            <label for="project-mode" class="form-label">
+                                <span class="material-icon">play_circle</span>
+                                حالت اجرا
+                            </label>
+                            <select id="project-mode" class="form-select">
+                                <option value="dry">آزمایشی (بدون اجرا)</option>
+                                <option value="live">زنده (اجرای کامل)</option>
+                            </select>
                         </div>
                         
-                        <button class="btn btn-secondary btn-full" style="margin-top: 16px;">
-                            <span class="material-icon">settings</span>
-                            تنظیمات پیشرفته API
+                        <button class="btn btn-secondary btn-full" id="testConnection">
+                            <span class="material-icon">wifi_tethering</span>
+                            تست اتصال
                         </button>
                     </div>
                 </div>
@@ -1431,6 +1670,216 @@
                 document.querySelectorAll('.agent-card').forEach(card => {
                     card.addEventListener('click', () => this.selectAgent(card));
                 });
+
+                // API Key Management
+                this.setupAPIKeyManagement();
+            }
+
+            setupAPIKeyManagement() {
+                // API Key toggle visibility
+                const toggleApiKey = document.getElementById('toggleApiKey');
+                const apiKeyInput = document.getElementById('api-key');
+                
+                if (toggleApiKey && apiKeyInput) {
+                    toggleApiKey.addEventListener('click', () => {
+                        const isPassword = apiKeyInput.type === 'password';
+                        apiKeyInput.type = isPassword ? 'text' : 'password';
+                        toggleApiKey.querySelector('.material-icon').textContent = 
+                            isPassword ? 'visibility_off' : 'visibility';
+                    });
+                }
+
+                // API Key validation
+                const validateBtn = document.getElementById('validateApiKey');
+                if (validateBtn) {
+                    validateBtn.addEventListener('click', () => this.validateAPIKey());
+                }
+
+                // API Key save
+                const saveBtn = document.getElementById('saveApiKey');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', () => this.saveAPIKey());
+                }
+
+                // API Key clear
+                const clearBtn = document.getElementById('clearApiKey');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', () => this.clearAPIKey());
+                }
+
+                // Test connection
+                const testBtn = document.getElementById('testConnection');
+                if (testBtn) {
+                    testBtn.addEventListener('click', () => this.testConnection());
+                }
+
+                // Load saved API key and check authentication status
+                this.loadSavedAPIKey();
+                this.checkAuthenticationStatus();
+            }
+
+            async validateAPIKey() {
+                const apiKeyInput = document.getElementById('api-key');
+                const validateBtn = document.getElementById('validateApiKey');
+                const statusDiv = document.getElementById('apiKeyStatus');
+                
+                const apiKey = apiKeyInput.value.trim();
+                
+                if (!apiKey) {
+                    this.showAPIKeyStatus('error', 'لطفاً کلید API را وارد کنید');
+                    return;
+                }
+
+                // Show loading state
+                validateBtn.classList.add('loading');
+                validateBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/api/validate-key', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': apiKey
+                        },
+                        body: JSON.stringify({ api_key: apiKey })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.valid) {
+                        this.showAPIKeyStatus('success', 'کلید API معتبر است ✓');
+                        this.updateAuthStatus('connected', 'احراز هویت موفق');
+                    } else {
+                        this.showAPIKeyStatus('error', result.message || 'کلید API نامعتبر است');
+                        this.updateAuthStatus('error', 'خطا در احراز هویت');
+                    }
+                } catch (error) {
+                    console.error('API key validation error:', error);
+                    this.showAPIKeyStatus('error', 'خطا در اتصال به سرور');
+                    this.updateAuthStatus('error', 'خطا در اتصال');
+                } finally {
+                    validateBtn.classList.remove('loading');
+                    validateBtn.disabled = false;
+                }
+            }
+
+            saveAPIKey() {
+                const apiKeyInput = document.getElementById('api-key');
+                const apiKey = apiKeyInput.value.trim();
+                
+                if (!apiKey) {
+                    this.showAPIKeyStatus('warning', 'هیچ کلیدی برای ذخیره وجود ندارد');
+                    return;
+                }
+
+                try {
+                    localStorage.setItem('api_key', apiKey);
+                    this.showAPIKeyStatus('success', 'کلید API با موفقیت ذخیره شد');
+                } catch (error) {
+                    console.error('Error saving API key:', error);
+                    this.showAPIKeyStatus('error', 'خطا در ذخیره کلید API');
+                }
+            }
+
+            loadSavedAPIKey() {
+                try {
+                    const savedApiKey = localStorage.getItem('api_key');
+                    if (savedApiKey) {
+                        const apiKeyInput = document.getElementById('api-key');
+                        if (apiKeyInput) {
+                            apiKeyInput.value = savedApiKey;
+                            this.showAPIKeyStatus('success', 'کلید ذخیره شده بارگذاری شد');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading saved API key:', error);
+                }
+            }
+
+            clearAPIKey() {
+                const apiKeyInput = document.getElementById('api-key');
+                const statusDiv = document.getElementById('apiKeyStatus');
+                
+                if (confirm('آیا مطمئن هستید که می‌خواهید کلید API را پاک کنید؟')) {
+                    apiKeyInput.value = '';
+                    localStorage.removeItem('api_key');
+                    statusDiv.className = 'api-key-status';
+                    statusDiv.textContent = '';
+                    this.updateAuthStatus('', 'بررسی...');
+                }
+            }
+
+            async testConnection() {
+                const testBtn = document.getElementById('testConnection');
+                
+                testBtn.classList.add('loading');
+                testBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/health');
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.showNotification('success', 'اتصال موفق', 'اتصال به سرور با موفقیت برقرار شد');
+                        this.updateAPIStatus('avalai', true);
+                    } else {
+                        this.showNotification('error', 'خطا در اتصال', 'عدم دسترسی به سرور');
+                        this.updateAPIStatus('avalai', false);
+                    }
+                } catch (error) {
+                    console.error('Connection test error:', error);
+                    this.showNotification('error', 'خطا در اتصال', 'خطا در برقراری ارتباط با سرور');
+                    this.updateAPIStatus('avalai', false);
+                } finally {
+                    testBtn.classList.remove('loading');
+                    testBtn.disabled = false;
+                }
+            }
+
+            async checkAuthenticationStatus() {
+                try {
+                    const response = await fetch('/health');
+                    const result = await response.json();
+
+                    if (response.ok && result.authentication) {
+                        const isEnabled = result.authentication.enabled;
+                        const totalKeys = result.authentication.total_keys;
+                        
+                        if (isEnabled) {
+                            this.updateAuthStatus('warning', `احراز هویت فعال (${totalKeys} کلید)`);
+                        } else {
+                            this.updateAuthStatus('connected', 'احراز هویت غیرفعال');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking auth status:', error);
+                    this.updateAuthStatus('error', 'خطا در بررسی وضعیت');
+                }
+            }
+
+            showAPIKeyStatus(type, message) {
+                const statusDiv = document.getElementById('apiKeyStatus');
+                if (statusDiv) {
+                    statusDiv.className = `api-key-status ${type}`;
+                    statusDiv.textContent = message;
+                }
+            }
+
+            updateAuthStatus(status, text) {
+                const indicator = document.getElementById('authIndicator');
+                const textEl = document.getElementById('authText');
+                
+                if (indicator && textEl) {
+                    indicator.className = `auth-indicator ${status}`;
+                    textEl.textContent = text;
+                }
+            }
+
+            updateAPIStatus(provider, connected) {
+                const statusEl = document.getElementById(`${provider}ApiStatus`);
+                if (statusEl) {
+                    statusEl.className = `api-status ${connected ? '' : 'disconnected'}`;
+                }
             }
 
             createParticles() {
@@ -1460,15 +1909,139 @@
                 }
             }
 
-            startProjectGeneration() {
-                const formData = new FormData(document.getElementById('projectForm'));
-                const projectName = formData.get('project-name') || document.getElementById('project-name').value;
+            async startProjectGeneration() {
+                const form = document.getElementById('projectForm');
+                const projectName = document.getElementById('project-name').value.trim();
+                const projectDesc = document.getElementById('project-desc').value.trim();
+                const projectType = document.getElementById('project-type').value;
+                const projectComplexity = document.getElementById('project-complexity').value;
+                const projectMode = document.getElementById('project-mode').value || 'dry';
+                const apiKey = document.getElementById('api-key').value.trim();
                 
-                this.showNotification('شروع تولید پروژه...', 'info');
+                // Validation
+                if (!projectName) {
+                    this.showNotification('error', 'خطا', 'نام پروژه الزامی است');
+                    return;
+                }
+                
+                if (!projectDesc || projectDesc.length < 10) {
+                    this.showNotification('error', 'خطا', 'توضیحات پروژه باید حداقل 10 کاراکتر باشد');
+                    return;
+                }
+
+                // Check API key if authentication is enabled
+                try {
+                    const healthResponse = await fetch('/health');
+                    const healthData = await healthResponse.json();
+                    
+                    if (healthData.authentication && healthData.authentication.enabled && !apiKey) {
+                        this.showNotification('error', 'خطا', 'کلید API برای ادامه الزامی است');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error checking authentication status:', error);
+                }
+                
+                // Prepare request data
+                const requestData = {
+                    description: `پروژه: ${projectName}\nنوع: ${projectType}\nسطح پیچیدگی: ${projectComplexity}\n\nتوضیحات:\n${projectDesc}`,
+                    mode: projectMode,
+                    rounds: 3
+                };
+                
+                // Add API key if provided
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (apiKey) {
+                    headers['X-API-Key'] = apiKey;
+                }
+                
+                this.showNotification('info', 'شروع تولید پروژه', 'در حال ارسال درخواست...');
                 this.addLog('شروع فرآیند تولید پروژه: ' + projectName, 'info');
                 
-                // Simulate project generation steps
-                this.simulateProjectSteps();
+                try {
+                    const response = await fetch('/api/generate', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(requestData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        this.showNotification('success', 'درخواست ثبت شد', `شناسه پروژه: ${result.job_id}`);
+                        this.addLog(`پروژه با شناسه ${result.job_id} ایجاد شد`, 'success');
+                        
+                        // Start monitoring the job progress
+                        this.monitorJobProgress(result.job_id);
+                    } else {
+                        this.showNotification('error', 'خطا در ایجاد پروژه', result.detail || 'خطای ناشناخته');
+                        this.addLog('خطا در ایجاد پروژه: ' + (result.detail || 'خطای ناشناخته'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Project generation error:', error);
+                    this.showNotification('error', 'خطا در اتصال', 'عدم دسترسی به سرور');
+                    this.addLog('خطا در اتصال به سرور', 'error');
+                }
+            }
+
+            async monitorJobProgress(jobId) {
+                const maxAttempts = 100;
+                let attempts = 0;
+                
+                const checkProgress = async () => {
+                    if (attempts >= maxAttempts) {
+                        this.addLog('زمان بررسی پروژه به پایان رسید', 'warning');
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch(`/api/status/${jobId}`);
+                        const status = await response.json();
+                        
+                        if (response.ok) {
+                            this.updateProgress(status.progress, status.message);
+                            this.addLog(`${status.message} (${status.progress}%)`, 'info');
+                            
+                            if (status.status === 'completed') {
+                                this.showNotification('success', 'پروژه تکمیل شد', 'فایل‌های پروژه آماده دانلود است');
+                                this.addLog('پروژه با موفقیت تکمیل شد', 'success');
+                                return;
+                            } else if (status.status === 'failed') {
+                                this.showNotification('error', 'خطا در تولید پروژه', status.message);
+                                this.addLog('خطا در تولید پروژه: ' + status.message, 'error');
+                                return;
+                            }
+                            
+                            // Continue monitoring
+                            setTimeout(checkProgress, 2000);
+                        } else {
+                            this.addLog('خطا در دریافت وضعیت پروژه', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error monitoring job progress:', error);
+                        this.addLog('خطا در بررسی پیشرفت پروژه', 'error');
+                    }
+                    
+                    attempts++;
+                };
+                
+                checkProgress();
+            }
+
+            updateProgress(progress, message) {
+                const progressBar = document.getElementById('progressBar');
+                const statusText = document.querySelector('.status-text');
+                
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+                
+                if (statusText) {
+                    statusText.textContent = message || `پیشرفت: ${progress}%`;
+                }
             }
 
             simulateProjectSteps() {

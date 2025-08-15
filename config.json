@@ -77,7 +77,7 @@
       "burst": 10
     },
     "authentication": {
-      "enabled": false,
+      "enabled": true,
       "api_key_header": "X-API-Key",
       "valid_keys": [
         "aa-4jpbPW57MrwaTTMFJMqflwJC68cO2i3VeJvK7UG5Gsl6mWy4",
