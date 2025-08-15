@@ -29,14 +29,14 @@ The FastAPI application was returning JSON at the root path (`/`) instead of ser
 **After:**
 ```json
 {
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.py"  // API requests only
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"  // API requests only
     },
     {
-      "src": "/(.*)",
-      "dest": "/public/index.html"  // UI requests
+      "source": "/(.*)",
+      "destination": "/public/index.html"  // UI requests
     }
   ]
 }

@@ -13,7 +13,7 @@ This guide addresses the issue where the FastAPI application was returning JSON 
 
 ### 1. Updated `vercel.json` Configuration
 
-The routing configuration now properly serves:
+The rewrite configuration now properly serves:
 - **UI**: `/` → `/public/index.html` (serves the main application interface)
 - **API**: `/api/*` → `/api/index.py` (handles all API requests)
 - **Static Files**: `/static/*`, `/assets/*`, `/pages/*` → respective directories

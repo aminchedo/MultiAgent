@@ -40,11 +40,11 @@ def test_vercel_config():
         with open('vercel.json', 'r') as f:
             config = json.load(f)
         
-        # Check for required routes
-        routes = config.get('routes', [])
-        route_sources = [route.get('src', '') for route in routes]
+        # Check for required rewrites
+        rewrites = config.get('rewrites', [])
+        rewrite_sources = [rewrite.get('source', '') for rewrite in rewrites]
         
-        required_routes = [
+        required_rewrites = [
             '/api/(.*)',
             '/health',
             '/favicon.ico',
@@ -52,13 +52,13 @@ def test_vercel_config():
             '/(.*)'
         ]
         
-        all_routes_present = True
-        for required_route in required_routes:
-            if any(required_route in src for src in route_sources):
-                print(f"   ✅ Route: {required_route}")
+        all_rewrites_present = True
+        for required_rewrite in required_rewrites:
+            if any(required_rewrite in src for src in rewrite_sources):
+                print(f"   ✅ Rewrite: {required_rewrite}")
             else:
-                print(f"   ❌ Route: {required_route} - Missing!")
-                all_routes_present = False
+                print(f"   ❌ Rewrite: {required_rewrite} - Missing!")
+                all_rewrites_present = False
         
         # Check for required headers
         headers = config.get('headers', [])
@@ -81,7 +81,7 @@ def test_vercel_config():
                 print(f"   ❌ Header: {required_header} - Missing!")
                 all_headers_present = False
         
-        return all_routes_present and all_headers_present
+        return all_rewrites_present and all_headers_present
         
     except Exception as e:
         print(f"   ❌ Error reading vercel.json: {e}")
