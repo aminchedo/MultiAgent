@@ -1,14 +1,14 @@
 """
-Database module with PostgreSQL, SQLAlchemy async, and Redis support.
+Database module with SQLite, SQLAlchemy async, and memory cache support.
 """
 
 import json
 import hashlib
+import time
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any, Union
 from contextlib import asynccontextmanager
 
-import redis.asyncio as redis
 from sqlalchemy import (
     Column, Integer, String, Text, DateTime, Float, JSON, 
     Boolean, ForeignKey, Index, create_engine
@@ -17,7 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, selectinload
 from sqlalchemy.sql import select, update, delete, func
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 from config.config import get_settings
@@ -26,6 +25,62 @@ from backend.models.models import JobStatus, ProjectType, ComplexityLevel, Agent
 
 settings = get_settings()
 Base = declarative_base()
+
+
+# Memory Cache Implementation (replaces Redis)
+class MemoryCache:
+    """Simple memory-based cache to replace Redis for Hugging Face."""
+    
+    def __init__(self):
+        self.cache: Dict[str, Dict[str, Any]] = {}
+        self.max_size = 1000  # Limit cache size
+    
+    def get(self, key: str) -> Optional[str]:
+        """Get value from cache."""
+        item = self.cache.get(key)
+        if item and item["expire"] > time.time():
+            return item["value"]
+        elif item:
+            del self.cache[key]
+        return None
+    
+    def set(self, key: str, value: str, ttl: int = 3600) -> bool:
+        """Set value in cache with TTL."""
+        try:
+            # Clean expired items if cache is getting large
+            if len(self.cache) > self.max_size:
+                self._cleanup_expired()
+            
+            self.cache[key] = {
+                "value": value,
+                "expire": time.time() + ttl
+            }
+            return True
+        except Exception:
+            return False
+    
+    def delete(self, key: str) -> bool:
+        """Delete value from cache."""
+        try:
+            if key in self.cache:
+                del self.cache[key]
+            return True
+        except Exception:
+            return False
+    
+    def _cleanup_expired(self):
+        """Clean up expired cache entries."""
+        current_time = time.time()
+        expired_keys = [
+            key for key, item in self.cache.items()
+            if item["expire"] <= current_time
+        ]
+        for key in expired_keys:
+            del self.cache[key]
+
+
+# Global memory cache instance
+memory_cache = MemoryCache()
 
 
 # SQLAlchemy Models
@@ -161,23 +216,25 @@ class StatsModel(Base):
 
 # Database Manager
 class DatabaseManager:
-    """Async database manager with PostgreSQL and Redis support."""
+    """Async database manager with SQLite and memory cache support."""
     
     def __init__(self):
         self.engine = None
         self.session_factory = None
-        self.redis_client = None
+        self.cache_client = memory_cache
         
     async def initialize(self):
         """Initialize database connections."""
-        # PostgreSQL connection
+        # SQLite connection (async with aiosqlite)
+        database_url = settings.database_url
+        if database_url.startswith("postgresql"):
+            # Convert to SQLite for Hugging Face
+            database_url = "sqlite+aiosqlite:///./multiagent.db"
+        
         self.engine = create_async_engine(
-            settings.database_url,
+            database_url,
             echo=settings.database_echo,
-            pool_size=20,
-            max_overflow=40,
-            pool_timeout=30,
-            pool_recycle=3600,
+            connect_args={"check_same_thread": False} if "sqlite" in database_url else {},
         )
         
         self.session_factory = async_sessionmaker(
@@ -186,21 +243,8 @@ class DatabaseManager:
             expire_on_commit=False
         )
         
-        # Redis connection
-        try:
-            self.redis_client = redis.from_url(
-                settings.redis_url,
-                encoding="utf-8",
-                decode_responses=True,
-                socket_timeout=5,
-                socket_connect_timeout=5,
-                retry_on_timeout=True
-            )
-            # Test Redis connection
-            await self.redis_client.ping()
-        except Exception as e:
-            print(f"Warning: Redis connection failed: {e}")
-            self.redis_client = None
+        # Memory cache is already initialized globally
+        print("Using memory cache instead of Redis for Hugging Face compatibility")
         
         # Create tables
         async with self.engine.begin() as conn:
@@ -210,8 +254,7 @@ class DatabaseManager:
         """Close database connections."""
         if self.engine:
             await self.engine.dispose()
-        if self.redis_client:
-            await self.redis_client.close()
+        # Memory cache doesn't need explicit closing
     
     @asynccontextmanager
     async def get_session(self):
@@ -226,34 +269,26 @@ class DatabaseManager:
             finally:
                 await session.close()
     
-    # Cache methods
+    # Cache methods (using memory cache)
     async def get_cache(self, key: str) -> Optional[str]:
         """Get value from cache."""
-        if not self.redis_client:
-            return None
         try:
-            return await self.redis_client.get(key)
+            return self.cache_client.get(key)
         except Exception:
             return None
     
     async def set_cache(self, key: str, value: str, ttl: int = None) -> bool:
         """Set value in cache."""
-        if not self.redis_client:
-            return False
         try:
-            ttl = ttl or settings.cache_ttl
-            await self.redis_client.setex(key, ttl, value)
-            return True
+            ttl = ttl or getattr(settings, 'cache_ttl', 3600)
+            return self.cache_client.set(key, value, ttl)
         except Exception:
             return False
     
     async def delete_cache(self, key: str) -> bool:
         """Delete value from cache."""
-        if not self.redis_client:
-            return False
         try:
-            await self.redis_client.delete(key)
-            return True
+            return self.cache_client.delete(key)
         except Exception:
             return False
     
