@@ -49,8 +49,9 @@
   },
   "functions": {
     "api/index.py": {
-      "maxDuration": 30,
-      "memory": 512
+      "maxDuration": 60,
+      "memory": 1024,
+      "runtime": "python3.9"
     }
   },
   "regions": ["iad1"]

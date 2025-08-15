@@ -59,5 +59,6 @@ except Exception as e:
     app = create_minimal_app()
     logger.info("Created minimal error handler app")
 
-# Export for Vercel
-handler = app
+# Export for Vercel - this is the correct way to export a FastAPI app
+# Vercel's Python runtime will automatically detect this as an ASGI application
+app.debug = False  # Ensure debug is disabled for production
