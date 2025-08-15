@@ -1082,7 +1082,23 @@
                                 <option value="enterprise">سازمانی (3+ ماه)</option>
                             </select>
                         </div>
-                        
+
+                        <div class="form-group">
+                            <label for="api-key" class="form-label">
+                                <span class="material-icon">vpn_key</span>
+                                کلید API (اختیاری)
+                            </label>
+                            <input type="password" id="api-key" class="form-input" placeholder="وارد نکردن = استفاده از پیش‌فرض سرور">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="api-base-url" class="form-label">
+                                <span class="material-icon">link</span>
+                                آدرس API (اختیاری)
+                            </label>
+                            <input type="text" id="api-base-url" class="form-input" placeholder="وارد نکردن = استفاده از پیش‌فرض سرور (https://api.avalai.ir/v1)">
+                        </div>
+
                         <button type="submit" class="btn btn-primary btn-full">
                             <span class="material-icon">play_arrow</span>
                             شروع تولید
@@ -1364,7 +1380,7 @@
             <span class="material-icon">check_circle</span>
             <div>
                 <div style="font-weight: 600;">عملیات موفق</div>
-                <div style="font-size: 0.875rem; opacity: 0.8;">پروژه با موفقیت ایجاد شد!</div>
+                <div style="font-size: 0.875rem; opacity: 0.8;">اعلان سیستم</div>
             </div>
         </div>
     </div>
@@ -1378,6 +1394,8 @@
                 this.createParticles();
                 this.startSystemMonitoring();
                 this.simulateProgress();
+                this.ws = null;
+                this.currentJobId = null;
             }
 
             init() {
@@ -1396,6 +1414,7 @@
                     anthropic: { connected: true, latency: 38 },
                     google: { connected: false, latency: 0 }
                 };
+                this.serverBase = window.location.origin;
             }
 
             setupEventListeners() {
@@ -1460,15 +1479,126 @@
                 }
             }
 
-            startProjectGeneration() {
-                const formData = new FormData(document.getElementById('projectForm'));
-                const projectName = formData.get('project-name') || document.getElementById('project-name').value;
-                
+            async startProjectGeneration() {
+                const desc = document.getElementById('project-desc').value.trim();
+                const apiKey = document.getElementById('api-key').value.trim();
+                const baseUrlOverride = document.getElementById('api-base-url').value.trim();
+                const payload = { description: desc || 'پروژه نمونه وب با داشبورد' };
+                if (apiKey) payload.api_key = apiKey;
                 this.showNotification('شروع تولید پروژه...', 'info');
-                this.addLog('شروع فرآیند تولید پروژه: ' + projectName, 'info');
-                
-                // Simulate project generation steps
-                this.simulateProjectSteps();
+                this.addLog('ارسال درخواست تولید پروژه به سرور...', 'info');
+                try {
+                    const res = await fetch(`${this.serverBase}/api/generate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) throw new Error('خطا در ارسال درخواست');
+                    const data = await res.json();
+                    this.currentJobId = data.job_id;
+                    this.addLog(`Job ID: ${this.currentJobId}`, 'success');
+                    this.connectWebSocket();
+                    this.pollStatus();
+                } catch (err) {
+                    this.addLog('خطا: ' + err.message, 'error');
+                    this.showNotification('خطا در شروع تولید', 'error');
+                }
+            }
+
+            connectWebSocket() {
+                try {
+                    const wsUrl = (this.serverBase.replace('http', 'ws')) + '/ws';
+                    this.ws = new WebSocket(wsUrl);
+                    this.ws.onmessage = (e) => {
+                        try {
+                            const msg = JSON.parse(e.data);
+                            if (msg.type === 'agent_log') {
+                                this.addLog(`[${msg.agent}] ${msg.message}`, msg.log_type || 'info');
+                            } else if (msg.type === 'progress_update' && msg.job_id === this.currentJobId) {
+                                this.updateProgress(msg.progress || 0);
+                                if (msg.status === 'completed') {
+                                    this.onJobCompleted();
+                                }
+                            }
+                        } catch {}
+                    };
+                } catch {}
+            }
+
+            async pollStatus() {
+                if (!this.currentJobId) return;
+                try {
+                    const res = await fetch(`${this.serverBase}/api/status/${this.currentJobId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.updateProgress(data.progress || 0);
+                    }
+                } catch {}
+                setTimeout(() => this.pollStatus(), 2000);
+            }
+
+            async onJobCompleted() {
+                this.showNotification('پروژه آماده دانلود است', 'success');
+                this.addLog('در حال دریافت لیست فایل‌ها...', 'info');
+                await this.refreshFileList();
+            }
+
+            async refreshFileList() {
+                if (!this.currentJobId) return;
+                const fileTree = document.getElementById('fileTree');
+                if (!fileTree) return;
+                fileTree.innerHTML = '';
+                try {
+                    const res = await fetch(`${this.serverBase}/api/files/${this.currentJobId}`);
+                    if (!res.ok) throw new Error('خطا در دریافت فایل‌ها');
+                    const data = await res.json();
+                    data.files.forEach(f => {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        fileItem.innerHTML = `
+                            <span class="material-icon">description</span>
+                            <div>
+                                <div>${f.filename}</div>
+                                <div class="file-meta">${f.agent || ''}</div>
+                            </div>
+                        `;
+                        fileItem.addEventListener('click', () => this.previewFile(f.filename));
+                        fileTree.appendChild(fileItem);
+                    });
+                } catch (e) {
+                    this.addLog(e.message, 'error');
+                }
+            }
+
+            async previewFile(filename) {
+                if (!this.currentJobId) return;
+                try {
+                    const res = await fetch(`${this.serverBase}/preview/${this.currentJobId}/${encodeURIComponent(filename)}`);
+                    if (!res.ok) throw new Error('پیش‌نمایش در دسترس نیست');
+                    const data = await res.json();
+                    this.switchTab(document.querySelector('[data-tab-target="#preview-tab"]'));
+                    const preview = document.querySelector('#preview-tab .preview-container');
+                    if (preview) {
+                        preview.innerHTML = `
+                            <div class="preview-toolbar">
+                                <div class="preview-title">${data.filename}</div>
+                                <div class="preview-actions">
+                                    <button class="btn btn-secondary btn-sm" onclick="window.open('${this.serverBase}/download/${this.currentJobId}', '_blank')">
+                                        <span class="material-icon">file_download</span>
+                                        دانلود پروژه
+                                    </button>
+                                </div>
+                            </div>
+                            <pre class="preview-code"><code>${this.escapeHtml(data.content || '')}</code></pre>
+                        `;
+                    }
+                } catch (e) {
+                    this.addLog(e.message, 'error');
+                }
+            }
+
+            escapeHtml(s) {
+                return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
             }
 
             simulateProjectSteps() {

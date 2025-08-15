@@ -2428,6 +2428,26 @@ async def get_all_jobs(limit: int = 50, offset: int = 0):
         
         return {"jobs": jobs, "total": len(jobs)}
 
+# New: list files for a job (for UI file tree)
+@app.get("/api/files/{job_id}")
+async def list_job_files(job_id: str):
+    """دریافت لیست فایل‌های تولید شده برای یک Job"""
+    files = db_manager.get_job_files(job_id)
+    if not files:
+        raise HTTPException(status_code=404, detail="فایلی یافت نشد یا Job نامعتبر است")
+    return {
+        "job_id": job_id,
+        "files": [
+            {
+                "filename": f["filename"],
+                "agent": f.get("agent"),
+                "file_size": f.get("file_size"),
+                "created_at": f.get("created_at"),
+            }
+            for f in files
+        ]
+    }
+
 @app.get("/download/{job_id}")
 async def download_project(job_id: str):
     """دانلود فایل ZIP پروژه"""
