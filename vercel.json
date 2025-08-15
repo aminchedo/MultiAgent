@@ -34,11 +34,6 @@
       "dest": "/api/index.py"
     }
   ],
-  "functions": {
-    "api/index.py": {
-      "runtime": "python3.9"
-    }
-  },
   "env": {
     "PYTHONPATH": "."
   }

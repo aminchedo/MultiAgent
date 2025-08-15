@@ -62,7 +62,8 @@ class DeploymentValidator:
             "api/vercel_app.py",
             "config/vercel_config.py",
             "vercel.json",
-            "requirements-vercel.txt",
+            "requirements.txt",
+            "runtime.txt",
             "package.json"
         ]
         
@@ -77,20 +78,16 @@ class DeploymentValidator:
             with open("vercel.json", "r") as f:
                 config = json.load(f)
                 
-            required_keys = ["version", "routes", "functions"]
+            required_keys = ["version", "routes"]
             has_all_keys = all(key in config for key in required_keys)
             
             self.log_test("vercel.json structure", has_all_keys, 
                          f"Keys: {list(config.keys())}")
             
-            # Test functions section (modern Vercel config)
-            functions = config.get("functions", {})
-            has_python_function = any(
-                func_config.get("runtime", "").startswith("python")
-                for func_config in functions.values()
-            )
-            self.log_test("Python function config", has_python_function,
-                         "Found Python runtime in functions")
+            # Test that we don't have conflicting function configs
+            has_functions = "functions" in config
+            self.log_test("No conflicting functions config", not has_functions,
+                         "Auto-detection enabled" if not has_functions else "Manual functions config found")
             
             # Test routes
             routes = config.get("routes", [])
@@ -100,6 +97,46 @@ class DeploymentValidator:
             
         except Exception as e:
             self.log_test("vercel.json parsing", False, f"Error: {str(e)}")
+            
+    def test_runtime_config(self):
+        """Test Python runtime configuration"""
+        print("\n🐍 Testing Python Runtime Configuration...")
+        
+        # Test runtime.txt
+        if Path("runtime.txt").exists():
+            try:
+                with open("runtime.txt", 'r') as f:
+                    runtime_content = f.read().strip()
+                    
+                has_python = runtime_content.startswith("python-")
+                has_version = len(runtime_content.split("-")) >= 2
+                
+                is_valid = has_python and has_version
+                self.log_test("runtime.txt format", is_valid, 
+                             f"Content: {runtime_content}")
+                             
+            except Exception as e:
+                self.log_test("runtime.txt parsing", False, f"Error: {str(e)}")
+        else:
+            self.log_test("runtime.txt exists", False, "File not found")
+            
+        # Test requirements.txt
+        if Path("requirements.txt").exists():
+            try:
+                with open("requirements.txt", 'r') as f:
+                    requirements = f.read().strip()
+                    
+                has_fastapi = "fastapi" in requirements.lower()
+                has_content = len(requirements) > 0
+                
+                is_valid = has_fastapi and has_content
+                self.log_test("requirements.txt content", is_valid,
+                             f"FastAPI: {has_fastapi}, Has content: {has_content}")
+                             
+            except Exception as e:
+                self.log_test("requirements.txt parsing", False, f"Error: {str(e)}")
+        else:
+            self.log_test("requirements.txt exists", False, "File not found")
             
     def test_python_compilation(self):
         """Test Python file compilation"""
@@ -159,6 +196,7 @@ class DeploymentValidator:
         self.test_directory_structure()
         self.test_required_files()
         self.test_vercel_config()
+        self.test_runtime_config()
         self.test_python_compilation()
         self.test_html_basic_structure()
         
