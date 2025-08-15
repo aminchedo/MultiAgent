@@ -26,6 +26,7 @@ The Vercel deployment error has been resolved by updating `vercel.json` to use t
 2. **Updated property names**:
    - `src` → `source`
    - `dest` → `destination`
+3. **Removed JWT_SECRET_KEY from vercel.json** (set via dashboard instead)
 
 ## 🚀 Ready for Deployment
 

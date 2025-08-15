@@ -98,7 +98,6 @@
   ],
   "env": {
     "PYTHONPATH": ".",
-    "VERCEL": "1",
-    "JWT_SECRET_KEY": "@jwt-secret-key"
+    "VERCEL": "1"
   }
 }

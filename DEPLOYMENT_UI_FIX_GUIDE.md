@@ -57,6 +57,8 @@ JWT_SECRET_KEY=YourGeneratedKeyHere...
 | `JWT_SECRET_KEY` | (Generated key from Step 1) | Production, Preview |
 | `OPENAI_API_KEY` | (Your OpenAI API key) | Production, Preview |
 
+**Important**: Do not use Vercel secrets for JWT_SECRET_KEY. Set it directly as an environment variable in the dashboard.
+
 ### Step 3: Deploy to Vercel
 
 ```bash
