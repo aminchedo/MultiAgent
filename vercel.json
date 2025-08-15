@@ -37,7 +37,6 @@
   "env": {
     "PYTHONPATH": ".",
     "VERCEL": "1",
-    "VERCEL_ENV": "@vercel-env",
     "OPENAI_API_KEY": "@openai-api-key",
     "JWT_SECRET_KEY": "@jwt-secret-key"
   },
