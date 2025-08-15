@@ -6,8 +6,9 @@ Simplified version without database and Redis dependencies.
 import time
 from contextlib import asynccontextmanager
 from typing import Dict, Any
+from datetime import datetime
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
@@ -188,10 +189,23 @@ async def health_check(request: Request):
     """Basic health check endpoint."""
     return {
         "status": "healthy",
-        "timestamp": time.time(),
-        "version": settings.app_version,
-        "service": settings.app_name,
-        "deployment": "vercel"
+        "timestamp": datetime.now().isoformat(),
+        "service": "Multi-Agent Code Generation System",
+        "available_endpoints": [
+            "/",
+            "/health",
+            "/info",
+            "/api/health",
+            "/docs",
+            "/redoc",
+            "POST /api/generate",
+            "POST /api/chat",
+            "/api/info",
+            "/api/agents",
+            "/static/index.html",
+            "/static/pages/index.html"
+        ],
+        "note": "Frontend files should be available at /static/ endpoints"
     }
 
 @app.get("/health/ready")
@@ -219,67 +233,43 @@ async def liveness_check(request: Request):
     }
 
 # Static files - serve the frontend
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="public"), name="static")
 
 # Root endpoint - serve the main frontend
 @app.get("/")
 @limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
-async def root(request: Request):
-    """Root endpoint - serve the main frontend."""
+async def root():
+    """Root endpoint that serves the main application"""
     try:
-        # Try to serve the main index.html from static directory
-        return FileResponse("static/index.html")
+        # Try to serve the main index.html from public directory
+        return FileResponse("public/index.html")
     except FileNotFoundError:
-        try:
-            # Fallback to frontend/pages/index.html
-            return FileResponse("frontend/pages/index.html")
-        except FileNotFoundError:
-            # Final fallback - return API info
-            return {
-                "message": "Multi-Agent Code Generation System",
-                "version": settings.app_version,
-                "docs_url": "/docs" if settings.debug else None,
-                "frontend_available_at": [
-                    "/static/index.html",
-                    "/static/pages/index.html"
-                ],
-                "status": "running",
-                "deployment": "vercel",
-                "note": "Frontend files should be available at /static/ endpoints"
-            }
+        return RedirectResponse(url="/info")
 
 # System information endpoint
 @app.get("/info")
 @limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
-async def system_info(request: Request):
-    """Get system information and configuration."""
+async def info():
+    """Information endpoint"""
     return {
-        "application": {
-            "name": settings.app_name,
-            "version": settings.app_version,
-            "debug": settings.debug,
-            "deployment": "vercel"
-        },
-        "features": {
-            "authentication": "JWT",
-            "rate_limiting": True,
-            "caching": "disabled",
-            "database": "disabled",
-            "agents": "CrewAI",
-            "monitoring": "disabled",
-        },
+        "name": "Multi-Agent Code Generation System",
+        "version": "1.0.0",
+        "description": "An intelligent code generation system with specialized AI agents",
+        "features": [
+            "Multi-agent architecture",
+            "Intelligent code generation",
+            "Real-time collaboration",
+            "Advanced AI capabilities"
+        ],
         "endpoints": {
+            "api": "/api/",
+            "docs": "/docs",
             "health": "/health",
-            "docs": "/docs" if settings.debug else None,
-            "frontend": "/",
             "static_files": "/static/",
-            "api": "/api/*",
+            "frontend": "/"
         },
-        "limits": {
-            "max_file_size": f"{settings.max_file_size / (1024*1024):.1f}MB",
-            "allowed_extensions": settings.allowed_extensions,
-            "rate_limit": f"{settings.rate_limit_requests}/{settings.rate_limit_window}s",
-        }
+        "status": "operational",
+        "timestamp": datetime.now().isoformat()
     }
 
 # Development utilities
@@ -324,22 +314,14 @@ async def startup_message():
     )
 
 # Catch-all route for SPA routing (must be after specific routes)
-@app.get("/{path:path}")
+@app.get("/{full_path:path}")
 @limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}s")
-async def catch_all(request: Request, path: str):
-    """Catch-all route for SPA routing - serves the frontend for unmatched routes."""
-    # Don't handle API routes
-    if path.startswith("api/") or path.startswith("health") or path.startswith("docs") or path.startswith("redoc"):
-        raise HTTPException(status_code=404, detail="API endpoint not found")
-    
-    # For frontend routes, serve the main index.html
+async def catch_all(full_path: str):
+    """Catch-all route to serve the frontend for any unmatched routes"""
     try:
-        return FileResponse("static/index.html")
+        return FileResponse("public/index.html")
     except FileNotFoundError:
-        try:
-            return FileResponse("frontend/pages/index.html")
-        except FileNotFoundError:
-            raise HTTPException(status_code=404, detail="Frontend files not found")
+        raise HTTPException(status_code=404, detail="Frontend not found")
 
 # Basic code generation endpoint
 @app.post("/api/generate")

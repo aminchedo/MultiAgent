@@ -18,7 +18,7 @@ class SystemInjector:
         self.project_dir = Path.cwd()
         self.back_file = self.project_dir / "back.py"
         self.front_file = self.project_dir / "front_optimized.html"
-        self.static_dir = self.project_dir / "static"
+        self.static_dir = self.project_dir / "public"
         self.requirements_file = self.project_dir / "requirements.txt"
         
         print("🚀 سیستم تزریق و راه‌اندازی چند-عامله")
@@ -161,12 +161,12 @@ app.add_middleware(
         """راه‌اندازی فرانت‌اند"""
         print("\n🎨 راه‌اندازی فرانت‌اند...")
         
-        # ایجاد پوشه static
+        # ایجاد پوشه public
         self.static_dir.mkdir(exist_ok=True)
         print(f"📁 پوشه {self.static_dir} ایجاد شد")
-        
-        # کپی فایل HTML به static در صورت وجود
-        if self.front_file.exists():
+
+        # کپی فایل HTML به public در صورت وجود
+        if self.front_file and self.front_file.exists():
             static_index = self.static_dir / "index.html"
             shutil.copy2(self.front_file, static_index)
             print(f"📄 {self.front_file} به {static_index} کپی شد")
@@ -260,7 +260,7 @@ python back.py
 - **API Base**: http://127.0.0.1:8000
 - **مستندات API**: http://127.0.0.1:8000/docs
 - **WebSocket**: ws://127.0.0.1:8000/ws
-- **فرانت‌اند**: static/index.html
+- **فرانت‌اند**: public/index.html
 
 ## 🔧 تست سریع
 
