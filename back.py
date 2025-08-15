@@ -246,11 +246,12 @@ class DatabaseManager:
 # ==============================================================================
 
 class BaseAgent:
-    def __init__(self, name: str, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
+    def __init__(self, name: str, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None, api_base_url: Optional[str] = None):
         self.name = name
         self.db = db_manager
         self.api_key_primary = api_key_primary
         self.api_key_backup = api_key_backup
+        self.api_base_url = api_base_url
     
     async def log(self, job_id: str, message: str, log_type: str = "info"):
         """ثبت لاگ عامل"""
@@ -275,9 +276,13 @@ class BaseAgent:
         """Returns the best-available API key, preferring an explicit override, then primary, then backup."""
         return override or self.api_key_primary or self.api_key_backup
 
+    def get_api_base_url(self, override: Optional[str] = None) -> str:
+        """Returns the configured base URL, preferring an explicit override, then configured value, then the global default."""
+        return (override or self.api_base_url or "https://api.avalai.ir/v1").rstrip("/")
+
 class PlannerAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
-        super().__init__("برنامه‌ریز", db_manager, api_key_primary, api_key_backup)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None, api_base_url: Optional[str] = None):
+        super().__init__("برنامه‌ریز", db_manager, api_key_primary, api_key_backup, api_base_url)
     
     async def generate_plan(self, job_id: str, description: str) -> Dict:
         """تولید طرح پروژه"""
@@ -427,8 +432,8 @@ class PlannerAgent(BaseAgent):
         return time_map.get(complexity, "3-5 دقیقه")
 
 class CoderAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
-        super().__init__("کدنویس", db_manager, api_key_primary, api_key_backup)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None, api_base_url: Optional[str] = None):
+        super().__init__("کدنویس", db_manager, api_key_primary, api_key_backup, api_base_url)
     
     async def generate_code(self, job_id: str, plan: Dict, description: str) -> Dict:
         """تولید کد پروژه"""
@@ -1493,8 +1498,8 @@ document.head.appendChild(style);''',
         }
 
 class ReviewerAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
-        super().__init__("بازبین", db_manager, api_key_primary, api_key_backup)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None, api_base_url: Optional[str] = None):
+        super().__init__("بازبین", db_manager, api_key_primary, api_key_backup, api_base_url)
     
     async def review_code(self, job_id: str, files: Dict) -> Dict:
         """بررسی کیفیت کد"""
@@ -1570,8 +1575,8 @@ class ReviewerAgent(BaseAgent):
         return review_result
 
 class OptimizerAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
-        super().__init__("بهینه‌ساز", db_manager, api_key_primary, api_key_backup)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None, api_base_url: Optional[str] = None):
+        super().__init__("بهینه‌ساز", db_manager, api_key_primary, api_key_backup, api_base_url)
     
     async def optimize_code(self, job_id: str, files: Dict) -> Dict:
         """بهینه‌سازی کد"""
@@ -1658,8 +1663,8 @@ window.addEventListener('error', (event) => {
         return optimization_comment + performance_code + content
 
 class TesterAgent(BaseAgent):
-    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None):
-        super().__init__("تست‌کننده", db_manager, api_key_primary, api_key_backup)
+    def __init__(self, db_manager: DatabaseManager, api_key_primary: Optional[str] = None, api_key_backup: Optional[str] = None, api_base_url: Optional[str] = None):
+        super().__init__("تست‌کننده", db_manager, api_key_primary, api_key_backup, api_base_url)
     
     async def generate_tests(self, job_id: str, files: Dict) -> Dict:
         """تولید تست‌ها"""
@@ -2169,12 +2174,19 @@ class MultiAgentOrchestrator:
                 self.api_key_primary = cfg_primary
             if not self.api_key_backup and cfg_backup:
                 self.api_key_backup = cfg_backup
+        # Base URL resolution
+        self.api_base_url = (
+            os.getenv("BASE_URL")
+            or os.getenv("AGENTS_API_BASE_URL")
+            or load_base_url_from_config()
+            or "https://api.avalai.ir/v1"
+        )
         self.agents = {
-            'planner': PlannerAgent(db_manager, self.api_key_primary, self.api_key_backup),
-            'coder': CoderAgent(db_manager, self.api_key_primary, self.api_key_backup),
-            'reviewer': ReviewerAgent(db_manager, self.api_key_primary, self.api_key_backup),
-            'optimizer': OptimizerAgent(db_manager, self.api_key_primary, self.api_key_backup),
-            'tester': TesterAgent(db_manager, self.api_key_primary, self.api_key_backup)
+            'planner': PlannerAgent(db_manager, self.api_key_primary, self.api_key_backup, self.api_base_url),
+            'coder': CoderAgent(db_manager, self.api_key_primary, self.api_key_backup, self.api_base_url),
+            'reviewer': ReviewerAgent(db_manager, self.api_key_primary, self.api_key_backup, self.api_base_url),
+            'optimizer': OptimizerAgent(db_manager, self.api_key_primary, self.api_key_backup, self.api_base_url),
+            'tester': TesterAgent(db_manager, self.api_key_primary, self.api_key_backup, self.api_base_url)
         }
     
     async def generate_project(self, job_id: str, request: ProjectRequest):
