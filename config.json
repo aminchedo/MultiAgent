@@ -70,6 +70,7 @@
     ]
   },
   "api": {
+    "base_url": "https://api.avalai.ir/v1",
     "rate_limit": {
       "enabled": false,
       "requests_per_minute": 60,
@@ -78,7 +79,10 @@
     "authentication": {
       "enabled": false,
       "api_key_header": "X-API-Key",
-      "valid_keys": []
+      "valid_keys": [
+        "aa-4jpbPW57MrwaTTMFJMqflwJC68cO2i3VeJvK7UG5Gsl6mWy4",
+        "aa-lPwmKyhGjxIqnqRx9XbotTjUczIlW6XfMDLhGqagWpcNd3be"
+      ]
     },
     "file_upload": {
       "max_size": 10485760,
