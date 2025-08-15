@@ -24,3 +24,9 @@
 2025-08-15 01:05:12,481 - __main__ - INFO - 🚀 Starting Multi-Agent Code Generation System...
 2025-08-15 01:05:12,481 - __main__ - INFO - 📊 Database connected: 0 jobs in history
 2025-08-15 01:05:12,485 - __main__ - INFO - ✅ System startup completed successfully
+2025-08-15 01:11:17,119 - __main__ - INFO - Database initialized successfully
+2025-08-15 01:11:17,143 - __main__ - INFO - 🚀 Starting Multi-Agent Code Generation System...
+2025-08-15 01:11:17,144 - __main__ - INFO - 📊 Database connected: 0 jobs in history
+2025-08-15 01:11:17,148 - __main__ - INFO - ✅ System startup completed successfully
+2025-08-15 01:11:17,150 - __main__ - INFO - 🔄 Shutting down Multi-Agent Code Generation System...
+2025-08-15 01:11:17,153 - __main__ - INFO - ✅ System shutdown completed
