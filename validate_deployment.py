@@ -77,20 +77,20 @@ class DeploymentValidator:
             with open("vercel.json", "r") as f:
                 config = json.load(f)
                 
-            required_keys = ["version", "builds", "routes", "functions"]
+            required_keys = ["version", "routes", "functions"]
             has_all_keys = all(key in config for key in required_keys)
             
             self.log_test("vercel.json structure", has_all_keys, 
                          f"Keys: {list(config.keys())}")
             
-            # Test builds section
-            builds = config.get("builds", [])
-            has_python_build = any(
-                build.get("use") == "@vercel/python" 
-                for build in builds
+            # Test functions section (modern Vercel config)
+            functions = config.get("functions", {})
+            has_python_function = any(
+                func_config.get("runtime", "").startswith("python")
+                for func_config in functions.values()
             )
-            self.log_test("Python build config", has_python_build,
-                         "Found @vercel/python build")
+            self.log_test("Python function config", has_python_function,
+                         "Found Python runtime in functions")
             
             # Test routes
             routes = config.get("routes", [])
