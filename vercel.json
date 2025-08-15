@@ -44,10 +44,5 @@
       "PYTHONPATH": ".",
       "VERCEL": "1"
     }
-  },
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 30
-    }
   }
 }

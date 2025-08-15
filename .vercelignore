@@ -1,0 +1,57 @@
+# Development files
+temp/
+tests/
+docs/
+scripts/
+deployment/
+.git/
+
+# Documentation
+*.md
+!README.md
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+.env
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+
+# Testing
+pytest.ini
+.pytest_cache/
+
+# Shell scripts
+*.sh
+!deploy-vercel.sh
+
+# Python development files
+*.py
+!api/
+!api/**
+!main.py
+!validate_deployment.py
+
+# Other config files that might conflict
+favicon.png
+fix_and_run.sh
+simple_run.py
+solution_script.sh
