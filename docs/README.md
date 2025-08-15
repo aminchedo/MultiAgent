@@ -11,6 +11,7 @@ A production-ready, intelligent code generation platform powered by CrewAI and O
 - **Production Ready**: JWT authentication, rate limiting, PostgreSQL, Redis caching
 - **Persian/Farsi UI**: RTL-supported interface with Persian localization
 - **Scalable Architecture**: Async FastAPI backend with proper error handling and monitoring
+- **🤗 Hugging Face Integration**: Automatic deployment to Hugging Face Spaces with CI/CD
 
 ## 🏗️ Architecture
 
@@ -33,6 +34,11 @@ A production-ready, intelligent code generation platform powered by CrewAI and O
                         ┌─────────────────┐              │
                         │   Redis Cache   │◄─────────────┘
                         └─────────────────┘
+                                 │
+                        ┌─────────────────┐
+                        │ Hugging Face    │
+                        │ Spaces Deploy   │
+                        └─────────────────┘
 ```
 
 ## 🧠 AI Agents
@@ -51,6 +57,7 @@ The system employs four specialized AI agents:
 - Redis 6+
 - Node.js 16+ (for frontend dependencies)
 - OpenAI API key
+- Hugging Face account and token (for deployment)
 
 ## 🔧 Installation
 
@@ -97,35 +104,90 @@ OPENAI_MODEL=gpt-4
 
 # Security Settings
 JWT_SECRET_KEY=your-super-secret-jwt-key-change-in-production
+
+# Hugging Face Token (for deployment)
+HF_TOKEN=hf_your_hugging_face_token_here
 ```
 
-### 5. Initialize Database
+## 🤗 Hugging Face Deployment Setup
+
+### Quick Setup (Recommended)
+
+Use our automated setup script for easy Hugging Face integration:
 
 ```bash
-# Start PostgreSQL and Redis services
-sudo systemctl start postgresql redis
-
-# Create database
-createdb multiagent
-
-# Run database migrations (if using Alembic)
-alembic upgrade head
+# Set your HF token and run setup
+HF_TOKEN=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 ./scripts/setup.sh
 ```
 
-### 6. Run the Application
+This will:
+- ✅ Validate your HF token
+- ✅ Install dependencies
+- ✅ Create environment configuration
+- ✅ Prepare deployment scripts
+- ✅ Generate GitHub setup instructions
 
+### Manual Setup
+
+1. **Get Your Hugging Face Token**
+   ```bash
+   # Visit: https://huggingface.co/settings/tokens
+   # Create a new token with 'write' permissions
+   export HF_TOKEN=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
+   ```
+
+2. **Validate Your Token**
+   ```bash
+   python scripts/validate-token.py
+   ```
+
+3. **Configure GitHub Secrets**
+   - Go to your GitHub repository settings
+   - Navigate to "Secrets and variables" → "Actions"  
+   - Add new secret: `HF_TOKEN` = `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`
+
+4. **Test Deployment**
+   ```bash
+   # Manual deployment
+   ./deploy.sh "🧪 Initial deployment test"
+   
+   # Or push to main branch for auto-deployment
+   git push origin main
+   ```
+
+### Deployment Options
+
+#### 🔄 Automatic Deployment (Recommended)
+Every push to `main` branch automatically deploys to:
+**https://huggingface.co/spaces/Really-amin/ultichat-hugginigfae**
+
+#### 🛠️ Manual Deployment
 ```bash
-# Development mode with new modular structure
-python main.py
-
-# Or using the deployment launcher
-python deployment/scripts/launch_app.py
-
-# Or with uvicorn directly
-uvicorn backend.core.app:app --host 0.0.0.0 --port 8000 --reload
+export HF_TOKEN=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
+./deploy.sh "Your deployment message"
 ```
 
-The application will be available at `http://localhost:8000`
+#### 📋 Deployment Commands
+```bash
+# Validate token only
+./deploy.sh validate
+
+# Prepare deployment files
+./deploy.sh prepare
+
+# Full deployment with custom message
+./deploy.sh deploy "🚀 New features added"
+```
+
+### Environment Variables for Hugging Face Spaces
+
+Set these in your Hugging Face Space settings:
+
+```env
+OPENAI_API_KEY=your-openai-api-key-here
+JWT_SECRET_KEY=your-secure-jwt-secret-key
+DATABASE_URL=your-database-url-if-external
+```
 
 ## 🚀 Quick Start
 
@@ -248,38 +310,71 @@ docker run -d \
   multi-agent-code-gen
 ```
 
-## ⚙️ Configuration
+## 🚀 Deployment
+
+### Local Development
+
+```bash
+# Start all services
+python main.py
+
+# Or use the comprehensive deployment script
+./scripts/deploy.sh
+```
+
+### Production Deployment
+
+#### Option 1: Hugging Face Spaces (Recommended)
+```bash
+# Automatic deployment on git push
+git push origin main
+
+# Or manual deployment
+./deploy.sh "Production deployment"
+```
+
+#### Option 2: Docker Deployment
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+
+# Or use the deployment script
+./scripts/deploy.sh deploy
+```
+
+#### Option 3: Traditional Server
+```bash
+# Set production environment
+export ENVIRONMENT=production
+
+# Run with Gunicorn
+gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```
+
+## 🔧 Configuration
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://...` |
-| `REDIS_URL` | Redis connection string | `redis://localhost:6379/0` |
-| `OPENAI_API_KEY` | OpenAI API key | Required |
-| `OPENAI_MODEL` | Model to use | `gpt-4` |
-| `JWT_SECRET_KEY` | JWT signing key | Required |
-| `DEBUG` | Enable debug mode | `false` |
-| `WORKERS` | Number of worker processes | `4` |
-| `MAX_FILE_SIZE` | Maximum upload size (bytes) | `10485760` |
+The application supports extensive configuration through environment variables. See `.env.example` for all available options:
 
-### Project Types
+- **Security**: JWT secrets, HTTPS settings, CORS configuration
+- **Database**: PostgreSQL connection, pool settings
+- **Redis**: Cache configuration, connection settings  
+- **AI Services**: OpenAI API configuration, Hugging Face tokens
+- **Performance**: Worker settings, timeouts, rate limiting
+- **Features**: Enable/disable specific functionality
+- **Monitoring**: Logging, metrics, health checks
 
-- `web_app`: Modern web applications
-- `api`: RESTful API services
-- `mobile_app`: Cross-platform mobile apps
-- `desktop_app`: Desktop applications
-- `cli_tool`: Command-line utilities
-- `library`: Reusable libraries
-- `microservice`: Microservice architectures
-- `fullstack`: Complete full-stack applications
+### Feature Flags
 
-### Complexity Levels
+Control application features via environment variables:
 
-- `simple`: Basic MVP functionality (1-2 hours)
-- `moderate`: Standard features (3-5 hours)
-- `complex`: Advanced functionality (6-12 hours)
-- `enterprise`: Production-scale systems (12+ hours)
+```env
+ENABLE_WEBSOCKETS=True          # Real-time updates
+ENABLE_FILE_UPLOAD=True         # File upload functionality  
+ENABLE_CODE_EXECUTION=False     # Code execution (use with caution)
+ENABLE_METRICS_DASHBOARD=True   # Performance monitoring
+```
 
 ## 🔐 Security
 
@@ -302,31 +397,37 @@ app.add_middleware(CORSMiddleware)
 
 All inputs are validated using Pydantic models with strict typing and sanitization.
 
+### Token Management
+
+- **Never commit tokens to git**: All sensitive data should be in environment variables
+- **Use GitHub Secrets**: For CI/CD deployment tokens
+- **Rotate tokens regularly**: Set reminders to update HF and OpenAI tokens
+- **Principle of least privilege**: Use tokens with minimal required permissions
+
+### Best Practices
+
+1. **Environment Separation**: Use different tokens for development/production
+2. **Token Validation**: Regularly validate tokens using `python scripts/validate-token.py`
+3. **Access Monitoring**: Monitor Hugging Face space access logs
+4. **Secret Management**: Use secure secret management in production
+
 ## 📊 Monitoring
 
 ### Health Checks
 
 ```bash
-# Basic health
+# Application health
 curl http://localhost:8000/health
 
-# Readiness (includes DB check)
-curl http://localhost:8000/health/ready
-
-# Liveness
-curl http://localhost:8000/health/live
+# Detailed system status  
+curl http://localhost:8000/health/detailed
 ```
 
-### System Statistics
+### Deployment Monitoring
 
-```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8000/api/stats
-```
-
-### Prometheus Metrics
-
-Metrics are available at `/metrics` when `ENABLE_PROMETHEUS=true`.
+- **GitHub Actions**: Monitor deployment workflows in the Actions tab
+- **Hugging Face Logs**: Check build and runtime logs in your Space
+- **Application Metrics**: Access metrics at `/metrics` endpoint
 
 ## 🌐 WebSocket API
 
@@ -451,13 +552,27 @@ tail -f app.log
 grep "ERROR" app.log
 ```
 
+### Getting Help
+
+1. **Check logs**: GitHub Actions, Hugging Face Space, application logs
+2. **Validate configuration**: Use provided validation scripts
+3. **Test components**: Use individual test commands for each service
+4. **Community support**: Open issues with detailed error information
+
+## 📚 Documentation
+
+- **API Documentation**: Available at `/docs` when running
+- **Component Documentation**: In `docs/` directory
+- **Deployment Guide**: See `GITHUB_SETUP.md` after running setup script
+- **Architecture Details**: See `docs/architecture.md`
+
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
 
 ### Development Setup
 
@@ -465,48 +580,61 @@ grep "ERROR" app.log
 # Install development dependencies
 pip install -r requirements-dev.txt
 
-# Install pre-commit hooks
-pre-commit install
+# Run tests
+pytest
 
-# Run code formatting
+# Format code
 black .
 isort .
 
-# Run linting
-flake8
+# Type checking
 mypy .
 ```
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
-- [CrewAI](https://github.com/joaomdmoura/crewAI) for multi-agent framework
-- [FastAPI](https://fastapi.tiangolo.com/) for the web framework
-- [OpenAI](https://openai.com/) for AI capabilities
-- [Sandpack](https://sandpack.codesandbox.io/) for code editing
-- [PostgreSQL](https://postgresql.org/) for reliable data storage
-
-## 📞 Support
-
-- **Documentation**: [Wiki](https://github.com/yourusername/multi-agent-code-generator/wiki)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/multi-agent-code-generator/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/multi-agent-code-generator/discussions)
-- **Email**: support@your-domain.com
-
-## 🗺️ Roadmap
-
-- [ ] Plugin system for custom agents
-- [ ] Advanced code analysis and optimization
-- [ ] Multi-language support for UI
-- [ ] Integration with more AI providers
-- [ ] Kubernetes deployment configurations
-- [ ] Advanced monitoring and analytics
-- [ ] Code review and suggestion system
-- [ ] Team collaboration features
+- **CrewAI**: For the multi-agent framework
+- **OpenAI**: For the language model API
+- **Hugging Face**: For hosting and deployment platform
+- **FastAPI**: For the high-performance web framework
+- **Community**: For contributions and feedback
 
 ---
 
-**Made with ❤️ for developers who want to code at the speed of thought**
+## 🚀 Quick Start Commands
+
+### Immediate Setup
+```bash
+# 1. Clone and setup
+git clone <your-repo-url>
+cd multi-agent-code-generator
+
+# 2. Quick HF setup
+HF_TOKEN=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 ./scripts/setup.sh
+
+# 3. Configure other environment variables
+nano .env
+
+# 4. Test deployment
+./deploy.sh "🧪 Initial test"
+```
+
+### Development Workflow
+```bash
+# Start development server
+python main.py
+
+# In another terminal, test the API
+curl http://localhost:8000/health
+
+# Deploy when ready
+git add .
+git commit -m "✨ New features"
+git push origin main  # Auto-deploys to HF Spaces
+```
+
+**🌐 Your deployed application**: https://huggingface.co/spaces/Really-amin/ultichat-hugginigfae

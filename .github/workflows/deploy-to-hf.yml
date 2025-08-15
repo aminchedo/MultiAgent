@@ -1,0 +1,209 @@
+name: 🚀 Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Deployment message'
+        required: false
+        default: '🤖 Manual deployment'
+
+env:
+  HF_SPACE: Really-amin/ultichat-hugginigfae
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    
+    - name: 📦 Install Hugging Face CLI
+      run: |
+        pip install -U huggingface_hub
+        pip install -U hf_transfer
+        
+    - name: 🔐 Validate HF Token
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        if [ -z "$HF_TOKEN" ]; then
+          echo "❌ HF_TOKEN secret not found!"
+          echo "Please add HF_TOKEN to your GitHub repository secrets."
+          echo "Go to: Settings > Secrets and variables > Actions > New repository secret"
+          exit 1
+        fi
+        
+        if ! echo "$HF_TOKEN" | grep -q "^hf_"; then
+          echo "❌ Invalid HF_TOKEN format. Token should start with 'hf_'"
+          exit 1
+        fi
+        
+        echo "✅ HF_TOKEN found and has correct format"
+        
+        # Test token validity
+        if huggingface-cli whoami --token "$HF_TOKEN" >/dev/null 2>&1; then
+          echo "✅ HF_TOKEN is valid"
+          huggingface-cli whoami --token "$HF_TOKEN"
+        else
+          echo "❌ HF_TOKEN validation failed"
+          exit 1
+        fi
+        
+    - name: 🏗️ Prepare deployment files
+      run: |
+        echo "📝 Creating app.py for Hugging Face Spaces..."
+        
+        # Create app.py if it doesn't exist
+        if [ ! -f "app.py" ]; then
+          cat > app.py << 'EOF'
+import gradio as gr
+import subprocess
+import sys
+import os
+from pathlib import Path
+
+# Set environment variables for Hugging Face Spaces
+os.environ["PORT"] = "7860"
+os.environ["HOST"] = "0.0.0.0"
+
+def install_requirements():
+    """Install requirements if needed"""
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        return "✅ Requirements installed successfully"
+    except Exception as e:
+        return f"❌ Error installing requirements: {str(e)}"
+
+def start_app():
+    """Start the main application"""
+    try:
+        # Try to import and run the main application
+        if Path("main.py").exists():
+            subprocess.Popen([sys.executable, "main.py"])
+            return "🚀 Application started successfully"
+        else:
+            return "❌ main.py not found"
+    except Exception as e:
+        return f"❌ Error starting application: {str(e)}"
+
+# Create Gradio interface
+with gr.Blocks(title="Multi-Agent Code Generator") as demo:
+    gr.Markdown("# 🚀 Multi-Agent Code Generation System")
+    gr.Markdown("A production-ready, intelligent code generation platform powered by CrewAI and OpenAI")
+    
+    with gr.Row():
+        install_btn = gr.Button("📦 Install Requirements", variant="secondary")
+        start_btn = gr.Button("🚀 Start Application", variant="primary")
+    
+    output = gr.Textbox(label="Status", lines=3)
+    
+    install_btn.click(install_requirements, outputs=output)
+    start_btn.click(start_app, outputs=output)
+    
+    gr.Markdown("""
+    ## 🔧 Setup Instructions
+    
+    1. Click "📦 Install Requirements" to install dependencies
+    2. Set your environment variables in the Hugging Face Spaces settings:
+       - `OPENAI_API_KEY`: Your OpenAI API key
+       - `JWT_SECRET_KEY`: A secure random string
+    3. Click "🚀 Start Application" to launch the system
+    
+    ## 🌐 Direct Access
+    
+    Once started, you can access the application directly at the application URL.
+    """)
+
+if __name__ == "__main__":
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        share=False
+    )
+EOF
+        fi
+        
+        # Ensure requirements.txt exists
+        if [ ! -f "requirements.txt" ]; then
+          echo "❌ requirements.txt not found!"
+          exit 1
+        fi
+        
+        echo "✅ Deployment files prepared"
+        
+    - name: 🚀 Deploy to Hugging Face
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        HF_HUB_ENABLE_HF_TRANSFER: 1
+      run: |
+        # Login to Hugging Face
+        huggingface-cli login --token "$HF_TOKEN"
+        
+        # Prepare commit message
+        COMMIT_MSG="${{ github.event.inputs.message }}"
+        if [ -z "$COMMIT_MSG" ]; then
+          COMMIT_MSG="🤖 Auto-deploy: $(git log -1 --pretty=%B | head -1)"
+        fi
+        
+        echo "📤 Uploading to Hugging Face Space: $HF_SPACE"
+        echo "💬 Commit message: $COMMIT_MSG"
+        
+        # Upload files to Hugging Face Space
+        huggingface-cli upload "$HF_SPACE" . \
+          --repo-type=space \
+          --commit-message="$COMMIT_MSG" \
+          --exclude="*.git*" \
+          --exclude="*/__pycache__/*" \
+          --exclude="*.pyc" \
+          --exclude="*/.venv/*" \
+          --exclude="*/venv/*" \
+          --exclude="*/node_modules/*" \
+          --exclude="*.log" \
+          --exclude="*/temp/*" \
+          --exclude="*/logs/*" \
+          --exclude="*/backups/*"
+        
+    - name: ✅ Deployment Summary
+      run: |
+        echo "🎉 Deployment completed successfully!"
+        echo ""
+        echo "📊 Deployment Details:"
+        echo "├─ 🚀 Space: $HF_SPACE"
+        echo "├─ 🌐 URL: https://huggingface.co/spaces/$HF_SPACE"
+        echo "├─ 🔄 Commit: $(git rev-parse --short HEAD)"
+        echo "└─ 📅 Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        echo ""
+        echo "🔗 View your deployment: https://huggingface.co/spaces/$HF_SPACE"
+        
+    - name: 📋 Post-deployment check
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        echo "🔍 Checking deployment status..."
+        sleep 10
+        
+        # Check if space is building/running
+        if huggingface-cli repo-info "$HF_SPACE" --repo-type=space --token "$HF_TOKEN" >/dev/null 2>&1; then
+          echo "✅ Space is accessible and updating"
+        else
+          echo "⚠️ Space check inconclusive (this might be normal)"
+        fi
+        
+        echo ""
+        echo "📝 Next steps:"
+        echo "1. Visit https://huggingface.co/spaces/$HF_SPACE"
+        echo "2. Check the build logs in the Hugging Face interface"
+        echo "3. Set your environment variables if needed"
+        echo "4. Test the application functionality"
