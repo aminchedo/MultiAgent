@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI, HTTPException, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
@@ -389,49 +389,24 @@ async def websocket_endpoint_handler(websocket: WebSocket):
     else:
         await websocket.close(code=1000, reason="WebSocket not available")
 
-# Additional API endpoints for WebSocket integration
-@app.post("/api/generate")
-async def generate_project():
-    """Enhanced project generation with WebSocket updates"""
-    try:
-        # Simulate project generation with progress updates
-        if connection_manager:
-            await connection_manager.send_generation_progress(
-                job_id="demo-job",
-                progress=0.0,
-                status="Starting generation..."
-            )
-            
-            # Simulate progress updates
-            import asyncio
-            for i in range(1, 11):
-                await asyncio.sleep(0.5)
-                progress = i * 10
-                await connection_manager.send_generation_progress(
-                    job_id="demo-job",
-                    progress=progress,
-                    status=f"Processing step {i}/10..."
-                )
-            
-            await connection_manager.send_generation_progress(
-                job_id="demo-job",
-                progress=100,
-                status="Generation complete!"
-            )
-        
-        return {
-            "status": "success",
-            "job_id": "demo-job",
-            "files": [
-                {"name": "main.py", "type": "python", "size": "1.2KB"},
-                {"name": "requirements.txt", "type": "text", "size": "156B"},
-                {"name": "README.md", "type": "markdown", "size": "2.1KB"}
-            ],
-            "message": "Project generated successfully"
-        }
-    except Exception as e:
-        logger.error(f"Generation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# Mount the real backend app
+try:
+    from backend.core.app import app as backend_app
+    logger.info("Backend app imported successfully")
+    
+    # Mount backend app instead of creating stubs
+    app.mount("/api", backend_app)
+    
+except ImportError as e:
+    logger.error(f"Failed to import backend app: {e}")
+    logger.error(f"Traceback: {traceback.format_exc()}")
+    
+    # Fallback: redirect to real endpoint
+    @app.post("/api/generate")
+    async def generate_project_redirect(request: Request):
+        """Redirect to real backend implementation"""
+        # Forward request to backend_app
+        return await backend_app(request)
 
 @app.post("/api/check-status")
 async def check_api_status():

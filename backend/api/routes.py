@@ -156,6 +156,17 @@ async def login(request: Request, auth_request: AuthRequest):
         )
 
 
+@router.post("/api/validate-key")
+async def validate_api_key(request: Request, api_key_data: dict):
+    """Convert API key to JWT token for frontend compatibility"""
+    api_key = api_key_data.get("api_key")
+    if api_key == os.getenv("API_KEY_SECRET", "default-dev-key"):
+        # Generate short-lived JWT
+        token = create_access_token(data={"sub": "api_user"})
+        return {"valid": True, "token": token}
+    raise HTTPException(status_code=401, detail="Invalid API key")
+
+
 # Project generation endpoints
 @router.post("/api/generate", response_model=ProjectGenerationResponse)
 @limiter.limit("5/minute")
@@ -276,6 +287,17 @@ async def get_job_status(
     )
 
 
+@router.get("/api/status/{job_id}", response_model=JobStatusResponse)
+@limiter.limit("30/minute")
+async def get_job_status_api(
+    request: Request,
+    job_id: str,
+    current_user: str = Depends(verify_token)
+):
+    """Alias for /status/{job_id} to match frontend expectations"""
+    return await get_job_status(request, job_id, current_user)
+
+
 @router.get("/download/{job_id}")
 @limiter.limit("10/minute")
 async def download_project(
@@ -318,6 +340,17 @@ async def download_project(
         media_type="application/zip",
         headers={"Content-Disposition": f"attachment; filename={job.name}.zip"}
     )
+
+
+@router.get("/api/download/{job_id}")
+@limiter.limit("10/minute")
+async def download_project_api(
+    request: Request,
+    job_id: str,
+    current_user: str = Depends(verify_token)
+):
+    """Alias for /download/{job_id}"""
+    return await download_project(request, job_id, current_user)
 
 
 @router.get("/preview/{job_id}/{filename:path}", response_model=FilePreviewResponse)

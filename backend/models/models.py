@@ -60,9 +60,9 @@ class MessageType(str, Enum):
 # Request Models
 class ProjectGenerationRequest(BaseModel):
     """Request model for project generation."""
-    name: str = Field(..., min_length=1, max_length=100, description="Project name")
+    name: Optional[str] = Field(default="Generated Project", max_length=100, description="Project name")
     description: str = Field(..., min_length=10, max_length=2000, description="Project description")
-    project_type: ProjectType = Field(..., description="Type of project to generate")
+    project_type: Optional[ProjectType] = Field(default=ProjectType.WEB_APP, description="Type of project to generate")
     languages: List[str] = Field(default=["python"], description="Programming languages to use")
     frameworks: List[str] = Field(default=[], description="Frameworks to include")
     complexity: ComplexityLevel = Field(default=ComplexityLevel.MODERATE, description="Project complexity level")

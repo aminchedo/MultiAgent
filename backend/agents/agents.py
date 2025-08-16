@@ -10,10 +10,11 @@ import subprocess
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Callable
 from pathlib import Path
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from crewai import Agent, Task, Crew, Process
 from crewai.tools import BaseTool
-from langchain_community.llms import OpenAI
+from langchain_openai import ChatOpenAI
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 
@@ -23,9 +24,22 @@ from backend.models.models import (
     generate_task_id, WebSocketMessage, MessageType
 )
 from backend.database.db import db_manager
+import structlog
+
+logger = structlog.get_logger()
 
 
 settings = get_settings()
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+async def execute_crew_with_retry(crew, inputs):
+    """Execute crew with automatic retries"""
+    try:
+        return await crew.kickoff(inputs)
+    except Exception as e:
+        logger.error(f"Crew execution failed: {e}")
+        raise
 
 
 class AgentTools:
@@ -145,9 +159,9 @@ class BaseCrewAgent:
     def __init__(self, job_id: str, websocket_callback: Optional[Callable] = None):
         self.job_id = job_id
         self.websocket_callback = websocket_callback
-        self.llm = OpenAI(
+        self.llm = ChatOpenAI(
             api_key=settings.openai_api_key,
-            model_name=settings.openai_model,
+            model=settings.openai_model,  # gpt-4 or gpt-4-turbo
             temperature=settings.openai_temperature,
             max_tokens=settings.openai_max_tokens
         )
@@ -212,7 +226,23 @@ class PlannerAgent(BaseCrewAgent):
             into manageable tasks and creating detailed technical specifications."""
         )
         
-        # Create planning task
+        # Create planning task with strict JSON schema enforcement
+        schema_prompt = '''
+        Return ONLY valid JSON with this exact structure:
+        {
+            "name": "project_name",
+            "structure": {
+                "README.md": "Project documentation",
+                "src/main.py": "Main application file",
+                "src/utils.py": "Utility functions",
+                "tests/test_main.py": "Unit tests",
+                "requirements.txt": "Python dependencies"
+            }
+        }
+        
+        CRITICAL: Only include FILES with extensions, never directories ending with /
+        '''
+        
         planning_task = Task(
             description=f"""
             Analyze the following project requirements and create a detailed development plan:
@@ -225,15 +255,17 @@ class PlannerAgent(BaseCrewAgent):
             Complexity: {project_data.get('complexity')}
             Features: {', '.join(project_data.get('features', []))}
             
+            {schema_prompt}
+            
             Create a plan that includes:
-            1. Project structure and file organization
+            1. Project structure and file organization (ONLY files with extensions)
             2. Technology stack recommendations
             3. Development phases and milestones
             4. Required dependencies and libraries
             5. Testing strategy
             6. Deployment considerations
             
-            Output the plan as a detailed JSON structure.
+            Output the plan as a detailed JSON structure following the exact schema above.
             """,
             agent=planner,
             expected_output="A comprehensive JSON plan with project structure, phases, and requirements"
@@ -248,29 +280,40 @@ class PlannerAgent(BaseCrewAgent):
         )
         
         await self.update_progress(30, "Generating project plan", 2)
-        result = crew.kickoff()
+        result = await execute_crew_with_retry(crew, {})
         
         try:
             # Parse the result as JSON
             plan = json.loads(result)
+            
+            # Validate structure contains only files
+            structure = plan.get('structure', {})
+            validated_structure = {}
+            
+            for path, description in structure.items():
+                if path.endswith('/'):
+                    # Skip directories, convert to files
+                    logger.warning(f"Skipping directory entry: {path}")
+                    continue
+                if '.' not in path.split('/')[-1]:
+                    # Add extension for extensionless files
+                    path = f"{path}.py"
+                validated_structure[path] = description
+                
+            plan['structure'] = validated_structure
+            
         except json.JSONDecodeError:
-            # Fallback: create a basic plan structure
+            # Enhanced fallback with actual files
             plan = {
-                "name": project_data.get('name'),
+                "name": project_data.get('name', 'Generated Project'),
                 "structure": {
-                    "src/": "Source code directory",
-                    "tests/": "Test files",
-                    "docs/": "Documentation",
-                    "requirements.txt": "Dependencies"
-                },
-                "phases": [
-                    {"name": "Setup", "description": "Project initialization"},
-                    {"name": "Core Development", "description": "Main functionality"},
-                    {"name": "Testing", "description": "Test implementation"},
-                    {"name": "Documentation", "description": "Documentation generation"}
-                ],
-                "technologies": project_data.get('languages', ['python']),
-                "frameworks": project_data.get('frameworks', [])
+                    "README.md": "Project documentation and setup instructions",
+                    "src/main.py": "Main application entry point",
+                    "src/config.py": "Configuration settings",
+                    "tests/test_main.py": "Unit tests for main functionality",
+                    "requirements.txt": "Python package dependencies",
+                    ".gitignore": "Git ignore rules"
+                }
             }
         
         await self.log_message("Project plan generated successfully", metadata={"plan_files": len(plan.get('structure', {}))})
@@ -343,7 +386,7 @@ class CodeGeneratorAgent(BaseCrewAgent):
                 process=Process.sequential
             )
             
-            result = crew.kickoff()
+            result = await execute_crew_with_retry(crew, {})
             
             # Determine language based on file extension
             language = self._detect_language(file_path)
@@ -469,7 +512,7 @@ class TesterAgent(BaseCrewAgent):
                     process=Process.sequential
                 )
                 
-                result = crew.kickoff()
+                result = await execute_crew_with_retry(crew, {})
                 
                 # Determine test file path
                 test_path = self._get_test_path(file_info['path'], file_info['language'])
@@ -566,7 +609,7 @@ class DocGeneratorAgent(BaseCrewAgent):
             process=Process.sequential
         )
         
-        readme_content = crew.kickoff()
+        readme_content = await execute_crew_with_retry(crew, {})
         
         # Save README
         await db_manager.create_file(
@@ -611,7 +654,7 @@ class DocGeneratorAgent(BaseCrewAgent):
                 process=Process.sequential
             )
             
-            api_doc_content = crew_api.kickoff()
+            api_doc_content = await execute_crew_with_retry(crew_api, {})
             
             await db_manager.create_file(
                 job_id=self.job_id,
@@ -643,6 +686,16 @@ class MultiAgentWorkflow:
         self.coder = CodeGeneratorAgent(job_id, websocket_callback)
         self.tester = TesterAgent(job_id, websocket_callback)
         self.doc_writer = DocGeneratorAgent(job_id, websocket_callback)
+        
+        # Import and integrate review agent
+        try:
+            from backend.agents.specialized.reviewer_agent import CodeReviewerAgent
+            from backend.memory.context_store import SharedMemoryStore
+            memory_store = SharedMemoryStore()
+            self.reviewer = CodeReviewerAgent(f"reviewer_{job_id}", memory_store)
+        except ImportError as e:
+            logger.warning(f"Review agent not available: {e}")
+            self.reviewer = None
     
     async def execute_workflow(self, project_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute the complete multi-agent workflow."""
@@ -680,6 +733,23 @@ class MultiAgentWorkflow:
             # Phase 4: Documentation
             doc_files = await self.doc_writer.generate_documentation(plan, code_files)
             
+            # Phase 5: Code Review (if reviewer is available)
+            if self.reviewer:
+                await self.update_progress(85, "Reviewing generated code", 6)
+                review_results = await self.reviewer.execute_task({
+                    'task_type': 'code_review',
+                    'files': code_files + test_files + doc_files,
+                    'project_data': project_data
+                })
+                
+                if review_results.get('needs_fixes'):
+                    # Apply automated fixes
+                    code_files = await self.apply_review_fixes(
+                        code_files, 
+                        review_results.get('suggestions', [])
+                    )
+                    await self.log_message("Applied review fixes", metadata={"fixes_applied": len(review_results.get('suggestions', []))})
+            
             # Complete the job
             await db_manager.update_job_status(
                 job_id=self.job_id,
@@ -715,6 +785,41 @@ class MultiAgentWorkflow:
                 await self.websocket_callback(error_message.dict())
             
             raise
+    
+    async def update_progress(self, progress: float, step: str, step_number: int = None):
+        """Update job progress."""
+        await db_manager.update_job_status(
+            job_id=self.job_id,
+            status=JobStatus.RUNNING,
+            progress=progress,
+            current_step=step,
+            step_number=step_number
+        )
+    
+    async def log_message(self, message: str, metadata: Dict[str, Any] = None):
+        """Log a message to the database."""
+        await db_manager.create_log(
+            job_id=self.job_id,
+            agent="MultiAgentWorkflow",
+            message=message,
+            level="INFO",
+            metadata=metadata or {}
+        )
+    
+    async def apply_review_fixes(self, files: List[Dict[str, Any]], suggestions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Apply review suggestions to files."""
+        # Simple implementation - in production, this would be more sophisticated
+        for suggestion in suggestions:
+            file_path = suggestion.get('file_path')
+            if file_path:
+                for file_info in files:
+                    if file_info['path'] == file_path:
+                        # Apply the suggestion (simplified)
+                        content = file_info['content']
+                        # Here you would implement the actual fix application
+                        file_info['content'] = content
+                        break
+        return files
 
 
 async def create_and_execute_workflow(

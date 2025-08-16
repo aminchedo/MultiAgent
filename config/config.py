@@ -6,7 +6,7 @@ Handles environment variables and application settings.
 import os
 from typing import Optional, List
 from pydantic_settings import BaseSettings
-from pydantic import validator
+from pydantic import validator, Field
 from pathlib import Path
 
 
@@ -29,8 +29,15 @@ class Settings(BaseSettings):
     server_log_level: str = "info"
     
     # Database settings
-    database_url: str = "postgresql+asyncpg://user:password@localhost:5432/multiagent"
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///./dev.db",  # SQLite for dev
+        description="Database connection URL"
+    )
     database_echo: bool = False
+    
+    @property
+    def is_development(self) -> bool:
+        return "sqlite" in self.database_url.lower()
     
     # Redis settings
     redis_url: str = "redis://localhost:6379/0"
