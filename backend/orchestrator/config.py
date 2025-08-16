@@ -102,11 +102,13 @@ class OrchestratorConfig:
         "cost_based_scheduling": False,  # Phase 2
         "critical_path_analysis": True,   # Phase 1
         "dag_optimization": True,         # Phase 1
-        "predictive_scaling": False,      # Phase 3
+        "predictive_scaling": True,       # Phase 3 - NOW ACTIVE
         "multi_region_support": False,    # Phase 3
         "task_preemption": False,         # Phase 2
         "adaptive_timeout": True,         # Phase 1
         "smart_retries": True,            # Phase 1
+        "ml_based_routing": False,        # Phase 4
+        "autonomous_healing": False,      # Phase 4
     })
     
     # Scheduling
