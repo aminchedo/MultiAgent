@@ -152,6 +152,28 @@ class IntentProcessor:
         """Identify the type of project from the description"""
         text_lower = text.lower()
         
+        # First, detect programming language requirements
+        language_indicators = {
+            'python': ['python', 'py', 'pip', 'pypi', 'django', 'flask', 'fastapi', 'pandas', 'numpy', 'matplotlib', 'scikit-learn', 'tensorflow', 'pytorch', 'speech', 'audio', 'microphone', 'recognition', 'translation', 'persian', 'farsi'],
+            'javascript': ['javascript', 'js', 'node', 'nodejs', 'npm', 'yarn', 'react', 'vue', 'angular', 'express', 'nextjs'],
+            'java': ['java', 'spring', 'springboot', 'maven', 'gradle'],
+            'go': ['go', 'golang', 'gin', 'echo'],
+            'rust': ['rust', 'cargo', 'actix', 'rocket'],
+            'csharp': ['c#', 'csharp', '.net', 'dotnet', 'asp.net'],
+            'php': ['php', 'laravel', 'symfony', 'composer'],
+            'ruby': ['ruby', 'rails', 'gem', 'bundler']
+        }
+        
+        # Detect primary language
+        detected_language = None
+        max_matches = 0
+        
+        for language, indicators in language_indicators.items():
+            matches = sum(1 for ind in indicators if ind in text_lower)
+            if matches > max_matches:
+                max_matches = matches
+                detected_language = language
+        
         # Use zero-shot classification
         candidate_labels = [pt.value for pt in ProjectType]
         result = self.classifier(text, candidate_labels)
@@ -160,7 +182,34 @@ class IntentProcessor:
         top_label = result['labels'][0]
         confidence = result['scores'][0]
         
-        # Verify with keyword matching
+        # Enhanced project type detection with language awareness
+        if detected_language == 'python':
+            # Python-specific project type detection
+            if any(word in text_lower for word in ['speech', 'audio', 'microphone', 'recognition', 'translation']):
+                return ProjectType.CLI_TOOL  # Python script for audio processing
+            elif any(word in text_lower for word in ['cli', 'command line', 'terminal', 'script', 'tool']):
+                return ProjectType.CLI_TOOL
+            elif any(word in text_lower for word in ['web', 'flask', 'django', 'fastapi', 'website']):
+                return ProjectType.WEB_APP
+            elif any(word in text_lower for word in ['api', 'rest', 'graphql', 'service']):
+                return ProjectType.API
+            elif any(word in text_lower for word in ['library', 'package', 'module', 'sdk']):
+                return ProjectType.LIBRARY
+            else:
+                # Default for Python projects is CLI tool, not web app
+                return ProjectType.CLI_TOOL
+        
+        elif detected_language == 'javascript':
+            if any(word in text_lower for word in ['react', 'vue', 'angular', 'frontend', 'ui', 'interface']):
+                return ProjectType.WEB_APP
+            elif any(word in text_lower for word in ['node', 'express', 'api', 'backend']):
+                return ProjectType.API
+            elif any(word in text_lower for word in ['mobile', 'react native', 'flutter']):
+                return ProjectType.MOBILE_APP
+            else:
+                return ProjectType.WEB_APP
+        
+        # Verify with keyword matching for other languages
         for project_type, indicators in self.project_type_indicators.items():
             indicator_count = sum(1 for ind in indicators if ind in text_lower)
             if indicator_count >= 2:
@@ -170,8 +219,24 @@ class IntentProcessor:
         if confidence > 0.7:
             return ProjectType(top_label)
         
-        # Default fallback
-        return ProjectType.WEB_APP
+        # Smart default based on content analysis
+        if any(word in text_lower for word in ['script', 'tool', 'utility', 'automation', 'cli', 'command']):
+            return ProjectType.CLI_TOOL
+        elif any(word in text_lower for word in ['api', 'service', 'backend', 'server']):
+            return ProjectType.API
+        elif any(word in text_lower for word in ['library', 'package', 'module', 'sdk']):
+            return ProjectType.LIBRARY
+        elif any(word in text_lower for word in ['mobile', 'app', 'ios', 'android']):
+            return ProjectType.MOBILE_APP
+        elif any(word in text_lower for word in ['desktop', 'windows', 'mac', 'electron']):
+            return ProjectType.DESKTOP_APP
+        else:
+            # Only default to web app if there are web-related keywords
+            if any(word in text_lower for word in ['web', 'website', 'frontend', 'ui', 'interface', 'dashboard']):
+                return ProjectType.WEB_APP
+            else:
+                # Default to CLI tool for general scripts/tools
+                return ProjectType.CLI_TOOL
     
     def _extract_features(self, text: str, doc: spacy.tokens.Doc) -> List[ExtractedFeature]:
         """Extract features from the requirements"""
@@ -612,14 +677,14 @@ class IntentProcessor:
     def _load_project_type_indicators(self) -> Dict[str, List[str]]:
         """Load indicators for project type detection"""
         return {
-            'web_app': ['website', 'web application', 'web app', 'portal', 'dashboard'],
-            'api': ['api', 'rest api', 'graphql', 'backend service', 'microservice'],
-            'mobile_app': ['mobile', 'ios', 'android', 'react native', 'flutter'],
-            'desktop_app': ['desktop', 'windows app', 'mac app', 'electron'],
-            'cli_tool': ['cli', 'command line', 'terminal', 'console app'],
-            'library': ['library', 'package', 'sdk', 'framework', 'module'],
-            'microservice': ['microservice', 'service mesh', 'distributed'],
-            'fullstack': ['full stack', 'fullstack', 'frontend and backend']
+            'web_app': ['website', 'web application', 'web app', 'portal', 'dashboard', 'frontend', 'ui', 'interface', 'react', 'vue', 'angular'],
+            'api': ['api', 'rest api', 'graphql', 'backend service', 'microservice', 'endpoint', 'server'],
+            'mobile_app': ['mobile', 'ios', 'android', 'react native', 'flutter', 'app store', 'play store'],
+            'desktop_app': ['desktop', 'windows app', 'mac app', 'electron', 'native app'],
+            'cli_tool': ['cli', 'command line', 'terminal', 'console app', 'script', 'tool', 'utility', 'automation', 'python script', 'bash script'],
+            'library': ['library', 'package', 'sdk', 'framework', 'module', 'pip package', 'npm package'],
+            'microservice': ['microservice', 'service mesh', 'distributed', 'containerized'],
+            'fullstack': ['full stack', 'fullstack', 'frontend and backend', 'complete application']
         }
     
     def to_dict(self, intent: ProjectIntent) -> Dict[str, Any]:

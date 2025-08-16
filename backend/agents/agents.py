@@ -217,13 +217,18 @@ class PlannerAgent(BaseCrewAgent):
         await self.log_message("Starting project analysis and planning...")
         await self.update_progress(10, "Analyzing project requirements", 1)
         
-        # Create the planner agent
+        # Create the planner agent with language-specific prompts
+        project_type = project_data.get('project_type', ProjectType.WEB_APP)
+        detected_language = self._detect_primary_language(project_data.get('description', ''))
+        
+        planner_role, planner_goal, planner_backstory = self._get_language_specific_prompt(
+            project_type, detected_language
+        )
+        
         planner = self.create_agent(
-            role="Senior Project Architect",
-            goal="Analyze project requirements and create a comprehensive development plan",
-            backstory="""You are an experienced software architect with expertise in multiple 
-            programming languages and frameworks. You excel at breaking down complex projects 
-            into manageable tasks and creating detailed technical specifications."""
+            role=planner_role,
+            goal=planner_goal,
+            backstory=planner_backstory
         )
         
         # Create planning task with strict JSON schema enforcement
@@ -254,16 +259,25 @@ class PlannerAgent(BaseCrewAgent):
             Frameworks: {', '.join(project_data.get('frameworks', []))}
             Complexity: {project_data.get('complexity')}
             Features: {', '.join(project_data.get('features', []))}
+            Detected Language: {detected_language}
             
             {schema_prompt}
             
+            IMPORTANT: This is a {detected_language.upper()} project of type {project_type.value.upper()}.
+            
             Create a plan that includes:
-            1. Project structure and file organization (ONLY files with extensions)
-            2. Technology stack recommendations
+            1. Project structure and file organization appropriate for {detected_language} (ONLY files with extensions)
+            2. Technology stack recommendations for {detected_language}
             3. Development phases and milestones
-            4. Required dependencies and libraries
-            5. Testing strategy
-            6. Deployment considerations
+            4. Required dependencies and libraries for {detected_language}
+            5. Testing strategy using {detected_language} testing frameworks
+            6. Deployment considerations for {detected_language} applications
+            
+            For {detected_language} projects, ensure:
+            - Use appropriate file extensions (.py for Python, .js/.ts for JavaScript, etc.)
+            - Include language-specific configuration files
+            - Consider language-specific best practices and conventions
+            - Include proper dependency management files
             
             Output the plan as a detailed JSON structure following the exact schema above.
             """,
@@ -320,6 +334,95 @@ class PlannerAgent(BaseCrewAgent):
         await self.update_progress(50, "Plan generation completed", 3)
         
         return plan
+    
+    def _detect_primary_language(self, description: str) -> str:
+        """Detect the primary programming language from the description."""
+        description_lower = description.lower()
+        
+        language_indicators = {
+            'python': ['python', 'py', 'pip', 'django', 'flask', 'fastapi', 'pandas', 'numpy', 'speech', 'audio', 'microphone', 'recognition', 'translation', 'persian', 'farsi'],
+            'javascript': ['javascript', 'js', 'node', 'nodejs', 'npm', 'react', 'vue', 'angular', 'express'],
+            'java': ['java', 'spring', 'springboot', 'maven'],
+            'go': ['go', 'golang', 'gin'],
+            'rust': ['rust', 'cargo', 'actix'],
+            'csharp': ['c#', 'csharp', '.net', 'dotnet'],
+            'php': ['php', 'laravel', 'symfony'],
+            'ruby': ['ruby', 'rails', 'gem']
+        }
+        
+        max_matches = 0
+        detected_language = 'python'  # Default
+        
+        for language, indicators in language_indicators.items():
+            matches = sum(1 for ind in indicators if ind in description_lower)
+            if matches > max_matches:
+                max_matches = matches
+                detected_language = language
+        
+        return detected_language
+    
+    def _get_language_specific_prompt(self, project_type: ProjectType, language: str) -> tuple:
+        """Get language-specific prompts for the planner agent."""
+        
+        if language == 'python':
+            if project_type == ProjectType.CLI_TOOL:
+                return (
+                    "Senior Python CLI Developer",
+                    "Create comprehensive Python command-line tools and scripts with proper error handling and user experience",
+                    """You are an expert Python developer specializing in command-line tools, scripts, and automation. 
+                    You excel at creating robust Python applications that handle audio processing, data analysis, 
+                    system utilities, and automation tasks. You understand Python best practices, proper error handling, 
+                    and creating user-friendly CLI interfaces."""
+                )
+            elif project_type == ProjectType.API:
+                return (
+                    "Senior Python Backend Architect",
+                    "Design and plan Python-based APIs and backend services using modern frameworks",
+                    """You are an expert Python backend developer with deep knowledge of FastAPI, Django, Flask, 
+                    and modern Python web development. You excel at designing scalable APIs, database schemas, 
+                    and backend architectures."""
+                )
+            else:
+                return (
+                    "Senior Python Developer",
+                    "Create comprehensive Python applications and tools following best practices",
+                    """You are an expert Python developer with extensive experience in creating Python applications, 
+                    scripts, and tools. You understand Python ecosystem, package management, testing frameworks, 
+                    and deployment strategies."""
+                )
+        
+        elif language == 'javascript':
+            if project_type == ProjectType.WEB_APP:
+                return (
+                    "Senior Frontend Developer",
+                    "Design modern web applications using React, Vue, or Angular with best practices",
+                    """You are an expert frontend developer specializing in modern JavaScript frameworks. 
+                    You excel at creating responsive, accessible, and performant web applications."""
+                )
+            elif project_type == ProjectType.API:
+                return (
+                    "Senior Node.js Backend Developer",
+                    "Design Node.js APIs and backend services using Express or modern frameworks",
+                    """You are an expert Node.js developer with deep knowledge of Express, Fastify, and modern 
+                    JavaScript backend development. You excel at designing scalable APIs and backend architectures."""
+                )
+            else:
+                return (
+                    "Senior JavaScript Developer",
+                    "Create comprehensive JavaScript applications and tools",
+                    """You are an expert JavaScript developer with extensive experience in both frontend and backend 
+                    development. You understand modern JavaScript ecosystem, package management, and deployment."""
+                )
+        
+        else:
+            # Generic prompt for other languages
+            return (
+                "Senior Software Architect",
+                "Analyze project requirements and create a comprehensive development plan",
+                f"""You are an experienced software architect with expertise in {language} and multiple 
+                programming languages and frameworks. You excel at breaking down complex projects 
+                into manageable tasks and creating detailed technical specifications."""
+            )
 
 
 class CodeGeneratorAgent(BaseCrewAgent):
@@ -336,13 +439,18 @@ class CodeGeneratorAgent(BaseCrewAgent):
             AgentTools.execute_code
         ]
         
-        # Create the code generator agent
+        # Create the code generator agent with language-specific prompts
+        project_type = plan.get('project_type', ProjectType.WEB_APP)
+        detected_language = self._detect_primary_language(plan.get('description', ''))
+        
+        coder_role, coder_goal, coder_backstory = self._get_coder_language_specific_prompt(
+            project_type, detected_language
+        )
+        
         coder = self.create_agent(
-            role="Senior Full-Stack Developer",
-            goal="Generate high-quality, production-ready code based on the project plan",
-            backstory="""You are an expert full-stack developer with extensive experience 
-            in multiple programming languages and frameworks. You write clean, efficient, 
-            and well-documented code following best practices and industry standards.""",
+            role=coder_role,
+            goal=coder_goal,
+            backstory=coder_backstory,
             tools=tools
         )
         
@@ -357,20 +465,34 @@ class CodeGeneratorAgent(BaseCrewAgent):
                 4 + i
             )
             
-            # Create code generation task
+            # Create code generation task with language-specific instructions
+            language = self._detect_language(file_path)
             code_task = Task(
                 description=f"""
                 Generate the code for: {file_path}
                 Description: {description}
                 Project: {project_name}
+                Language: {language}
+                Project Type: {project_type.value}
                 Plan context: {json.dumps(plan, indent=2)}
                 
+                IMPORTANT: This is a {language.upper()} file for a {project_type.value.upper()} project.
+                
                 Requirements:
-                1. Follow best practices for the target language
-                2. Include proper error handling
-                3. Add comprehensive comments and docstrings
-                4. Ensure code is production-ready
-                5. Include necessary imports and dependencies
+                1. Follow {language} best practices and conventions
+                2. Include proper error handling appropriate for {language}
+                3. Add comprehensive comments and docstrings in {language} style
+                4. Ensure code is production-ready for {language}
+                5. Include necessary imports and dependencies for {language}
+                6. Use appropriate {language} libraries and frameworks
+                7. Follow {language} coding standards and PEP guidelines (if Python)
+                
+                For {language} files, ensure:
+                - Use proper {language} syntax and idioms
+                - Include appropriate error handling patterns for {language}
+                - Use {language}-specific libraries when needed
+                - Follow {language} naming conventions
+                - Include proper documentation for {language} developers
                 
                 Generate complete, functional code for this file.
                 """,
@@ -443,6 +565,73 @@ class CodeGeneratorAgent(BaseCrewAgent):
             '.bat': 'batch'
         }
         return language_map.get(ext, 'text')
+    
+    def _get_coder_language_specific_prompt(self, project_type: ProjectType, language: str) -> tuple:
+        """Get language-specific prompts for the code generator agent."""
+        
+        if language == 'python':
+            if project_type == ProjectType.CLI_TOOL:
+                return (
+                    "Senior Python CLI Developer",
+                    "Generate high-quality Python command-line tools and scripts with proper error handling",
+                    """You are an expert Python developer specializing in command-line tools and scripts. 
+                    You excel at creating robust Python applications that handle audio processing, data analysis, 
+                    system utilities, and automation tasks. You write clean, well-documented Python code with proper 
+                    error handling, logging, and user-friendly interfaces. You understand Python best practices, 
+                    virtual environments, and package management."""
+                )
+            elif project_type == ProjectType.API:
+                return (
+                    "Senior Python Backend Developer",
+                    "Generate high-quality Python APIs and backend services using modern frameworks",
+                    """You are an expert Python backend developer with deep knowledge of FastAPI, Django, Flask, 
+                    and modern Python web development. You write clean, efficient, and well-documented code 
+                    following REST API best practices, proper error handling, and security standards."""
+                )
+            else:
+                return (
+                    "Senior Python Developer",
+                    "Generate high-quality Python applications and tools following best practices",
+                    """You are an expert Python developer with extensive experience in creating Python applications, 
+                    scripts, and tools. You write clean, efficient, and well-documented code following Python 
+                    best practices, PEP standards, and industry standards."""
+                )
+        
+        elif language == 'javascript':
+            if project_type == ProjectType.WEB_APP:
+                return (
+                    "Senior Frontend Developer",
+                    "Generate high-quality React/Vue/Angular applications with modern best practices",
+                    """You are an expert frontend developer specializing in modern JavaScript frameworks. 
+                    You write clean, efficient, and well-documented code following modern JavaScript best practices, 
+                    component architecture, and responsive design principles."""
+                )
+            elif project_type == ProjectType.API:
+                return (
+                    "Senior Node.js Backend Developer",
+                    "Generate high-quality Node.js APIs and backend services using Express or modern frameworks",
+                    """You are an expert Node.js developer with deep knowledge of Express, Fastify, and modern 
+                    JavaScript backend development. You write clean, efficient, and well-documented code 
+                    following REST API best practices and Node.js conventions."""
+                )
+            else:
+                return (
+                    "Senior JavaScript Developer",
+                    "Generate high-quality JavaScript applications and tools",
+                    """You are an expert JavaScript developer with extensive experience in both frontend and backend 
+                    development. You write clean, efficient, and well-documented code following modern JavaScript 
+                    best practices and industry standards."""
+                )
+        
+        else:
+            # Generic prompt for other languages
+            return (
+                "Senior Full-Stack Developer",
+                "Generate high-quality, production-ready code based on the project plan",
+                f"""You are an expert full-stack developer with extensive experience in {language} and multiple 
+                programming languages and frameworks. You write clean, efficient, and well-documented code 
+                following best practices and industry standards."""
+            )
 
 
 class TesterAgent(BaseCrewAgent):
