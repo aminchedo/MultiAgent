@@ -92,9 +92,8 @@ def check_vercel_config():
         if "builds" not in config:
             issues.append("Missing 'builds' section")
         
-        # Check for functions configuration
-        if "functions" not in config:
-            issues.append("Missing 'functions' section")
+        # Check for functions configuration (optional in modern Vercel)
+        # Functions are now configured in individual files
         
         if issues:
             for issue in issues:

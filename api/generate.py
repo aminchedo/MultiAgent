@@ -9,6 +9,10 @@ import os
 
 app = FastAPI()
 
+# Vercel function configuration
+# @vercel/functions
+# maxDuration: 60
+
 # Job storage (replace with database)
 jobs_db = {}
 

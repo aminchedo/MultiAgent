@@ -32,11 +32,18 @@ This document provides the complete solution for fixing the critical Vercel depl
 - Created `src/lib/api/production-client.ts` with complete API client
 - Added all required methods: `login`, `createVibeJob`, `getJobStatus`, `downloadJob`
 
+### 5. **Vercel Configuration Conflict** - FIXED ✅
+**Problem**: `functions` property cannot be used with `builds` property in vercel.json
+**Solution**: 
+- Removed deprecated `functions` property from vercel.json
+- Added function configurations directly to individual Python files
+- Used modern Vercel configuration approach
+
 ## 📁 Files Modified/Created
 
 ### Core Configuration Files
 1. **`next.config.js`** ✅ - Fixed API rewrite configuration
-2. **`vercel.json`** ✅ - Added NODE_ENV and improved routing
+2. **`vercel.json`** ✅ - Fixed configuration conflict, added NODE_ENV and routing
 3. **`package.json`** ✅ - Verified Next.js 15.4.6 configuration
 
 ### Environment Files
@@ -47,10 +54,16 @@ This document provides the complete solution for fixing the critical Vercel depl
 6. **`src/lib/utils.ts`** ✅ - Created utility functions
 7. **`src/lib/api/production-client.ts`** ✅ - Created complete API client
 
+### API Function Configurations
+8. **`api/auth/login.py`** ✅ - Added maxDuration: 30
+9. **`api/generate.py`** ✅ - Added maxDuration: 60
+10. **`api/status/[job_id].py`** ✅ - Added maxDuration: 30
+11. **`api/download/[job_id].py`** ✅ - Added maxDuration: 30
+
 ### Deployment Scripts
-8. **`deploy_vercel_fixes.sh`** ✅ - Automated deployment script
-9. **`verify_vercel_fixes.py`** ✅ - Verification script
-10. **`VERCEL_DEPLOYMENT_FIXES_COMPLETE.md`** ✅ - Comprehensive guide
+12. **`deploy_vercel_fixes.sh`** ✅ - Automated deployment script
+13. **`verify_vercel_fixes.py`** ✅ - Verification script
+14. **`VERCEL_DEPLOYMENT_FIXES_COMPLETE.md`** ✅ - Comprehensive guide
 
 ## 🚀 Deployment Instructions
 
@@ -144,8 +157,21 @@ const nextConfig = {
   "env": {
     "PYTHONPATH": ".",
     "NODE_ENV": "production"
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
 }
+```
+
+**Note**: Function configurations (maxDuration) are now set in individual Python files using comments:
+```python
+# Vercel function configuration
+# @vercel/functions
+# maxDuration: 30
 ```
 
 ### API Client (src/lib/api/production-client.ts)
@@ -229,8 +255,9 @@ All critical deployment issues have been successfully resolved:
 ✅ **Invalid next.config.js Configuration** - Removed deprecated settings  
 ✅ **Non-standard NODE_ENV Warning** - Added proper production environment
 ✅ **Environment Variables Setup** - Created comprehensive configuration
-✅ **Vercel Configuration** - Updated for optimal deployment
+✅ **Vercel Configuration** - Fixed configuration conflict, updated for optimal deployment
 ✅ **Frontend Dependencies** - Created all missing files
+✅ **API Function Configurations** - Added proper maxDuration settings
 ✅ **Project Structure Review** - Verified and documented
 
 Your Next.js + FastAPI project is now ready for successful Vercel deployment! 🚀

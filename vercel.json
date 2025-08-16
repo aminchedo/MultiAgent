@@ -10,20 +10,6 @@
       "use": "@vercel/python"
     }
   ],
-  "functions": {
-    "api/auth/login.py": {
-      "maxDuration": 30
-    },
-    "api/generate.py": {
-      "maxDuration": 60
-    },
-    "api/status/[job_id].py": {
-      "maxDuration": 30
-    },
-    "api/download/[job_id].py": {
-      "maxDuration": 30
-    }
-  },
   "env": {
     "PYTHONPATH": ".",
     "NODE_ENV": "production"

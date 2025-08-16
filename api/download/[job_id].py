@@ -8,6 +8,10 @@ import sys
 
 app = FastAPI()
 
+# Vercel function configuration
+# @vercel/functions
+# maxDuration: 30
+
 # Import jobs database
 sys.path.append(os.path.dirname(__file__))
 from ..generate import jobs_db

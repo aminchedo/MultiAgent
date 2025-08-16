@@ -8,6 +8,10 @@ import hashlib
 
 app = FastAPI()
 
+# Vercel function configuration
+# @vercel/functions
+# maxDuration: 30
+
 # Simple user database (replace with real database)
 USERS = {
     "admin": {

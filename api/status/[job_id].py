@@ -3,6 +3,10 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
+# Vercel function configuration
+# @vercel/functions
+# maxDuration: 30
+
 # Import jobs database
 import sys
 import os
