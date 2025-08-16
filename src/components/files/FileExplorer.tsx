@@ -13,8 +13,6 @@ import {
   Image as ImageIcon,
   PlayCircle 
 } from 'lucide-react'
-import { BackendAPIClient } from '@/lib/api/client'
-
 interface FileItem {
   path: string
   content: string
@@ -34,7 +32,6 @@ interface FileExplorerProps {
 
 export function FileExplorer({ jobId, files, onFileSelect, selectedFile }: FileExplorerProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
-  const apiClient = new BackendAPIClient()
 
   const getFileIcon = (file: FileItem) => {
     if (file.type === 'folder') return <Folder className="w-4 h-4" />
