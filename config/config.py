@@ -83,6 +83,12 @@ class Settings(BaseSettings):
     # Backend URL (for frontend)
     backend_url: str = "http://localhost:8000"
     
+    # Feature flags for phased rollout
+    FEATURE_FLAGS = {
+        "cost_based_scheduling": False,  # Phase 2
+        "critical_path_analysis": True,  # Phase 1
+    }
+    
     @validator("upload_dir")
     def create_upload_dir(cls, v):
         """Ensure upload directory exists."""
