@@ -1,48 +1,182 @@
 'use client'
 import { useParams } from 'next/navigation'
-import { useWebSocket } from '@/hooks/use-websocket'
+import { useEffect, useState } from 'react'
+import { useEnhancedWebSocket } from '@/hooks/use-enhanced-websocket'
 import { useJobStore } from '@/stores/job-store'
-import { AgentCard } from '@/components/agents/AgentCard'
+import { AgentOrchestra } from '@/components/agents/agent-orchestra'
+import { FileExplorer } from '@/components/files/FileExplorer'
+import { CodePreview } from '@/components/files/CodePreview'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { 
+  Download, 
+  ExternalLink, 
+  RefreshCw, 
+  CheckCircle2, 
+  AlertCircle,
+  Clock
+} from 'lucide-react'
 
-export default function GeneratePage() {
-	const params = useParams()
-	const jobId = (params as any)?.jobId as string
-	const { isConnected } = useWebSocket(jobId)
-	const { agentProgress, files } = useJobStore()
+export default function EnhancedGeneratePage() {
+  const { jobId } = useParams<{ jobId: string }>()
+  const [selectedFile, setSelectedFile] = useState<any>(null)
+  
+  const { 
+    isConnected, 
+    lastMessage, 
+    connectionAttempts, 
+    reconnect 
+  } = useEnhancedWebSocket(jobId)
+  
+  const { 
+    currentJob, 
+    agentProgress, 
+    files, 
+    jobStatus 
+  } = useJobStore()
 
-	const agentKeys = ['planner', 'code_generator', 'tester', 'doc_generator', 'reviewer']
+  const getOverallProgress = () => {
+    const agents = ['planner', 'code_generator', 'tester', 'doc_generator', 'reviewer']
+    const totalProgress = agents.reduce((sum, agent) => {
+      return sum + (agentProgress[agent]?.progress || 0)
+    }, 0)
+    return Math.round(totalProgress / agents.length)
+  }
 
-	return (
-		<div className="container mx-auto py-8">
-			<h1 className="text-3xl font-bold mb-8">Generating Your Project</h1>
-			<div className="mb-6">
-				<span className={`inline-block px-3 py-1 rounded-full text-sm ${
-					isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-				}`}> {isConnected ? 'Connected' : 'Disconnected'} </span>
-			</div>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-				{agentKeys.map(agentType => (
-					<AgentCard
-						key={agentType}
-						agentType={agentType}
-						progress={agentProgress[agentType]?.progress || 0}
-						status={agentProgress[agentType]?.status || 'waiting'}
-						currentTask={agentProgress[agentType]?.current_task || agentProgress[agentType]?.message || 'Waiting to start...'}
-					/>
-				))}
-			</div>
-			{files.length > 0 && (
-				<div>
-					<h2 className="text-2xl font-bold mb-4">Generated Files</h2>
-					<div className="space-y-2">
-						{files.map((file, index) => (
-							<div key={index} className="p-3 border rounded">
-								<span className="font-mono">{file.path}</span>
-							</div>
-						))}
-					</div>
-				</div>
-			)}
-		</div>
-	)
+  const getStatusIcon = () => {
+    switch (jobStatus) {
+      case 'completed':
+        return <CheckCircle2 className="w-5 h-5 text-green-400" />
+      case 'failed':
+        return <AlertCircle className="w-5 h-5 text-red-400" />
+      case 'running':
+        return <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />
+      default:
+        return <Clock className="w-5 h-5 text-yellow-400" />
+    }
+  }
+
+  const deployToVercel = async () => {
+    try {
+      // Implementation for Vercel deployment
+      console.log('Deploying to Vercel...')
+      alert('Deployment feature coming soon!')
+    } catch (error) {
+      console.error('Deployment failed:', error)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-black">
+      <div className="container mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                🎨 Vibe Coding in Progress
+              </h1>
+              <p className="text-gray-400">
+                Job ID: {jobId}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <Badge variant={isConnected ? 'default' : 'destructive'}>
+                {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+              </Badge>
+              
+              <div className="flex items-center gap-2">
+                {getStatusIcon()}
+                <Badge variant="outline">
+                  {jobStatus || 'pending'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+          
+          {/* Overall Progress */}
+          <Card className="p-4 bg-gray-900/50 border-gray-700">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-white">Overall Progress</span>
+              <span className="text-sm text-gray-400">{getOverallProgress()}%</span>
+            </div>
+            <Progress value={getOverallProgress()} className="h-2" />
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Agent Orchestra */}
+          <div className="lg:col-span-3">
+            <AgentOrchestra />
+          </div>
+          
+          {/* File Explorer */}
+          <div className="lg:col-span-1">
+            <FileExplorer
+              jobId={jobId}
+              files={files}
+              onFileSelect={setSelectedFile}
+              selectedFile={selectedFile}
+            />
+          </div>
+          
+          {/* Code Preview */}
+          <div className="lg:col-span-2">
+            <CodePreview file={selectedFile} jobId={jobId} />
+          </div>
+        </div>
+
+        {/* Actions */}
+        {jobStatus === 'completed' && files.length > 0 && (
+          <Card className="p-6 bg-gradient-to-r from-green-900/20 to-blue-900/20 border-green-500/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  🎉 Project Generated Successfully!
+                </h3>
+                <p className="text-gray-400">
+                  Your project is ready with {files.length} files
+                </p>
+              </div>
+              
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={deployToVercel}>
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Deploy to Vercel
+                </Button>
+                
+                <Button>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Project
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Connection Issues */}
+        {!isConnected && connectionAttempts > 0 && (
+          <Card className="p-4 bg-red-900/20 border-red-500/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-400" />
+                <span className="text-red-300">
+                  Connection lost. Attempting to reconnect... ({connectionAttempts}/5)
+                </span>
+              </div>
+              
+              <Button size="sm" variant="outline" onClick={reconnect}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </div>
+          </Card>
+        )}
+      </div>
+    </div>
+  )
 }
