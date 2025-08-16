@@ -1,0 +1,173 @@
+syntax = "proto3";
+
+package agent;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
+
+// Agent service definition for inter-agent communication
+service AgentService {
+    // Execute a task assigned by the orchestrator
+    rpc ExecuteTask(TaskRequest) returns (TaskResponse);
+    
+    // Stream task progress updates
+    rpc StreamTaskProgress(TaskProgressRequest) returns (stream TaskProgressUpdate);
+    
+    // Health check and heartbeat
+    rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+    
+    // Get agent capabilities
+    rpc GetCapabilities(CapabilitiesRequest) returns (CapabilitiesResponse);
+    
+    // Collaborate with other agents
+    rpc CollaborateRequest(CollaborationRequest) returns (CollaborationResponse);
+    
+    // Share context between agents
+    rpc ShareContext(ContextShareRequest) returns (ContextShareResponse);
+    
+    // Cancel a running task
+    rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse);
+}
+
+// Common message types
+message TaskRequest {
+    string task_id = 1;
+    string task_type = 2;
+    google.protobuf.Struct payload = 3;
+    map<string, string> context = 4;
+    repeated string dependencies = 5;
+    int32 priority = 6;
+    google.protobuf.Timestamp deadline = 7;
+}
+
+message TaskResponse {
+    string task_id = 1;
+    bool success = 2;
+    google.protobuf.Struct result = 3;
+    string error_message = 4;
+    repeated Artifact artifacts = 5;
+    map<string, string> output_context = 6;
+    TaskMetrics metrics = 7;
+}
+
+message TaskProgressRequest {
+    string task_id = 1;
+}
+
+message TaskProgressUpdate {
+    string task_id = 1;
+    float progress = 2;  // 0.0 to 1.0
+    string status = 3;
+    string message = 4;
+    google.protobuf.Timestamp timestamp = 5;
+    repeated string completed_steps = 6;
+    repeated string remaining_steps = 7;
+}
+
+message HeartbeatRequest {
+    string agent_id = 1;
+    AgentStatus status = 2;
+    map<string, float> resource_usage = 3;  // cpu, memory, etc.
+}
+
+message HeartbeatResponse {
+    bool acknowledged = 1;
+    google.protobuf.Timestamp server_time = 2;
+}
+
+message CapabilitiesRequest {
+    string agent_id = 1;
+}
+
+message CapabilitiesResponse {
+    string agent_id = 1;
+    string agent_type = 2;
+    repeated string supported_tasks = 3;
+    repeated string languages = 4;
+    repeated string frameworks = 5;
+    map<string, string> metadata = 6;
+    ResourceLimits limits = 7;
+}
+
+message CollaborationRequest {
+    string requesting_agent_id = 1;
+    string collaboration_type = 2;  // "review", "validate", "enhance", etc.
+    google.protobuf.Struct data = 3;
+    map<string, string> context = 4;
+    int32 timeout_seconds = 5;
+}
+
+message CollaborationResponse {
+    string responding_agent_id = 1;
+    bool accepted = 2;
+    google.protobuf.Struct response_data = 3;
+    repeated Suggestion suggestions = 4;
+    float confidence_score = 5;
+}
+
+message ContextShareRequest {
+    string sharing_agent_id = 1;
+    repeated string target_agent_ids = 2;
+    map<string, google.protobuf.Any> shared_data = 3;
+    int32 ttl_seconds = 4;
+    repeated string required_keys = 5;
+}
+
+message ContextShareResponse {
+    bool success = 1;
+    repeated string acknowledged_by = 2;
+    map<string, string> errors = 3;
+}
+
+message CancelTaskRequest {
+    string task_id = 1;
+    string reason = 2;
+    bool force = 3;
+}
+
+message CancelTaskResponse {
+    bool cancelled = 1;
+    string message = 2;
+}
+
+// Supporting data structures
+message Artifact {
+    string name = 1;
+    string type = 2;  // "code", "documentation", "test", "config", etc.
+    bytes content = 3;
+    string path = 4;
+    map<string, string> metadata = 5;
+}
+
+message Suggestion {
+    string type = 1;  // "improvement", "fix", "optimization", etc.
+    string description = 2;
+    string code_snippet = 3;
+    int32 line_number = 4;
+    float impact_score = 5;
+}
+
+message TaskMetrics {
+    int64 execution_time_ms = 1;
+    int64 tokens_used = 2;
+    float cpu_usage = 3;
+    int64 memory_usage_bytes = 4;
+    map<string, float> custom_metrics = 5;
+}
+
+message ResourceLimits {
+    int32 max_concurrent_tasks = 1;
+    int64 max_memory_bytes = 2;
+    int32 max_execution_time_seconds = 3;
+    int32 rate_limit_per_minute = 4;
+}
+
+enum AgentStatus {
+    UNKNOWN = 0;
+    AVAILABLE = 1;
+    BUSY = 2;
+    OFFLINE = 3;
+    ERROR = 4;
+    MAINTENANCE = 5;
+}
