@@ -1,253 +1,191 @@
 #!/usr/bin/env python3
 """
-Simple test script for optimized frontend - no external dependencies
-Verifies file structure and basic functionality
+Simple functionality test using subprocess and curl
 """
 
-import os
+import subprocess
+import json
+import time
 import sys
-from pathlib import Path
 
-def test_file_structure():
-    """Test if all optimized files are in place"""
-    print("🔍 Testing file structure...")
-    
-    required_files = [
-        "public/index.html",
-        "public/optimized-styles.css", 
-        "public/js/app.js",
-        "api/websocket_handler.py"
-    ]
-    
-    results = {}
-    for file_path in required_files:
-        exists = Path(file_path).exists()
-        results[file_path] = exists
-        status = "✅" if exists else "❌"
-        print(f"  {status} {file_path}")
-    
-    return results
-
-def test_html_optimizations():
-    """Test HTML optimizations"""
-    print("\n🌐 Testing HTML optimizations...")
-    
+def run_curl_command(command):
+    """Run a curl command and return the result."""
     try:
-        with open("public/index.html", "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        optimizations = {
-            "preload_links": "preload" in content,
-            "optimized_css": "optimized-styles.css" in content,
-            "modular_js": "js/app.js" in content,
-            "meta_description": 'meta name="description"' in content,
-            "theme_color": 'meta name="theme-color"' in content,
-            "skip_link": 'href="#main-content"' in content,
-            "aria_labels": 'role="tab"' in content,
-            "semantic_html": '<main' in content and '<nav' in content,
-            "lang_attribute": 'lang="fa"' in content,
-            "rtl_support": 'dir="rtl"' in content
-        }
-        
-        for opt, present in optimizations.items():
-            status = "✅" if present else "❌"
-            print(f"  {status} {opt.replace('_', ' ').title()}")
-        
-        return optimizations
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=10)
+        return result.returncode == 0, result.stdout, result.stderr
+    except subprocess.TimeoutExpired:
+        return False, "", "Timeout"
     except Exception as e:
-        print(f"  ❌ Error reading HTML: {e}")
-        return {}
+        return False, "", str(e)
 
-def test_css_structure():
-    """Test CSS structure and optimizations"""
-    print("\n🎨 Testing CSS structure...")
+def test_server_health():
+    """Test if server is running."""
+    print("🔍 STEP 1: Testing Server Health")
+    print("=" * 50)
     
-    try:
-        with open("public/optimized-styles.css", "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        css_features = {
-            "css_variables": ":root" in content and "--primary" in content,
-            "design_tokens": "--space-" in content and "--text-" in content,
-            "component_system": ".glass-card" in content,
-            "responsive_design": "@media" in content,
-            "performance_optimized": "will-change" in content,
-            "accessibility_support": "prefers-reduced-motion" in content,
-            "modern_css": "backdrop-filter" in content
-        }
-        
-        for feature, present in css_features.items():
-            status = "✅" if present else "❌"
-            print(f"  {status} {feature.replace('_', ' ').title()}")
-        
-        size_kb = len(content) / 1024
-        print(f"  📏 CSS Size: {size_kb:.1f}KB")
-        
-        return css_features
-    except Exception as e:
-        print(f"  ❌ Error reading CSS: {e}")
-        return {}
+    success, output, error = run_curl_command("curl -s http://localhost:8000/api/health")
+    
+    if success and output:
+        print("✅ Server is running and responding")
+        print(f"   Response: {output.strip()}")
+        return True
+    else:
+        print("❌ Server is not responding")
+        print(f"   Error: {error}")
+        return False
 
-def test_javascript_structure():
-    """Test JavaScript structure and features"""
-    print("\n⚙️ Testing JavaScript structure...")
+def test_python_generation():
+    """Test Python speech recognition generation."""
+    print("\n🎯 STEP 2: Testing Python Speech Recognition Generation")
+    print("=" * 50)
     
-    try:
-        with open("public/js/app.js", "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        js_features = {
-            "modular_architecture": "class AppState" in content,
-            "state_management": "setState" in content and "getState" in content,
-            "websocket_support": "WebSocket" in content,
-            "api_service": "class ApiService" in content,
-            "notification_system": "class NotificationManager" in content,
-            "performance_monitoring": "class PerformanceMonitor" in content,
-            "error_handling": "try" in content and "catch" in content,
-            "es6_features": "async" in content and "await" in content
-        }
-        
-        for feature, present in js_features.items():
-            status = "✅" if present else "❌"
-            print(f"  {status} {feature.replace('_', ' ').title()}")
-        
-        size_kb = len(content) / 1024
-        print(f"  📏 JS Size: {size_kb:.1f}KB")
-        
-        return js_features
-    except Exception as e:
-        print(f"  ❌ Error reading JavaScript: {e}")
-        return {}
+    # Test request
+    curl_command = '''curl -s -X POST http://localhost:8000/api/generate \\
+        -H "Content-Type: application/json" \\
+        -d '{"prompt": "Write a Python script that captures audio from the microphone, recognizes spoken Persian (Farsi), and translates it to English text. Include speech_recognition library and googletrans.", "projectType": "cli"}' '''
+    
+    print("📤 Sending Python speech recognition request...")
+    success, output, error = run_curl_command(curl_command)
+    
+    if success and output:
+        try:
+            data = json.loads(output)
+            job_id = data.get('job_id')
+            if job_id:
+                print(f"✅ Request successful! Job ID: {job_id}")
+                return wait_for_completion_and_analyze(job_id, "Python Speech Recognition")
+            else:
+                print("❌ No job ID returned")
+                print(f"   Response: {output}")
+                return False
+        except json.JSONDecodeError:
+            print("❌ Invalid JSON response")
+            print(f"   Response: {output}")
+            return False
+    else:
+        print("❌ Request failed")
+        print(f"   Error: {error}")
+        return False
 
-def test_websocket_handler():
-    """Test WebSocket handler implementation"""
-    print("\n🔌 Testing WebSocket handler...")
+def wait_for_completion_and_analyze(job_id, test_name):
+    """Wait for job completion and analyze results."""
+    print(f"⏳ Waiting for {test_name} job completion...")
     
-    try:
-        with open("api/websocket_handler.py", "r", encoding="utf-8") as f:
-            content = f.read()
+    max_wait = 30  # 30 seconds max wait
+    start_time = time.time()
+    
+    while time.time() - start_time < max_wait:
+        success, output, error = run_curl_command(f"curl -s http://localhost:8000/api/status/{job_id}")
         
-        ws_features = {
-            "connection_manager": "class ConnectionManager" in content,
-            "websocket_endpoint": "async def websocket_endpoint" in content,
-            "message_handling": "handleWebSocketMessage" in content or "handle_websocket_message" in content,
-            "real_time_updates": "send_generation_progress" in content,
-            "connection_cleanup": "disconnect" in content,
-            "error_handling": "except" in content,
-            "async_support": "async def" in content and "await" in content
-        }
-        
-        for feature, present in ws_features.items():
-            status = "✅" if present else "❌"
-            print(f"  {status} {feature.replace('_', ' ').title()}")
-        
-        return ws_features
-    except Exception as e:
-        print(f"  ❌ Error reading WebSocket handler: {e}")
-        return {}
+        if success and output:
+            try:
+                data = json.loads(output)
+                status = data.get('status', 'unknown')
+                progress = data.get('progress', 0)
+                
+                print(f"   Status: {status}, Progress: {progress}%")
+                
+                if status == 'completed':
+                    print(f"✅ {test_name} job completed!")
+                    return analyze_generated_files(job_id, test_name)
+                elif status == 'failed':
+                    print(f"❌ {test_name} job failed!")
+                    return False
+                    
+            except json.JSONDecodeError:
+                print("   Error parsing status response")
+                
+        time.sleep(2)
+    
+    print(f"⏰ Timeout waiting for {test_name} job completion")
+    return False
 
-def test_api_integration():
-    """Test API integration"""
-    print("\n🔗 Testing API integration...")
+def analyze_generated_files(job_id, test_name):
+    """Analyze the generated files."""
+    print(f"🔍 Analyzing generated files for {test_name}...")
     
-    try:
-        with open("api/vercel_app.py", "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        api_features = {
-            "websocket_import": "websocket_handler" in content,
-            "websocket_endpoint": "@app.websocket" in content,
-            "generate_endpoint": "/api/generate" in content,
-            "check_status_endpoint": "/api/check-status" in content,
-            "websocket_support": "WebSocket" in content,
-            "async_support": "async def" in content
-        }
-        
-        for feature, present in api_features.items():
-            status = "✅" if present else "❌"
-            print(f"  {status} {feature.replace('_', ' ').title()}")
-        
-        return api_features
-    except Exception as e:
-        print(f"  ❌ Error reading API file: {e}")
-        return {}
-
-def print_summary(results):
-    """Print comprehensive test summary"""
-    print("\n" + "="*60)
-    print("📊 COMPREHENSIVE TEST SUMMARY")
-    print("="*60)
+    success, output, error = run_curl_command(f"curl -s http://localhost:8000/api/download/{job_id}")
     
-    total_tests = 0
-    passed_tests = 0
-    
-    for category, category_results in results.items():
-        if isinstance(category_results, dict):
-            category_passed = sum(1 for passed in category_results.values() if passed)
-            category_total = len(category_results)
-            total_tests += category_total
-            passed_tests += category_passed
+    if success and output:
+        try:
+            data = json.loads(output)
+            files = data.get('files', [])
             
-            print(f"\n{category.replace('_', ' ').title()}: {category_passed}/{category_total}")
-            for test, passed in category_results.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {test.replace('_', ' ').title()}")
-    
-    # Calculate overall success rate
-    success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
-    
-    print(f"\n{'='*60}")
-    print(f"🎯 OVERALL SUCCESS RATE: {success_rate:.1f}% ({passed_tests}/{total_tests})")
-    print(f"{'='*60}")
-    
-    if success_rate >= 90:
-        print("🌟 EXCELLENT! Frontend optimization is working perfectly!")
-        print("   All major optimizations have been successfully implemented.")
-    elif success_rate >= 75:
-        print("✅ GOOD! Most optimizations are working correctly.")
-        print("   Minor issues may need attention, but core functionality is solid.")
-    elif success_rate >= 50:
-        print("⚠️  PARTIAL SUCCESS. Some important features are missing.")
-        print("   Please review the failed tests and address the issues.")
+            print(f"   Generated {len(files)} files")
+            
+            # Analyze file types
+            python_files = []
+            react_files = []
+            other_files = []
+            
+            for file_info in files:
+                file_path = file_info.get('path', '')
+                content = file_info.get('content', '')
+                
+                if file_path.endswith('.py') or 'python' in content.lower():
+                    python_files.append(file_info)
+                elif file_path.endswith(('.jsx', '.js')) or 'react' in content.lower():
+                    react_files.append(file_info)
+                else:
+                    other_files.append(file_info)
+            
+            print(f"   Python files: {len(python_files)}")
+            print(f"   React files: {len(react_files)}")
+            print(f"   Other files: {len(other_files)}")
+            
+            # Validate based on test type
+            if "Python" in test_name:
+                if python_files and not react_files:
+                    print("✅ SUCCESS: Python request generated Python code!")
+                    if python_files:
+                        sample_content = python_files[0].get('content', '')[:200]
+                        print(f"   Sample content: {sample_content}...")
+                    return True
+                else:
+                    print("❌ FAILED: Python request did not generate Python code!")
+                    if react_files:
+                        print("   ❌ Generated React code instead!")
+                    return False
+            else:
+                print("⚠️  Unknown test type")
+                return True
+                
+        except json.JSONDecodeError:
+            print("❌ Error parsing download response")
+            return False
     else:
-        print("❌ MAJOR ISSUES DETECTED. Implementation needs significant work.")
-        print("   Please review all failed tests and re-implement missing features.")
-    
-    print("\n🚀 NEXT STEPS:")
-    if success_rate >= 90:
-        print("   • Start the server and test the live interface")
-        print("   • Verify WebSocket connections are working")
-        print("   • Test project generation functionality")
-        print("   • Monitor performance metrics")
-    else:
-        print("   • Fix failed tests before proceeding")
-        print("   • Ensure all required files are properly created")
-        print("   • Verify file contents and implementations")
-    
-    return success_rate
+        print("❌ Failed to download files")
+        return False
 
 def main():
-    """Run all tests"""
-    print("🎯 Starting Frontend Optimization Verification...\n")
+    """Run the complete test."""
+    print("🚀 REAL FUNCTIONALITY VALIDATION TEST")
+    print("=" * 60)
+    print("Testing if the system ACTUALLY works in practice!")
+    print("=" * 60)
     
-    results = {}
+    # Test 1: Server Health
+    if not test_server_health():
+        print("\n❌ CRITICAL FAILURE: Server is not running!")
+        return False
     
-    # Run all tests
-    results["file_structure"] = test_file_structure()
-    results["html_optimizations"] = test_html_optimizations()
-    results["css_structure"] = test_css_structure()
-    results["javascript_structure"] = test_javascript_structure()
-    results["websocket_handler"] = test_websocket_handler()
-    results["api_integration"] = test_api_integration()
+    # Test 2: Python Speech Recognition (CRITICAL TEST)
+    python_success = test_python_generation()
     
-    # Print comprehensive summary
-    success_rate = print_summary(results)
+    # Final Results
+    print("\n" + "=" * 60)
+    print("🎯 FINAL VALIDATION RESULTS")
+    print("=" * 60)
     
-    # Return exit code based on success rate
-    if success_rate >= 75:
-        sys.exit(0)  # Success
+    if python_success:
+        print("🎉 SUCCESS: Python speech recognition test passed!")
+        print("✅ The critical fix is working!")
+        return True
     else:
-        sys.exit(1)  # Issues detected
+        print("❌ CRITICAL FAILURE: Python speech recognition test failed!")
+        print("❌ The system is still generating React for Python requests!")
+        return False
 
 if __name__ == "__main__":
-    main()
+    success = main()
+    sys.exit(0 if success else 1)
