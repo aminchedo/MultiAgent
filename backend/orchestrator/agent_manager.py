@@ -19,11 +19,8 @@ import structlog
 from asyncio import Queue, PriorityQueue
 import redis.asyncio as redis
 from prometheus_client import Counter, Gauge, Histogram
-
-from backend.models.models import AgentType, JobStatus
-from backend.memory.context_store import SharedMemoryStore
-from backend.grpc.agent_client import AgentServiceClient
-from backend.database.db import db_manager
+from opentelemetry import trace
+from config.config import FEATURE_FLAGS
 
 
 logger = structlog.get_logger()
@@ -33,6 +30,10 @@ task_assigned_counter = Counter('agent_tasks_assigned_total', 'Total tasks assig
 task_completed_counter = Counter('agent_tasks_completed_total', 'Total tasks completed by agents', ['agent_type'])
 agent_utilization_gauge = Gauge('agent_utilization_ratio', 'Agent utilization ratio', ['agent_type'])
 task_duration_histogram = Histogram('agent_task_duration_seconds', 'Task duration in seconds', ['agent_type'])
+# New histogram to track queue latency
+task_queue_duration_histogram = Histogram('task_queue_duration_seconds', 'Time tasks spend in queue', ['agent_type'])
+# OpenTelemetry tracer
+tracer = trace.get_tracer(__name__)
 
 
 class TaskPriority(Enum):
@@ -75,6 +76,9 @@ class AgentInstance:
     current_task: Optional[str] = None
     capabilities: Set[str] = field(default_factory=set)
     performance_score: float = 1.0
+    # Cost-based scheduling attributes
+    cost_factor: float = 1.0
+    current_capacity: int = 1
     tasks_completed: int = 0
     average_task_time: float = 0.0
     last_heartbeat: datetime = field(default_factory=datetime.utcnow)
@@ -98,6 +102,8 @@ class AgentManager:
         # Shared memory and communication
         self.memory_store = SharedMemoryStore(redis_url)
         self.agent_clients: Dict[str, AgentServiceClient] = {}
+        # Redis client for dead-letter queue & autoscaling telemetry
+        self.redis = redis.from_url(redis_url, decode_responses=True)
         
         # Task routing rules
         self.task_routing_rules: Dict[str, List[AgentType]] = {
@@ -124,6 +130,7 @@ class AgentManager:
         self._running = False
         self._task_processor_task = None
         self._heartbeat_monitor_task = None
+        self._autoscale_task = None
     
     async def initialize(self):
         """Initialize the agent manager and start background tasks"""
@@ -133,6 +140,8 @@ class AgentManager:
         # Start background tasks
         self._task_processor_task = asyncio.create_task(self._process_tasks())
         self._heartbeat_monitor_task = asyncio.create_task(self._monitor_agent_heartbeats())
+        # Background autoscaling monitor
+        self._autoscale_task = asyncio.create_task(self._autoscale_loop())
         
         logger.info("Agent Manager initialized")
     
@@ -144,6 +153,8 @@ class AgentManager:
             self._task_processor_task.cancel()
         if self._heartbeat_monitor_task:
             self._heartbeat_monitor_task.cancel()
+        if self._autoscale_task:
+            self._autoscale_task.cancel()
             
         await self.memory_store.disconnect()
         
@@ -231,6 +242,12 @@ class AgentManager:
                    task_type=task_type,
                    priority=priority.value)
         
+        # Graceful degradation – drop or divert tasks when overloaded
+        if self._is_overloaded():
+            await self._dead_letter_task(task, reason="load_shedding")
+            logger.warning("Load shedding triggered – task sent to dead-letter queue", task_id=task.task_id)
+            return task.task_id
+        
         return task.task_id
     
     async def get_task_status(self, task_id: str) -> Optional[Dict[str, Any]]:
@@ -250,23 +267,21 @@ class AgentManager:
         else:
             return None
     
-    def get_least_busy_agent(self, task_type: str) -> Optional[AgentInstance]:
-        """Find the least busy agent capable of handling the task type"""
-        eligible_agent_types = self.task_routing_rules.get(task_type, [])
-        
+    def get_least_busy_agent(self, task: AgentTask) -> Optional[AgentInstance]:
+        """Select optimal agent for the given task (cost-based if flag enabled)"""
+        eligible_agent_types = self.task_routing_rules.get(task.task_type, [])
         available_agents = [
             agent for agent in self.agents.values()
             if agent.agent_type in eligible_agent_types
             and agent.status == AgentStatus.AVAILABLE
-            and task_type in agent.capabilities
+            and task.task_type in agent.capabilities
         ]
-        
         if not available_agents:
             return None
-        
-        # Sort by performance score and current workload
-        return max(available_agents, 
-                  key=lambda a: (a.performance_score, -a.tasks_completed))
+        if FEATURE_FLAGS.get("cost_based_scheduling", False):
+            complexity = task.payload.get("estimated_complexity", 1.0)
+            return min(available_agents, key=lambda a: a.cost_factor * complexity / max(a.current_capacity, 1))
+        return max(available_agents, key=lambda a: (a.performance_score, -a.tasks_completed))
     
     async def _process_tasks(self):
         """Background task processor"""
@@ -276,7 +291,7 @@ class AgentManager:
                 task = await asyncio.wait_for(self.task_queue.get(), timeout=1.0)
                 
                 # Find suitable agent
-                agent = self.get_least_busy_agent(task.task_type)
+                agent = self.get_least_busy_agent(task)
                 
                 if agent:
                     # Assign task to agent
@@ -304,6 +319,14 @@ class AgentManager:
         # Update metrics
         task_assigned_counter.labels(agent_type=agent.agent_type.value).inc()
         agent_utilization_gauge.labels(agent_type=agent.agent_type.value).set(1.0)
+        # Observability – queue latency & tracing
+        queue_duration = (datetime.utcnow() - task.created_at).total_seconds()
+        task_queue_duration_histogram.labels(agent_type=agent.agent_type.value).observe(queue_duration)
+        span = tracer.start_span("assign_task")
+        span.set_attribute("agent_type", agent.agent_type.value)
+        span.set_attribute("task_type", task.task_type)
+        span.set_attribute("task_id", task.task_id)
+        span.set_attribute("queue_duration_seconds", queue_duration)
         
         # Load context from shared memory
         context = {}
@@ -323,6 +346,7 @@ class AgentManager:
                     payload=task.payload,
                     context=context
                 )
+                span.end()
                 
                 # Task completed successfully
                 await self._handle_task_completion(task, agent, result, start_time)
@@ -333,6 +357,8 @@ class AgentManager:
                            task_id=task.task_id,
                            error=str(e))
                 await self._handle_task_failure(task, str(e))
+                span.record_exception(e)
+                span.end()
         else:
             # Fallback to local execution (for backward compatibility)
             logger.warning("No gRPC client for agent, using local execution",
@@ -484,3 +510,48 @@ class AgentManager:
             stats["agents_by_type"][agent.agent_type.value] += 1
         
         return stats
+
+    def _is_overloaded(self) -> bool:
+        """Return True when 90 % or more of agents are busy"""
+        total = len(self.agents)
+        if total == 0:
+            return True
+        busy = sum(1 for a in self.agents.values() if a.status == AgentStatus.BUSY)
+        return busy / total >= 0.9
+
+    async def _dead_letter_task(self, task: AgentTask, reason: str):
+        """Push task to Redis dead-letter stream for later inspection"""
+        await self.redis.xadd(
+            "dead_letter_tasks",
+            {
+                "task_id": task.task_id,
+                "reason": reason,
+                "payload": json.dumps(task.payload),
+                "timestamp": datetime.utcnow().isoformat(),
+            },
+        )
+
+    def _get_avg_process_time(self, agent_type: AgentType) -> float:
+        times = [a.average_task_time for a in self.agents.values() if a.agent_type == agent_type and a.tasks_completed > 0]
+        return sum(times) / len(times) if times else 1.0
+
+    def _should_scale(self, agent_type: AgentType) -> bool:
+        pending = sum(
+            1 for t in self.pending_tasks.values()
+            if agent_type in self.task_routing_rules.get(t.task_type, [])
+        )
+        current_agents = sum(1 for a in self.agents.values() if a.agent_type == agent_type)
+        avg_time = self._get_avg_process_time(agent_type)
+        return pending > (current_agents * avg_time * 0.8)
+
+    async def _autoscale_loop(self):
+        """Monitor workload and suggest scaling actions"""
+        while self._running:
+            try:
+                for agent_type in AgentType:
+                    if self._should_scale(agent_type):
+                        logger.info("Autoscale triggered", agent_type=agent_type.value)
+                        # Integration hook for Kubernetes or external scaler goes here
+                await asyncio.sleep(5)
+            except Exception as e:
+                logger.error("Autoscale loop error", error=str(e))
