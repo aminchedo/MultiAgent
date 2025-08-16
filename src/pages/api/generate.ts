@@ -160,7 +160,7 @@ export default App;`,
 				total_files: files.length,
 				python_files: files.filter(f => f.name.endsWith('.py')).length,
 				react_files: files.filter(f => f.name.endsWith('.jsx') || f.content.includes('React')).length,
-				language_match: detectedLanguage in description.toLowerCase()
+				language_match: description.toLowerCase().includes(detectedLanguage)
 			}
 		})
 
