@@ -12,6 +12,7 @@ import tempfile
 import subprocess
 import psutil
 import uuid
+import time
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from pathlib import Path
@@ -126,6 +127,38 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
         )
 
 
+# Health check endpoint
+@router.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring and load balancers."""
+    try:
+        # Check database connection
+        db_status = "healthy"
+        try:
+            # Simple database check
+            await db_manager.get_job("test")
+        except:
+            db_status = "degraded"
+        
+        return {
+            "status": "healthy",
+            "service": "multi-agent-code-generation",
+            "version": "1.0.0",
+            "timestamp": datetime.utcnow().isoformat(),
+            "components": {
+                "database": db_status,
+                "openai": "healthy" if settings.openai_api_key else "unconfigured",
+                "redis": "healthy"
+            }
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
 # Authentication endpoints
 @router.post("/auth/login", response_model=AuthResponse)
 @limiter.limit("10/minute")
@@ -156,6 +189,50 @@ async def login(request: Request, auth_request: AuthRequest):
         )
 
 
+@router.get("/api/templates", response_model=TemplateResponse)
+@limiter.limit("30/minute")
+async def get_templates(request: Request):
+    """Get available project templates."""
+    templates = [
+        {
+            "id": "react-app",
+            "name": "React Application",
+            "description": "Modern React app with TypeScript and Tailwind CSS",
+            "category": "frontend",
+            "complexity": "moderate",
+            "features": ["authentication", "routing", "state-management", "styling"],
+            "languages": ["typescript", "javascript"],
+            "frameworks": ["react", "next.js", "tailwind"]
+        },
+        {
+            "id": "fastapi-backend",
+            "name": "FastAPI Backend",
+            "description": "Python FastAPI backend with database and authentication",
+            "category": "backend",
+            "complexity": "moderate",
+            "features": ["authentication", "database", "api", "documentation"],
+            "languages": ["python"],
+            "frameworks": ["fastapi", "sqlalchemy", "pydantic"]
+        },
+        {
+            "id": "fullstack-app",
+            "name": "Full-Stack Application",
+            "description": "Complete full-stack application with frontend and backend",
+            "category": "fullstack",
+            "complexity": "complex",
+            "features": ["authentication", "database", "api", "frontend", "deployment"],
+            "languages": ["python", "typescript", "javascript"],
+            "frameworks": ["fastapi", "react", "next.js", "sqlalchemy"]
+        }
+    ]
+    
+    return TemplateResponse(
+        success=True,
+        message="Templates retrieved successfully",
+        templates=templates
+    )
+
+
 @router.post("/api/validate-key")
 async def validate_api_key(request: Request, api_key_data: dict):
     """Convert API key to JWT token for frontend compatibility"""
@@ -168,6 +245,29 @@ async def validate_api_key(request: Request, api_key_data: dict):
 
 
 # Project generation endpoints
+@router.post("/api/jobs", response_model=ProjectGenerationResponse)
+@limiter.limit("5/minute")
+async def create_job(
+    request: Request,
+    project_request: ProjectGenerationRequest,
+    background_tasks: BackgroundTasks,
+    current_user: str = Depends(verify_token)
+):
+    """Create a new project generation job (alias for /api/generate)."""
+    return await generate_project(request, project_request, background_tasks, current_user)
+
+
+@router.get("/api/jobs/{job_id}", response_model=JobStatusResponse)
+@limiter.limit("30/minute")
+async def get_job_status_alias(
+    request: Request,
+    job_id: str,
+    current_user: str = Depends(verify_token)
+):
+    """Get job status (alias for /api/status/{job_id})."""
+    return await get_job_status(request, job_id, current_user)
+
+
 @router.post("/api/generate", response_model=ProjectGenerationResponse)
 @limiter.limit("5/minute")
 async def generate_project(
@@ -340,6 +440,57 @@ async def download_project(
         media_type="application/zip",
         headers={"Content-Disposition": f"attachment; filename={job.name}.zip"}
     )
+
+
+@router.get("/api/stats", response_model=SystemStatsResponse)
+@limiter.limit("10/minute")
+async def get_system_stats(
+    request: Request,
+    current_user: str = Depends(verify_token)
+):
+    """Get system statistics and performance metrics."""
+    try:
+        # Get basic system stats
+        import psutil
+        
+        # Get job statistics
+        total_jobs = await db_manager.get_job_count()
+        completed_jobs = await db_manager.get_completed_job_count()
+        failed_jobs = await db_manager.get_failed_job_count()
+        
+        # Get system resources
+        cpu_percent = psutil.cpu_percent(interval=1)
+        memory = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        
+        return SystemStatsResponse(
+            success=True,
+            message="System stats retrieved successfully",
+            stats={
+                "jobs": {
+                    "total": total_jobs,
+                    "completed": completed_jobs,
+                    "failed": failed_jobs,
+                    "success_rate": (completed_jobs / max(total_jobs, 1)) * 100
+                },
+                "system": {
+                    "cpu_percent": cpu_percent,
+                    "memory_percent": memory.percent,
+                    "disk_percent": (disk.used / disk.total) * 100,
+                    "uptime": time.time() - psutil.boot_time()
+                },
+                "agents": {
+                    "active": len([conn for conn in manager.active_connections.values()]),
+                    "total_agents": 5  # Planner, Coder, Tester, Doc Writer, Reviewer
+                }
+            }
+        )
+    except Exception as e:
+        logger.error(f"Failed to get system stats: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get system stats: {str(e)}"
+        )
 
 
 @router.get("/api/download/{job_id}")

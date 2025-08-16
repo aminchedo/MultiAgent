@@ -565,6 +565,28 @@ class DatabaseManager:
                 "total_jobs": total_jobs.scalar() or 0,
                 "avg_completion_time": avg_time.scalar() or 0,
             }
+    
+    async def get_job_count(self) -> int:
+        """Get total number of jobs."""
+        async with self.get_session() as session:
+            result = await session.execute(select(func.count(JobModel.id)))
+            return result.scalar() or 0
+    
+    async def get_completed_job_count(self) -> int:
+        """Get number of completed jobs."""
+        async with self.get_session() as session:
+            result = await session.execute(
+                select(func.count(JobModel.id)).where(JobModel.status == JobStatus.COMPLETED)
+            )
+            return result.scalar() or 0
+    
+    async def get_failed_job_count(self) -> int:
+        """Get number of failed jobs."""
+        async with self.get_session() as session:
+            result = await session.execute(
+                select(func.count(JobModel.id)).where(JobModel.status == JobStatus.FAILED)
+            )
+            return result.scalar() or 0
 
 
 # Global database manager instance
