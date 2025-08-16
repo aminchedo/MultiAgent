@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # Vercel Deployment Fixes Script
-# This script helps deploy the fixes for the Vercel deployment issues
+# This script automates the deployment process with all the fixes applied
 
 set -e  # Exit on any error
 
-echo "🚀 Deploying Vercel Fixes"
-echo "=========================="
+echo "🚀 Starting Vercel Deployment Fixes..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -33,130 +32,142 @@ print_error() {
 }
 
 # Check if we're in the right directory
-if [ ! -f "api/vercel_app.py" ]; then
+if [ ! -f "next.config.js" ] || [ ! -f "vercel.json" ]; then
     print_error "This script must be run from the project root directory"
     exit 1
 fi
 
-# Check if git is available
-if ! command -v git &> /dev/null; then
-    print_error "Git is not installed or not in PATH"
-    exit 1
-fi
+print_status "Verifying project structure..."
 
-# Check if vercel CLI is available
-if ! command -v vercel &> /dev/null; then
-    print_warning "Vercel CLI not found. You can still deploy using git push."
-fi
-
-print_status "Checking current git status..."
-
-# Check if there are uncommitted changes
-if [ -n "$(git status --porcelain)" ]; then
-    print_warning "You have uncommitted changes. Please commit them first:"
-    git status --short
-    echo ""
-    read -p "Do you want to commit all changes? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        print_status "Committing changes..."
-        git add .
-        git commit -m "Fix Vercel deployment issues: add root endpoint, favicon handling, and JWT_SECRET_KEY defaults"
-        print_success "Changes committed"
-    else
-        print_error "Please commit your changes before deploying"
+# Check for required files
+required_files=("next.config.js" "vercel.json" "package.json" "requirements.txt")
+for file in "${required_files[@]}"; do
+    if [ ! -f "$file" ]; then
+        print_error "Missing required file: $file"
         exit 1
     fi
+done
+
+print_success "Project structure verified"
+
+# Check if .env.local exists, create if not
+if [ ! -f ".env.local" ]; then
+    print_warning ".env.local not found, creating with default values..."
+    cat > .env.local << EOF
+# Next.js Frontend Environment Variables
+NEXT_PUBLIC_API_URL=http://localhost:8000
+API_DESTINATION=http://localhost:8000
+
+# Backend Configuration
+BACKEND_URL=http://localhost:8000
+
+# Development Settings
+NODE_ENV=development
+NEXT_PUBLIC_VERCEL_ENV=development
+EOF
+    print_success "Created .env.local"
+fi
+
+# Check if .env.production exists, create if not
+if [ ! -f ".env.production" ]; then
+    print_warning ".env.production not found, creating template..."
+    cat > .env.production << EOF
+# Production Environment Variables for Vercel
+# IMPORTANT: Set these in your Vercel dashboard
+
+# API Configuration - Replace with your actual backend URL
+NEXT_PUBLIC_API_URL=https://your-backend-api.vercel.app
+API_DESTINATION=https://your-backend-api.vercel.app
+
+# Backend Configuration
+BACKEND_URL=https://your-backend-api.vercel.app
+
+# Production Settings
+NODE_ENV=production
+NEXT_PUBLIC_VERCEL_ENV=production
+
+# AI Configuration (if using separate AI service)
+OPENAI_API_KEY=your-openai-api-key-here
+JWT_SECRET_KEY=your-super-secret-jwt-key-change-in-production-min-32-chars
+EOF
+    print_success "Created .env.production template"
+fi
+
+print_status "Checking Next.js configuration..."
+
+# Verify next.config.js has the fixes
+if grep -q "destination.*undefined" next.config.js; then
+    print_error "next.config.js still contains 'undefined' destination"
+    exit 1
+fi
+
+if grep -q "experimental.*appDir" next.config.js; then
+    print_error "next.config.js still contains deprecated experimental.appDir"
+    exit 1
+fi
+
+print_success "Next.js configuration verified"
+
+print_status "Checking Vercel configuration..."
+
+# Verify vercel.json has the fixes
+if ! grep -q "NODE_ENV.*production" vercel.json; then
+    print_error "vercel.json missing NODE_ENV=production"
+    exit 1
+fi
+
+print_success "Vercel configuration verified"
+
+print_status "Installing dependencies..."
+
+# Install Node.js dependencies
+if [ -f "package-lock.json" ]; then
+    npm ci
 else
-    print_success "No uncommitted changes found"
+    npm install
 fi
 
-# Verify the fixes are in place
-print_status "Verifying fixes are in place..."
+print_success "Dependencies installed"
 
-# Check if root endpoint exists
-if ! grep -q "@app.get(\"/\")" api/vercel_app.py; then
-    print_error "Root endpoint not found in api/vercel_app.py"
-    exit 1
+print_status "Building Next.js application..."
+
+# Build the Next.js application
+npm run build
+
+print_success "Next.js build completed"
+
+print_status "Checking for Vercel CLI..."
+
+# Check if Vercel CLI is installed
+if ! command -v vercel &> /dev/null; then
+    print_warning "Vercel CLI not found, installing..."
+    npm install -g vercel
 fi
 
-# Check if favicon endpoints exist
-if ! grep -q "@app.get(\"/favicon.ico\")" api/vercel_app.py; then
-    print_error "Favicon.ico endpoint not found in api/vercel_app.py"
-    exit 1
-fi
+print_success "Vercel CLI available"
 
-if ! grep -q "@app.get(\"/favicon.png\")" api/vercel_app.py; then
-    print_error "Favicon.png endpoint not found in api/vercel_app.py"
-    exit 1
-fi
-
-# Check if static directory exists
-if [ ! -d "static" ]; then
-    print_error "Static directory not found"
-    exit 1
-fi
-
-# Check if favicon files exist
-if [ ! -f "static/favicon.ico" ]; then
-    print_warning "static/favicon.ico not found"
-fi
-
-if [ ! -f "static/favicon.png" ]; then
-    print_warning "static/favicon.png not found"
-fi
-
-# Check if vercel.json has the right routes
-if ! grep -q "\"/favicon.ico\"" vercel.json; then
-    print_error "Favicon routes not found in vercel.json"
-    exit 1
-fi
-
-print_success "All fixes verified"
-
-# Show current branch
-current_branch=$(git branch --show-current)
-print_status "Current branch: $current_branch"
-
-# Ask for deployment method
+# Ask user for deployment preference
 echo ""
-echo "Choose deployment method:"
-echo "1. Git push (recommended for Vercel)"
-echo "2. Vercel CLI deploy"
-echo "3. Just verify and exit"
+print_status "Choose deployment method:"
+echo "1) Deploy to Vercel (recommended)"
+echo "2) Push to Git and let Vercel auto-deploy"
+echo "3) Just verify configuration (no deployment)"
+read -p "Enter your choice (1-3): " choice
 
-read -p "Enter your choice (1-3): " -n 1 -r
-echo
-
-case $REPLY in
+case $choice in
     1)
-        print_status "Deploying via git push..."
-        
-        # Check if remote exists
-        if ! git remote get-url origin &> /dev/null; then
-            print_error "No remote 'origin' found. Please add your git remote first."
-            exit 1
-        fi
-        
-        # Push to remote
-        print_status "Pushing to remote..."
-        git push origin "$current_branch"
-        print_success "Deployment initiated via git push"
-        print_status "Vercel will automatically deploy from your git repository"
+        print_status "Deploying to Vercel..."
+        vercel --prod
         ;;
     2)
-        if ! command -v vercel &> /dev/null; then
-            print_error "Vercel CLI not found. Please install it first: npm i -g vercel"
-            exit 1
-        fi
-        
-        print_status "Deploying via Vercel CLI..."
-        vercel --prod
-        print_success "Deployment completed via Vercel CLI"
+        print_status "Preparing for Git deployment..."
+        git add .
+        git commit -m "Fix Vercel deployment issues: update next.config.js, vercel.json, and environment variables"
+        git push
+        print_success "Code pushed to Git. Vercel will auto-deploy if connected."
         ;;
     3)
-        print_success "Verification completed. No deployment performed."
-        exit 0
+        print_success "Configuration verification completed. No deployment performed."
         ;;
     *)
         print_error "Invalid choice"
@@ -164,16 +175,26 @@ case $REPLY in
         ;;
 esac
 
-# Environment variables reminder
 echo ""
-print_warning "IMPORTANT: Don't forget to set environment variables in Vercel dashboard:"
-echo "  1. Go to your Vercel project dashboard"
-echo "  2. Navigate to Settings → Environment Variables"
-echo "  3. Add the following variables:"
-echo "     - OPENAI_API_KEY: Your OpenAI API key"
-echo "     - JWT_SECRET_KEY: A secure random string (recommended for production)"
+print_success "🎉 Deployment process completed!"
 echo ""
-
-print_success "Deployment script completed!"
-print_status "Monitor your Vercel deployment logs for any issues."
-print_status "You can test the endpoints once deployment is complete."
+print_status "IMPORTANT: Don't forget to set environment variables in your Vercel dashboard:"
+echo ""
+echo "Required Environment Variables:"
+echo "- NEXT_PUBLIC_API_URL = https://your-backend-api.vercel.app"
+echo "- API_DESTINATION = https://your-backend-api.vercel.app"
+echo "- NODE_ENV = production"
+echo "- OPENAI_API_KEY = your_actual_openai_api_key"
+echo "- JWT_SECRET_KEY = your_secure_jwt_secret"
+echo ""
+print_status "To set these variables:"
+echo "1. Go to your Vercel project dashboard"
+echo "2. Navigate to Settings → Environment Variables"
+echo "3. Add each variable with the appropriate value"
+echo ""
+print_status "Test your deployment:"
+echo "- Frontend: https://your-app.vercel.app"
+echo "- API Health: https://your-app.vercel.app/api/health"
+echo "- API Root: https://your-app.vercel.app/api"
+echo ""
+print_success "Deployment fixes applied successfully! 🚀"

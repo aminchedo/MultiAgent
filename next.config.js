@@ -17,7 +17,7 @@ const nextConfig = {
 			destination = `${apiUrl}/api/:path*`;
 		} else {
 			// Fallback to local API if the URL is malformed
-			destination = '/api/:path*';
+			destination = 'http://localhost:8000/api/:path*';
 		}
 			
 		return [
