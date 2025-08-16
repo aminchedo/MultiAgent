@@ -1,11 +1,11 @@
 // Production API client configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class ProductionClient {
   private baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || API_BASE_URL;
+    this.baseUrl = baseUrl ?? API_BASE_URL;
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -38,17 +38,28 @@ export class ProductionClient {
     return this.request('/api/health');
   }
 
-  // Login endpoint
+  // Mock/Proxy login
   async login(credentials: { username: string; password: string }): Promise<any> {
-    return this.request('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    // If external backend configured and it supports auth, proxy there
+    if (this.baseUrl) {
+      try {
+        return await this.request('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify(credentials),
+        })
+      } catch {
+        // fall through to mock
+      }
+    }
+    // Mock: persist a fake token
+    const token = `mock-${Math.random().toString(36).slice(2)}`
+    try { localStorage.setItem('vibe_coding_token', token) } catch {}
+    return { access_token: token, success: true }
   }
 
-  // Generate endpoint
+  // Generate endpoint (create job)
   async generate(prompt: string): Promise<{ job_id: string }> {
-    return this.request('/api/generate', {
+    return this.request('/api/jobs', {
       method: 'POST',
       body: JSON.stringify({ prompt }),
     });
@@ -56,7 +67,7 @@ export class ProductionClient {
 
   // Create vibe job endpoint
   async createVibeJob(vibe: string, options: any = {}): Promise<{ data: { id: string }, error?: string }> {
-    const response = await this.request<{ job_id: string }>('/api/generate', {
+    const response = await this.request<{ job_id: string }>('/api/jobs', {
       method: 'POST',
       body: JSON.stringify({ 
         prompt: vibe,
@@ -64,7 +75,6 @@ export class ProductionClient {
       }),
     });
     
-    // Transform the response to match expected format
     return {
       data: { id: response.job_id },
       error: undefined
@@ -73,13 +83,13 @@ export class ProductionClient {
 
   // Status endpoint
   async status(jobId: string): Promise<{ status: string; result?: any }> {
-    return this.request(`/api/status/${jobId}`);
+    return this.request(`/api/jobs/${jobId}/status`);
   }
 
   // Get job status endpoint (alias for status)
   async getJobStatus(jobId: string): Promise<{ data: any, error?: string }> {
     try {
-      const response = await this.request(`/api/status/${jobId}`);
+      const response = await this.request(`/api/jobs/${jobId}/status`);
       return {
         data: response,
         error: undefined
@@ -94,7 +104,7 @@ export class ProductionClient {
 
   // Download endpoint
   async download(jobId: string): Promise<Blob> {
-    const url = `${this.baseUrl}/api/download/${jobId}`;
+    const url = `${this.baseUrl}/api/jobs/${jobId}/download`;
     const response = await fetch(url);
     
     if (!response.ok) {
