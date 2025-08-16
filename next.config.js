@@ -6,13 +6,19 @@
 const nextConfig = {
 	reactStrictMode: true,
 	async rewrites() {
-		// Ensure we have a valid API URL
-		const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+		// Ensure we have a valid API URL with safe fallback
+		const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_DESTINATION || 'http://localhost:8000';
 		
-		// Ensure the destination starts with a valid prefix
-		const destination = apiUrl.startsWith('http://') || apiUrl.startsWith('https://') || apiUrl.startsWith('/')
-			? `${apiUrl}/api/:path*`
-			: `/${apiUrl}/api/:path*`;
+		// Normalize the destination to ensure it starts with a valid prefix
+		let destination;
+		if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+			destination = `${apiUrl}/api/:path*`;
+		} else if (apiUrl.startsWith('/')) {
+			destination = `${apiUrl}/api/:path*`;
+		} else {
+			// Fallback to local API if the URL is malformed
+			destination = '/api/:path*';
+		}
 			
 		return [
 			{

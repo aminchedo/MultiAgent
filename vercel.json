@@ -10,28 +10,6 @@
       "use": "@vercel/python"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/auth/(.*)",
-      "dest": "/api/auth/$1"
-    },
-    {
-      "src": "/api/generate",
-      "dest": "/api/generate"
-    },
-    {
-      "src": "/api/status/(.*)",
-      "dest": "/api/status/[job_id]"
-    },
-    {
-      "src": "/api/download/(.*)",
-      "dest": "/api/download/[job_id]"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
   "functions": {
     "api/auth/login.py": {
       "maxDuration": 30

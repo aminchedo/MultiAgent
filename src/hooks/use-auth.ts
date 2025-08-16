@@ -11,7 +11,7 @@ export const useAuth = () => {
 	const login = async (username: string, password: string) => {
 		try {
 			setIsLoading(true)
-			const response = await apiClient.login(username, password)
+			const response = await apiClient.login({ username, password })
 			setUser({ username })
 			return { success: true, response }
 		} catch (error: any) {
