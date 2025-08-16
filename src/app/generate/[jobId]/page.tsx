@@ -58,8 +58,8 @@ const agents = [
 ]
 
 export default function GenerationPage() {
-  const params = useParams()
-  const jobId = params.jobId as string
+  const params = useParams() as { jobId?: string }
+  const jobId = (params?.jobId || '') as string
   const { 
     currentJob, 
     agentProgress, 
