@@ -68,9 +68,14 @@ export const useJobStore = create<JobState>((set, get) => ({
   createJob: async (description: string, preferences = {}) => {
     set({ isLoading: true, error: null })
     try {
-      const job = await apiClient.createVibeJob(description, preferences)
-      set({ currentJob: job, isLoading: false })
-      return job
+      const response = await apiClient.createVibeJob(description, preferences)
+      
+      if (response.error || !response.data) {
+        throw new Error(response.error || 'Failed to create job')
+      }
+      
+      set({ currentJob: response.data, isLoading: false })
+      return response.data
     } catch (error: any) {
       set({ error: error.message, isLoading: false })
       throw error
@@ -79,7 +84,13 @@ export const useJobStore = create<JobState>((set, get) => ({
   
   fetchJobStatus: async (jobId: string) => {
     try {
-      const job = await apiClient.getJobStatus(jobId)
+      const response = await apiClient.getJobStatus(jobId)
+      
+      if (response.error || !response.data) {
+        throw new Error(response.error || 'Failed to fetch job status')
+      }
+      
+      const job = response.data
       set({ currentJob: job })
       
       // Update agent progress based on current agent
@@ -110,8 +121,13 @@ export const useJobStore = create<JobState>((set, get) => ({
   
   downloadProject: async (jobId: string) => {
     try {
-      const blob = await apiClient.downloadProject(jobId)
-      return blob
+      const response = await apiClient.downloadJob(jobId)
+      
+      if (response.error || !response.data) {
+        throw new Error(response.error || 'Failed to download project')
+      }
+      
+      return response.data
     } catch (error: any) {
       set({ error: error.message })
       throw error

@@ -31,15 +31,19 @@ export function VibeInput() {
       console.log('🚀 Creating vibe project:', vibe)
       
       // Create job with real backend
-      const job = await apiClient.createVibeJob(vibe, {
+      const response = await apiClient.createVibeJob(vibe, {
         projectType: 'web',
         complexity: 'simple'
       })
 
-      console.log('✅ Job created:', job)
+      console.log('✅ Job created:', response)
+      
+      if (response.error || !response.data) {
+        throw new Error(response.error || 'Failed to create job')
+      }
       
       // Navigate to generation page
-      router.push(`/generate/${job.id}`)
+      router.push(`/generate/${response.data.id}`)
       
     } catch (error: any) {
       console.error('❌ Failed to create job:', error)
