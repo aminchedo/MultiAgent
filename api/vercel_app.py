@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
@@ -67,6 +67,15 @@ app = FastAPI(
     description="AI-powered code generation system",
     version="1.0.0"
 )
+
+# Import WebSocket handler
+try:
+    from websocket_handler import websocket_endpoint, connection_manager
+    logger.info("WebSocket handler imported successfully")
+except ImportError as e:
+    logger.warning(f"WebSocket handler not available: {e}")
+    websocket_endpoint = None
+    connection_manager = None
 
 # CORS middleware
 app.add_middleware(
@@ -371,6 +380,74 @@ async def upload_file():
             detail=f"Upload endpoint error: {str(e)}"
         )
 
+# WebSocket endpoint
+@app.websocket("/ws")
+async def websocket_endpoint_handler(websocket: WebSocket):
+    """WebSocket endpoint for real-time updates"""
+    if websocket_endpoint:
+        await websocket_endpoint(websocket)
+    else:
+        await websocket.close(code=1000, reason="WebSocket not available")
+
+# Additional API endpoints for WebSocket integration
+@app.post("/api/generate")
+async def generate_project():
+    """Enhanced project generation with WebSocket updates"""
+    try:
+        # Simulate project generation with progress updates
+        if connection_manager:
+            await connection_manager.send_generation_progress(
+                job_id="demo-job",
+                progress=0.0,
+                status="Starting generation..."
+            )
+            
+            # Simulate progress updates
+            import asyncio
+            for i in range(1, 11):
+                await asyncio.sleep(0.5)
+                progress = i * 10
+                await connection_manager.send_generation_progress(
+                    job_id="demo-job",
+                    progress=progress,
+                    status=f"Processing step {i}/10..."
+                )
+            
+            await connection_manager.send_generation_progress(
+                job_id="demo-job",
+                progress=100,
+                status="Generation complete!"
+            )
+        
+        return {
+            "status": "success",
+            "job_id": "demo-job",
+            "files": [
+                {"name": "main.py", "type": "python", "size": "1.2KB"},
+                {"name": "requirements.txt", "type": "text", "size": "156B"},
+                {"name": "README.md", "type": "markdown", "size": "2.1KB"}
+            ],
+            "message": "Project generated successfully"
+        }
+    except Exception as e:
+        logger.error(f"Generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/check-status")
+async def check_api_status():
+    """Check API provider status"""
+    try:
+        # Simulate API status check
+        return {
+            "status": "connected",
+            "provider": "openai",
+            "latency": 150,
+            "timestamp": "2024-01-01T00:00:00Z"
+        }
+    except Exception as e:
+        logger.error(f"Status check error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Error handlers
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
@@ -383,4 +460,4 @@ async def internal_error_handler(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, ws_ping_interval=20, ws_ping_timeout=10)
