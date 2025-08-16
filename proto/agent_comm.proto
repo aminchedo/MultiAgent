@@ -1,0 +1,198 @@
+syntax = "proto3";
+
+package agent.network;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+// Main coordination service for agent network
+service AgentCoordinator {
+  // Submit a task to an agent
+  rpc SubmitTask (TaskRequest) returns (Ack);
+  
+  // Get context information
+  rpc GetContext (ContextQuery) returns (ContextData);
+  
+  // Broadcast updates to interested agents
+  rpc BroadcastUpdate (AgentUpdate) returns (Ack);
+  
+  // Bidirectional streaming for real-time communication
+  rpc StreamUpdates (stream AgentUpdate) returns (stream AgentUpdate);
+  
+  // Health check endpoint
+  rpc HealthCheck (HealthRequest) returns (HealthResponse);
+}
+
+// Agent registry service for discovery
+service AgentRegistry {
+  // Register a new agent
+  rpc RegisterAgent (AgentInfo) returns (RegistrationResponse);
+  
+  // Deregister an agent
+  rpc DeregisterAgent (AgentId) returns (Ack);
+  
+  // Discover agents by capability
+  rpc DiscoverAgents (DiscoveryRequest) returns (DiscoveryResponse);
+  
+  // Get agent status
+  rpc GetAgentStatus (AgentId) returns (AgentStatus);
+  
+  // Stream agent status updates
+  rpc StreamAgentUpdates (AgentStatusRequest) returns (stream AgentStatusUpdate);
+}
+
+// Basic messages
+message Ack {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message TaskRequest {
+  string task_id = 1;
+  bytes payload = 2;  // Serialized Protocol Buffer
+  repeated string dependent_agents = 3;
+  map<string, string> metadata = 4;
+  Priority priority = 5;
+  google.protobuf.Timestamp deadline = 6;
+}
+
+message ContextQuery {
+  string context_key = 1;
+  repeated string required_fields = 2;
+  google.protobuf.Timestamp as_of = 3;
+}
+
+message ContextData {
+  string context_key = 1;
+  google.protobuf.Any data = 2;
+  google.protobuf.Timestamp last_updated = 3;
+  string updated_by_agent = 4;
+}
+
+message AgentUpdate {
+  string agent_id = 1;
+  string task_id = 2;
+  UpdateType type = 3;
+  google.protobuf.Any payload = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  map<string, string> metadata = 6;
+}
+
+// Agent registry messages
+message AgentInfo {
+  string agent_id = 1;
+  string agent_type = 2;
+  repeated string capabilities = 3;
+  string endpoint = 4;
+  map<string, string> metadata = 5;
+  ResourceInfo resources = 6;
+}
+
+message AgentId {
+  string agent_id = 1;
+}
+
+message RegistrationResponse {
+  bool success = 1;
+  string agent_id = 2;
+  string auth_token = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+message DiscoveryRequest {
+  repeated string required_capabilities = 1;
+  LoadBalancingStrategy strategy = 2;
+  int32 max_results = 3;
+}
+
+message DiscoveryResponse {
+  repeated AgentInfo agents = 1;
+  google.protobuf.Timestamp as_of = 2;
+}
+
+message AgentStatus {
+  string agent_id = 1;
+  AgentState state = 2;
+  double load = 3;
+  ResourceInfo resources = 4;
+  google.protobuf.Timestamp last_heartbeat = 5;
+  map<string, string> metadata = 6;
+}
+
+message AgentStatusRequest {
+  repeated string agent_ids = 1;  // Empty means all agents
+  bool include_metrics = 2;
+}
+
+message AgentStatusUpdate {
+  AgentStatus status = 1;
+  UpdateType update_type = 2;
+}
+
+// Health check messages
+message HealthRequest {
+  string agent_id = 1;
+}
+
+message HealthResponse {
+  ServingStatus status = 1;
+  string message = 2;
+  map<string, ComponentHealth> components = 3;
+}
+
+message ComponentHealth {
+  ServingStatus status = 1;
+  string message = 2;
+  google.protobuf.Timestamp last_check = 3;
+}
+
+// Resource information
+message ResourceInfo {
+  double cpu_usage = 1;
+  double memory_usage = 2;
+  int64 active_tasks = 3;
+  int64 queued_tasks = 4;
+  map<string, double> custom_metrics = 5;
+}
+
+// Enums
+enum Priority {
+  LOW = 0;
+  NORMAL = 1;
+  HIGH = 2;
+  CRITICAL = 3;
+}
+
+enum UpdateType {
+  STATUS_CHANGE = 0;
+  PROGRESS_UPDATE = 1;
+  RESULT_AVAILABLE = 2;
+  ERROR_OCCURRED = 3;
+  DEPENDENCY_UPDATE = 4;
+  CONTEXT_CHANGE = 5;
+}
+
+enum LoadBalancingStrategy {
+  ROUND_ROBIN = 0;
+  LEAST_CONNECTIONS = 1;
+  LEAST_LOAD = 2;
+  RANDOM = 3;
+  WEIGHTED = 4;
+}
+
+enum AgentState {
+  INITIALIZING = 0;
+  READY = 1;
+  BUSY = 2;
+  OVERLOADED = 3;
+  SHUTTING_DOWN = 4;
+  ERROR = 5;
+}
+
+enum ServingStatus {
+  UNKNOWN = 0;
+  SERVING = 1;
+  NOT_SERVING = 2;
+  SERVICE_UNKNOWN = 3;
+}
