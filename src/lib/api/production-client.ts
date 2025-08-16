@@ -1,11 +1,11 @@
 // Production API client configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class ProductionClient {
   private baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || API_BASE_URL;
+    this.baseUrl = baseUrl ?? API_BASE_URL;
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -26,6 +26,7 @@ export class ProductionClient {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
+      // If expecting blob (download), caller uses fetch directly
       return await response.json();
     } catch (error) {
       console.error('API request failed:', error);
@@ -64,7 +65,6 @@ export class ProductionClient {
       }),
     });
     
-    // Transform the response to match expected format
     return {
       data: { id: response.job_id },
       error: undefined
