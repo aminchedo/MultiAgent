@@ -2,8 +2,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api/production-client'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Card } from '@/components/ui/card'
+import { Loader2, Sparkles, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Sparkles, Zap, Loader2 } from 'lucide-react'
 
 export function VibeInput() {
   const [vibe, setVibe] = useState('')
@@ -53,7 +56,7 @@ export function VibeInput() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="p-8 bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/20 backdrop-blur-xl rounded-2xl">
+        <Card className="p-8 bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-500/20 backdrop-blur-xl">
           <div className="text-center mb-8">
             <motion.div
               animate={{ rotate: 360 }}
@@ -94,11 +97,11 @@ export function VibeInput() {
             </div>
 
             {/* Main input */}
-            <textarea
+            <Textarea
               placeholder="I want to build a modern web application with..."
               value={vibe}
               onChange={(e) => setVibe(e.target.value)}
-              className="min-h-32 w-full p-4 bg-black/20 border border-purple-500/30 text-white placeholder:text-gray-500 text-lg resize-none rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="min-h-32 bg-black/20 border-purple-500/30 text-white placeholder:text-gray-500 text-lg resize-none"
             />
 
             {/* Error message */}
@@ -114,26 +117,27 @@ export function VibeInput() {
 
             {/* Submit button */}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <button
+              <Button
                 onClick={handleCreateProject}
                 disabled={!vibe.trim() || isCreating}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-4 text-lg rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-4 text-lg"
+                size="lg"
               >
                 {isCreating ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin inline" />
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                     Creating Your Project...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-5 h-5 mr-2 inline" />
+                    <Sparkles className="w-5 h-5 mr-2" />
                     Generate Project with AI Agents
                   </>
                 )}
-              </button>
+              </Button>
             </motion.div>
           </div>
-        </div>
+        </Card>
       </motion.div>
     </div>
   )

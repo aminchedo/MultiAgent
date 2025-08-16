@@ -25,7 +25,7 @@
     },
     {
       "src": "/api/download/(.*)",
-      "dest": "/api/download/$1"
+      "dest": "/api/download/[job_id]"
     },
     {
       "src": "/(.*)",
@@ -40,6 +40,9 @@
       "maxDuration": 60
     },
     "api/status/[job_id].py": {
+      "maxDuration": 30
+    },
+    "api/download/[job_id].py": {
       "maxDuration": 30
     }
   },
