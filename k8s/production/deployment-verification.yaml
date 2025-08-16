@@ -1,0 +1,385 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-system
+  labels:
+    name: agent-system
+    environment: production
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agent-system
+  namespace: agent-system
+  annotations:
+    eks.amazonaws.com/role-arn: ${AGENT_SYSTEM_ROLE_ARN}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-system
+  namespace: agent-system
+  labels:
+    app: agent-system
+    version: ${BUILD_VERSION}
+    environment: production
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: agent-system
+  template:
+    metadata:
+      labels:
+        app: agent-system
+        version: ${BUILD_VERSION}
+    spec:
+      serviceAccountName: agent-system
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      containers:
+      - name: agent-system
+        image: ${DOCKER_REGISTRY}/agent-system:${BUILD_VERSION}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+        - containerPort: 8080
+          name: metrics
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: jwt-secret
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2
+            memory: 4Gi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+      - name: monitoring-sidecar
+        image: prom/node-exporter:latest
+        ports:
+        - containerPort: 9100
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-system-service
+  namespace: agent-system
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP
+  - name: metrics
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: agent-system
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agent-system-ingress
+  namespace: agent-system
+  annotations:
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/certificate-arn: ${ACM_CERTIFICATE_ARN}
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+spec:
+  rules:
+  - host: api.agents.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: agent-system-service
+            port:
+              number: 80
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: agent-system-hpa
+  namespace: agent-system
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: agent-system
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: agent-system-pdb
+  namespace: agent-system
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: agent-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-system-config
+  namespace: agent-system
+data:
+  config.yaml: |
+    app:
+      name: "agent-system"
+      version: "${BUILD_VERSION}"
+      environment: "production"
+    
+    server:
+      host: "0.0.0.0"
+      port: 8000
+      workers: 4
+      
+    monitoring:
+      metrics_port: 8080
+      health_check_interval: 30
+      
+    agents:
+      coordination:
+        task_timeout: 300
+        retry_attempts: 3
+        verification_threshold: 0.75
+      
+    security:
+      jwt_expire_minutes: 60
+      rate_limit_per_minute: 1000
+      
+    sla:
+      uptime_target: 99.95
+      response_time_target: 500
+      error_rate_target: 0.1
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pre-deployment-checks
+  namespace: agent-system
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: pre-deploy-check
+        image: ${DOCKER_REGISTRY}/agent-system:${BUILD_VERSION}
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Running pre-deployment checks..."
+          
+          # Database connectivity check
+          python -c "
+          import asyncio
+          import psycopg2
+          try:
+              conn = psycopg2.connect('${DATABASE_URL}')
+              print('✅ Database connectivity: PASS')
+              conn.close()
+          except Exception as e:
+              print('❌ Database connectivity: FAIL -', e)
+              exit(1)
+          "
+          
+          # Redis connectivity check
+          python -c "
+          import redis
+          try:
+              r = redis.from_url('${REDIS_URL}')
+              r.ping()
+              print('✅ Redis connectivity: PASS')
+          except Exception as e:
+              print('❌ Redis connectivity: FAIL -', e)
+              exit(1)
+          "
+          
+          # Configuration validation
+          python -c "
+          import yaml
+          import os
+          try:
+              with open('/app/config.yaml') as f:
+                  config = yaml.safe_load(f)
+              assert config['app']['environment'] == 'production'
+              print('✅ Configuration validation: PASS')
+          except Exception as e:
+              print('❌ Configuration validation: FAIL -', e)
+              exit(1)
+          "
+          
+          echo "✅ All pre-deployment checks passed"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: url
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+      volumes:
+      - name: config-volume
+        configMap:
+          name: agent-system-config
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: post-deployment-verification
+  namespace: agent-system
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: post-deploy-verify
+        image: ${DOCKER_REGISTRY}/agent-system:${BUILD_VERSION}
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Running post-deployment verification..."
+          
+          # Wait for service to be ready
+          sleep 30
+          
+          # Health check verification
+          curl -f http://agent-system-service/health || exit 1
+          echo "✅ Health check: PASS"
+          
+          # API endpoint verification
+          curl -f http://agent-system-service/api/v2/agents/status || exit 1
+          echo "✅ API endpoints: PASS"
+          
+          # Load test verification
+          python -c "
+          import requests
+          import time
+          import concurrent.futures
+          
+          def test_request():
+              response = requests.get('http://agent-system-service/health')
+              return response.status_code == 200
+          
+          # Test with 100 concurrent requests
+          with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+              futures = [executor.submit(test_request) for _ in range(100)]
+              results = [f.result() for f in futures]
+          
+          success_rate = sum(results) / len(results)
+          if success_rate >= 0.99:
+              print('✅ Load test verification: PASS')
+          else:
+              print('❌ Load test verification: FAIL - Success rate:', success_rate)
+              exit(1)
+          "
+          
+          echo "✅ All post-deployment verifications passed"
