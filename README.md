@@ -97,6 +97,24 @@ Required for production deployment:
 - `DATABASE_URL`: PostgreSQL connection string (optional)
 - `REDIS_URL`: Redis connection string (optional)
 
+### Next.js Frontend Environment Variables
+
+For the Next.js frontend (when deployed on Vercel):
+
+- `NEXT_PUBLIC_API_URL`: The base URL for your API backend (e.g., `https://your-api-domain.com`)
+- `API_DESTINATION`: Alternative API destination URL (fallback if NEXT_PUBLIC_API_URL is not set)
+
+**Vercel Setup Instructions:**
+1. Go to your Vercel project dashboard
+2. Navigate to Settings → Environment Variables
+3. Add `NEXT_PUBLIC_API_URL` with your API backend URL
+4. For local development, this defaults to `http://localhost:8000`
+
+**Example:**
+```
+NEXT_PUBLIC_API_URL=https://your-backend-api.vercel.app
+```
+
 ## 🤖 Multi-Agent System
 
 ### Agents
