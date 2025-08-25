@@ -1,0 +1,163 @@
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@your-domain.com'
+  slack_api_url: 'REPLACE_WITH_SLACK_WEBHOOK_URL'
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  routes:
+    # Critical alerts go to both email and Slack immediately
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 0s
+      group_interval: 5m
+      repeat_interval: 30m
+
+    # Warning alerts go to Slack with grouping
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 2h
+
+    # Database alerts
+    - match:
+        service: database
+      receiver: 'database-alerts'
+      group_wait: 15s
+      repeat_interval: 1h
+
+    # Agent-specific alerts
+    - match:
+        service: agents
+      receiver: 'agent-alerts'
+      group_wait: 15s
+      repeat_interval: 1h
+
+receivers:
+  - name: 'default'
+    email_configs:
+      - to: 'admin@your-domain.com'
+        subject: '[MultiAgent] Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Instance: {{ .Labels.instance }}
+          Severity: {{ .Labels.severity }}
+          {{ end }}
+
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'admin@your-domain.com,oncall@your-domain.com'
+        subject: '[CRITICAL] MultiAgent Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          🚨 CRITICAL ALERT 🚨
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Instance: {{ .Labels.instance }}
+          Service: {{ .Labels.service }}
+          Started: {{ .StartsAt }}
+          {{ end }}
+        
+    slack_configs:
+      - api_url: 'REPLACE_WITH_SLACK_WEBHOOK_URL'
+        channel: '#alerts-critical'
+        title: ':fire: Critical Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Instance:* {{ .Labels.instance }}
+          *Service:* {{ .Labels.service }}
+          *Severity:* {{ .Labels.severity }}
+          {{ end }}
+        send_resolved: true
+
+  - name: 'warning-alerts'
+    slack_configs:
+      - api_url: 'REPLACE_WITH_SLACK_WEBHOOK_URL'
+        channel: '#alerts-warning'
+        title: ':warning: Warning: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Instance:* {{ .Labels.instance }}
+          *Service:* {{ .Labels.service }}
+          {{ end }}
+        send_resolved: true
+
+  - name: 'database-alerts'
+    email_configs:
+      - to: 'dba@your-domain.com,admin@your-domain.com'
+        subject: '[DATABASE] MultiAgent Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          Database Alert Detected
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Instance: {{ .Labels.instance }}
+          Database: {{ .Labels.datname }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'REPLACE_WITH_SLACK_WEBHOOK_URL'
+        channel: '#database-alerts'
+        title: ':floppy_disk: Database Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Instance:* {{ .Labels.instance }}
+          {{ end }}
+
+  - name: 'agent-alerts'
+    email_configs:
+      - to: 'ai-team@your-domain.com,admin@your-domain.com'
+        subject: '[AGENTS] MultiAgent Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          Agent Processing Alert
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Agent: {{ .Labels.agent }}
+          Instance: {{ .Labels.instance }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'REPLACE_WITH_SLACK_WEBHOOK_URL'
+        channel: '#ai-alerts'
+        title: ':robot_face: Agent Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Agent:* {{ .Labels.agent }}
+          *Instance:* {{ .Labels.instance }}
+          {{ end }}
+
+inhibit_rules:
+  # Inhibit warning alerts if critical alert is active
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+
+  # Inhibit individual container alerts if the whole node is down
+  - source_match:
+      alertname: 'NodeDown'
+    target_match_re:
+      alertname: 'Container.*'
+    equal: ['instance']

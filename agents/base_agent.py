@@ -885,3 +885,269 @@ class SecurityAgent(BaseAgent):
             'scans_completed': 127,
             'average_risk_score': 0.25
         }
+
+
+class AgentMetrics:
+    """
+    Production-ready metrics collection for agents.
+    Tracks performance, success rates, and operational metrics.
+    """
+    
+    def __init__(self, agent_name: str):
+        self.agent_name = agent_name
+        self.start_time = time.time()
+        self.metrics = {
+            "total_requests": 0,
+            "successful_requests": 0,
+            "failed_requests": 0,
+            "total_response_time": 0.0,
+            "average_response_time": 0.0,
+            "last_request_time": None,
+            "errors": [],
+            "request_history": []
+        }
+        self.logger = logging.getLogger(f"agent.{agent_name}")
+    
+    def record_request_start(self) -> float:
+        """Call this at the start of each agent operation"""
+        return time.time()
+    
+    def record_request_end(self, start_time: float, success: bool, error_msg: str = None, 
+                          task_type: str = None, input_size: int = None):
+        """Call this at the end of each agent operation with ACTUAL results"""
+        response_time = time.time() - start_time
+        current_time = datetime.now().isoformat()
+        
+        self.metrics["total_requests"] += 1
+        self.metrics["total_response_time"] += response_time
+        self.metrics["average_response_time"] = (
+            self.metrics["total_response_time"] / self.metrics["total_requests"]
+        )
+        self.metrics["last_request_time"] = current_time
+        
+        # Record in history (keep last 100 requests)
+        request_record = {
+            "timestamp": current_time,
+            "response_time": response_time,
+            "success": success,
+            "task_type": task_type,
+            "input_size": input_size
+        }
+        
+        self.metrics["request_history"].append(request_record)
+        if len(self.metrics["request_history"]) > 100:
+            self.metrics["request_history"].pop(0)
+        
+        if success:
+            self.metrics["successful_requests"] += 1
+            self.logger.info(
+                f"Request completed successfully",
+                extra={
+                    "response_time": response_time,
+                    "task_type": task_type,
+                    "input_size": input_size
+                }
+            )
+        else:
+            self.metrics["failed_requests"] += 1
+            if error_msg:
+                error_record = {
+                    "timestamp": current_time,
+                    "error": error_msg,
+                    "response_time": response_time,
+                    "task_type": task_type
+                }
+                self.metrics["errors"].append(error_record)
+                # Keep only last 50 errors
+                if len(self.metrics["errors"]) > 50:
+                    self.metrics["errors"].pop(0)
+            
+            self.logger.error(
+                f"Request failed",
+                extra={
+                    "response_time": response_time,
+                    "error": error_msg,
+                    "task_type": task_type,
+                    "input_size": input_size
+                }
+            )
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Return comprehensive metrics - NO FAKE DATA"""
+        uptime = time.time() - self.start_time
+        success_rate = (
+            (self.metrics["successful_requests"] / self.metrics["total_requests"])
+            if self.metrics["total_requests"] > 0 else 0
+        )
+        
+        # Calculate percentiles from recent requests
+        recent_times = [
+            req["response_time"] 
+            for req in self.metrics["request_history"]
+            if req["success"]
+        ]
+        
+        percentiles = {}
+        if recent_times:
+            recent_times.sort()
+            percentiles = {
+                "p50": recent_times[len(recent_times) // 2] if recent_times else 0,
+                "p95": recent_times[int(len(recent_times) * 0.95)] if recent_times else 0,
+                "p99": recent_times[int(len(recent_times) * 0.99)] if recent_times else 0
+            }
+        
+        # Determine health status
+        status = "healthy"
+        if success_rate < 0.5:
+            status = "critical"
+        elif success_rate < 0.8:
+            status = "degraded"
+        elif uptime < 60:  # Less than 1 minute uptime
+            status = "starting"
+        
+        return {
+            "agent_name": self.agent_name,
+            "timestamp": datetime.now().isoformat(),
+            "uptime_seconds": uptime,
+            "status": status,
+            "performance": {
+                "success_rate_percent": round(success_rate * 100, 2),
+                "total_requests": self.metrics["total_requests"],
+                "successful_requests": self.metrics["successful_requests"],
+                "failed_requests": self.metrics["failed_requests"],
+                "average_response_time": round(self.metrics["average_response_time"], 3),
+                "response_time_percentiles": percentiles
+            },
+            "recent_activity": {
+                "last_request_time": self.metrics["last_request_time"],
+                "requests_last_hour": len([
+                    req for req in self.metrics["request_history"]
+                    if (time.time() - time.mktime(
+                        datetime.fromisoformat(req["timestamp"]).timetuple()
+                    )) < 3600
+                ]),
+                "recent_errors": len([
+                    err for err in self.metrics["errors"]
+                    if (time.time() - time.mktime(
+                        datetime.fromisoformat(err["timestamp"]).timetuple()
+                    )) < 3600
+                ])
+            },
+            "error_summary": {
+                "total_errors": len(self.metrics["errors"]),
+                "recent_error_types": list(set([
+                    err.get("error", "Unknown")[:50] 
+                    for err in self.metrics["errors"][-10:]
+                ]))
+            }
+        }
+    
+    def get_prometheus_metrics(self) -> str:
+        """Return metrics in Prometheus format"""
+        metrics = self.get_metrics()
+        
+        prometheus_lines = [
+            f'# HELP agent_uptime_seconds Agent uptime in seconds',
+            f'# TYPE agent_uptime_seconds gauge',
+            f'agent_uptime_seconds{{agent="{self.agent_name}"}} {metrics["uptime_seconds"]}',
+            f'',
+            f'# HELP agent_requests_total Total number of requests processed',
+            f'# TYPE agent_requests_total counter', 
+            f'agent_requests_total{{agent="{self.agent_name}",status="success"}} {metrics["performance"]["successful_requests"]}',
+            f'agent_requests_total{{agent="{self.agent_name}",status="failure"}} {metrics["performance"]["failed_requests"]}',
+            f'',
+            f'# HELP agent_response_time_seconds Average response time in seconds',
+            f'# TYPE agent_response_time_seconds gauge',
+            f'agent_response_time_seconds{{agent="{self.agent_name}"}} {metrics["performance"]["average_response_time"]}',
+            f'',
+            f'# HELP agent_success_rate Success rate as a percentage',
+            f'# TYPE agent_success_rate gauge',
+            f'agent_success_rate{{agent="{self.agent_name}"}} {metrics["performance"]["success_rate_percent"] / 100}',
+        ]
+        
+        return '\n'.join(prometheus_lines)
+
+
+# Enhanced base agent class with metrics
+class MetricsEnabledBaseAgent(BaseAgent):
+    """
+    Enhanced BaseAgent with built-in metrics collection.
+    Use this as the base class for all production agents.
+    """
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.metrics = AgentMetrics(self.__class__.__name__)
+    
+    async def process_with_metrics(self, task_data: Any, task_type: str = None) -> Any:
+        """
+        Process a task with automatic metrics collection.
+        Override this method in your agent implementations.
+        """
+        start_time = self.metrics.record_request_start()
+        try:
+            # Subclasses should implement the actual processing
+            result = await self._process_task(task_data, task_type)
+            self.metrics.record_request_end(
+                start_time, 
+                success=True, 
+                task_type=task_type,
+                input_size=len(str(task_data)) if task_data else 0
+            )
+            return result
+        except Exception as e:
+            self.metrics.record_request_end(
+                start_time, 
+                success=False, 
+                error_msg=str(e), 
+                task_type=task_type,
+                input_size=len(str(task_data)) if task_data else 0
+            )
+            raise
+    
+    async def _process_task(self, task_data: Any, task_type: str = None) -> Any:
+        """
+        Override this method in your agent implementations.
+        This is where the actual agent logic goes.
+        """
+        raise NotImplementedError("Subclasses must implement _process_task")
+    
+    def get_agent_metrics(self) -> Dict[str, Any]:
+        """Return comprehensive agent metrics"""
+        return self.metrics.get_metrics()
+    
+    def get_prometheus_metrics(self) -> str:
+        """Return metrics in Prometheus format"""
+        return self.metrics.get_prometheus_metrics()
+
+
+# Example specialized agent implementations
+class CodeGenerationAgent(MetricsEnabledBaseAgent):
+    """Example code generation agent with metrics"""
+    
+    async def _process_task(self, task_data: Any, task_type: str = None) -> Any:
+        """Process code generation request"""
+        # Simulate code generation work
+        await asyncio.sleep(0.5)  # Simulate processing time
+        
+        # Return generated code (this would be real code generation in production)
+        return {
+            "generated_code": f"# Generated code for: {task_data}",
+            "files_created": 3,
+            "lines_of_code": 150
+        }
+
+
+class ReviewAgent(MetricsEnabledBaseAgent):
+    """Example code review agent with metrics"""
+    
+    async def _process_task(self, task_data: Any, task_type: str = None) -> Any:
+        """Process code review request"""
+        # Simulate code review work
+        await asyncio.sleep(0.3)  # Simulate processing time
+        
+        return {
+            "review_comments": ["Good structure", "Consider error handling"],
+            "score": 8.5,
+            "issues_found": 2
+        }
