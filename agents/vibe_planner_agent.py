@@ -4,13 +4,13 @@ VibePlannerAgent - Analyze vibe prompts using pattern matching and create compre
 
 import re
 from typing import Dict, Any, List, Optional
-from agents.base_agent import BaseAgent
+from agents.vibe_base_agent import VibeBaseAgent
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class VibePlannerAgent(BaseAgent):
+class VibePlannerAgent(VibeBaseAgent):
     """Agent for analyzing vibe prompts and creating technical implementation plans."""
     
     def __init__(self):
