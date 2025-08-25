@@ -41,6 +41,7 @@ from backend.models.models import (
 )
 from backend.database.db import db_manager
 from backend.agents.agents import create_and_execute_workflow
+from backend.agents.specialized.vibe_workflow_orchestrator import create_and_execute_enhanced_workflow
 
 
 settings = get_settings()
@@ -268,6 +269,80 @@ async def get_job_status_alias(
     return await get_job_status(request, job_id, current_user)
 
 
+@router.post("/api/vibe-coding", response_model=ProjectGenerationResponse)
+@limiter.limit("5/minute")
+async def create_vibe_project(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    vibe_prompt: str,
+    project_type: str = "web",
+    complexity: str = "simple",
+    framework: Optional[str] = None,
+    styling: Optional[str] = None,
+    current_user: str = Depends(verify_token)
+):
+    """Create a project from a natural language vibe description using the enhanced workflow."""
+    job_id = generate_job_id()
+    
+    try:
+        # Create job in database with vibe-specific data
+        await db_manager.create_job(
+            job_id=job_id,
+            name=f"Vibe Project: {vibe_prompt[:50]}...",
+            description=vibe_prompt,
+            project_type=project_type,
+            languages=["javascript", "css", "html"] if project_type == "web" else ["python"],
+            frameworks=[framework] if framework else ["react"],
+            complexity=complexity,
+            features=["vibe_based_generation"],
+            mode="vibe"
+        )
+        
+        # Estimate duration based on complexity for vibe projects
+        duration_map = {
+            "simple": 90,      # 1.5 minutes for vibe projects
+            "moderate": 240,   # 4 minutes
+            "complex": 420     # 7 minutes
+        }
+        estimated_duration = duration_map.get(complexity, 240)
+        
+        # Prepare vibe project data
+        vibe_project_data = {
+            "vibe_prompt": vibe_prompt,
+            "prompt": vibe_prompt,  # For compatibility
+            "description": vibe_prompt,
+            "project_type": project_type,
+            "complexity": complexity,
+            "framework": framework,
+            "styling": styling,
+            "mode": "vibe",
+            "vibe_based": True
+        }
+        
+        # Start background task for vibe project generation
+        background_tasks.add_task(
+            execute_project_generation,
+            job_id,
+            vibe_project_data
+        )
+        
+        logger.info("Vibe project generation started", job_id=job_id, user=current_user, vibe=vibe_prompt[:100])
+        
+        return ProjectGenerationResponse(
+            success=True,
+            message="🚀 Your vibe project is being created! Watch 5 AI agents collaborate to bring your vision to life.",
+            job_id=job_id,
+            estimated_duration=estimated_duration
+        )
+        
+    except Exception as e:
+        logger.error("Failed to start vibe project generation", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to start vibe project generation: {str(e)}"
+        )
+
+
 @router.post("/api/generate", response_model=ProjectGenerationResponse)
 @limiter.limit("5/minute")
 async def generate_project(
@@ -333,8 +408,8 @@ async def execute_project_generation(job_id: str, project_data: Dict[str, Any]):
         async def websocket_callback(message: Dict):
             await manager.send_message(message, job_id)
         
-        # Execute the multi-agent workflow
-        result = await create_and_execute_workflow(
+        # Execute the enhanced multi-agent workflow (supports both traditional and vibe-based requests)
+        result = await create_and_execute_enhanced_workflow(
             job_id=job_id,
             project_data=project_data,
             websocket_callback=websocket_callback
