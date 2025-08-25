@@ -15,36 +15,17 @@ from abc import ABC, abstractmethod
 from typing import Any, AsyncIterator, Dict, List, Optional, Set, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-try:
-    import psutil
-except ImportError:
-    psutil = None
+import psutil
 from contextlib import asynccontextmanager
 
-try:
-    import grpc
-    from grpc import aio
-except ImportError:
-    grpc = None
+import grpc
+from grpc import aio
+import redis.asyncio as redis
 
-try:
-    import redis.asyncio as redis
-except ImportError:
-    redis = None
-
-# Import middleware (optional)
-try:
-    from middleware.jwt_auth import JWTTokenManager, JWTClientInterceptor
-    from middleware.backpressure import ClientBackpressureInterceptor, BackpressureProfiles
-    from services.discovery_service import AgentInfo, DiscoveryService
-except ImportError:
-    # Mock classes for basic operation
-    class JWTTokenManager: pass
-    class JWTClientInterceptor: pass
-    class ClientBackpressureInterceptor: pass
-    class BackpressureProfiles: pass
-    class AgentInfo: pass
-    class DiscoveryService: pass
+# Import middleware
+from middleware.jwt_auth import JWTTokenManager, JWTClientInterceptor
+from middleware.backpressure import ClientBackpressureInterceptor, BackpressureProfiles
+from services.discovery_service import AgentInfo, DiscoveryService
 
 # Import generated protobuf classes (these would be generated from agent_comm.proto)
 # from proto import agent_comm_pb2, agent_comm_pb2_grpc

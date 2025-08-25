@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست UI بهبود یافته</title>
+    
+    <!-- Enhanced Font Loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Enhanced Color Palette */
+            --primary: #6366f1;
+            --primary-light: #8b5cf6;
+            --primary-dark: #4f46e5;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            /* Advanced Background System */
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #151b2e;
+            --bg-tertiary: #1e2a42;
+            --bg-quaternary: #283548;
+            --bg-glass: rgba(15, 23, 42, 0.7);
+            --bg-glass-light: rgba(255, 255, 255, 0.05);
+            --bg-card: rgba(30, 42, 66, 0.8);
+            
+            /* Enhanced Text Colors */
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-accent: #a855f7;
+            
+            /* Border System */
+            --border-primary: #475569;
+            --border-secondary: #64748b;
+            --border-accent: rgba(168, 85, 247, 0.3);
+            --border-glow: rgba(99, 102, 241, 0.4);
+            
+            /* Advanced Effects */
+            --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.2);
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 40px 80px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 50px rgba(99, 102, 241, 0.3);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            --gradient-secondary: linear-gradient(145deg, #0a0e1a 0%, #151b2e 50%, #1e2a42 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #facc15 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            --blur: blur(32px);
+            --blur-strong: blur(48px);
+            
+            /* Enhanced Border Radius */
+            --radius-xs: 8px;
+            --radius-sm: 16px;
+            --radius: 24px;
+            --radius-lg: 32px;
+            --radius-xl: 48px;
+            
+            /* Animation System */
+            --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            /* Enhanced Typography */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-persian: 'Vazirmatn', sans-serif;
+            --font-icon: 'Material Symbols Outlined';
+            
+            /* Spacing System */
+            --space-xs: 8px;
+            --space-sm: 16px;
+            --space: 24px;
+            --space-lg: 32px;
+            --space-xl: 48px;
+            --space-2xl: 64px;
+            
+            /* Zoom Control System - 30% zoom out */
+            --zoom-scale: 0.7;
+            --zoom-scale-hover: 0.75;
+            --zoom-scale-active: 0.65;
+            
+            /* Enhanced Typography Scale */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --text-4xl: 2.25rem;
+            --text-5xl: 3rem;
+            --text-6xl: 3.75rem;
+            
+            /* Line Heights */
+            --leading-tight: 1.25;
+            --leading-snug: 1.375;
+            --leading-normal: 1.5;
+            --leading-relaxed: 1.625;
+            --leading-loose: 2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Global Zoom Application */
+        body {
+            transform: scale(var(--zoom-scale));
+            transform-origin: top center;
+            width: calc(100% / var(--zoom-scale));
+            height: calc(100vh / var(--zoom-scale));
+            font-family: var(--font-persian);
+            background: var(--gradient-secondary);
+            color: var(--text-primary);
+            line-height: var(--leading-relaxed);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-weight: 400;
+            position: relative;
+            font-size: var(--text-base);
+        }
+
+        /* Enhanced Typography Improvements */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            line-height: var(--leading-tight);
+            letter-spacing: -0.025em;
+        }
+
+        h1 { font-size: var(--text-5xl); }
+        h2 { font-size: var(--text-4xl); }
+        h3 { font-size: var(--text-3xl); }
+        h4 { font-size: var(--text-2xl); }
+        h5 { font-size: var(--text-xl); }
+        h6 { font-size: var(--text-lg); }
+
+        p {
+            font-size: var(--text-base);
+            line-height: var(--leading-relaxed);
+            margin-bottom: var(--space-sm);
+        }
+
+        .container {
+            max-width: 2000px;
+            margin: 0 auto;
+            padding: var(--space-xl);
+            position: relative;
+        }
+
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            margin-bottom: var(--space-2xl);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .header-title {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space);
+            letter-spacing: -0.02em;
+            font-family: var(--font-primary);
+            line-height: var(--leading-tight);
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(1.125rem, 3vw, 1.75rem);
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto var(--space-lg);
+            opacity: 0.9;
+            font-family: var(--font-persian);
+            line-height: var(--leading-relaxed);
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 500px 1fr 400px;
+            gap: var(--space-xl);
+            min-height: calc(100vh - 400px);
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            position: relative;
+            transition: var(--transition-slow);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .card-title {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            font-family: var(--font-primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space) var(--space-lg);
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font-primary);
+            font-size: var(--text-base);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Enhanced Communication System */
+        .communication-status {
+            position: fixed;
+            bottom: var(--space-lg);
+            left: var(--space-lg);
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: var(--text-sm);
+            transition: var(--transition);
+            transform: translateY(100px);
+            opacity: 0;
+        }
+
+        .communication-status.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .communication-status.connected {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .connection-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        /* Enhanced Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .toast {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(100%);
+            transition: transform 0.3s var(--bounce);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+            background: var(--success);
+            color: white;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            color: var(--text-primary);
+        }
+
+        .toast-message {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .demo-section {
+            margin-bottom: var(--space-2xl);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: var(--text-4xl);
+            margin-bottom: var(--space);
+        }
+
+        .feature-title {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Communication System -->
+    <div class="communication-status show connected" id="communicationStatus">
+        <div class="connection-indicator" id="connectionIndicator"></div>
+        <span id="connectionText">اتصال برقرار</span>
+    </div>
+
+    <!-- Enhanced Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container">
+        <!-- Enhanced Header -->
+        <header class="header">
+            <h1 class="header-title">
+                🚀 تست UI بهبود یافته
+            </h1>
+            <p class="header-subtitle">
+                نمایش بهبودهای اعمال شده شامل زوم 30%، بهبود تایپوگرافی و سیستم ارتباطی پیشرفته
+            </p>
+        </header>
+
+        <div class="main-layout">
+            <!-- Left Column -->
+            <div class="demo-section">
+                <div class="card">
+                    <h3 class="card-title">بهبودهای اعمال شده</h3>
+                    <div class="demo-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🔍</div>
+                            <div class="feature-title">زوم 30%</div>
+                            <div class="feature-description">
+                                تمام عناصر صفحه 30% کوچک‌تر شده‌اند تا فضای بیشتری برای مشاهده محتوا فراهم شود
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📝</div>
+                            <div class="feature-title">تایپوگرافی پیشرفته</div>
+                            <div class="feature-description">
+                                بهبود فونت‌ها، اندازه‌ها و فاصله‌گذاری برای خوانایی بهتر
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔗</div>
+                            <div class="feature-title">ارتباط پیشرفته</div>
+                            <div class="feature-description">
+                                سیستم ارتباطی بهبود یافته با مدیریت خطا و تلاش مجدد
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Column -->
+            <div class="demo-section">
+                <div class="card">
+                    <h3 class="card-title">تست عملکرد</h3>
+                    <p>برای تست سیستم ارتباطی، روی دکمه‌های زیر کلیک کنید:</p>
+                    
+                    <div style="display: flex; gap: var(--space); margin-top: var(--space-lg);">
+                        <button class="btn" onclick="testConnection()">
+                            <span class="material-icon">wifi</span>
+                            تست اتصال
+                        </button>
+                        <button class="btn" onclick="showSuccessToast()">
+                            <span class="material-icon">check_circle</span>
+                            پیام موفقیت
+                        </button>
+                        <button class="btn" onclick="showErrorToast()">
+                            <span class="material-icon">error</span>
+                            پیام خطا
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="demo-section">
+                <div class="card">
+                    <h3 class="card-title">مشخصات فنی</h3>
+                    <ul style="color: var(--text-secondary); line-height: var(--leading-relaxed);">
+                        <li>زوم: 30% کاهش اندازه</li>
+                        <li>فونت اصلی: Inter</li>
+                        <li>فونت فارسی: Vazirmatn</li>
+                        <li>فونت مونو: JetBrains Mono</li>
+                        <li>سیستم رنگ: 16 رنگ اصلی</li>
+                        <li>انیمیشن: CSS Transitions</li>
+                        <li>ارتباط: Fetch API + Retry Logic</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Communication System
+        class EnhancedUI {
+            constructor() {
+                this.initializeCommunicationSystem();
+            }
+
+            // Enhanced Request Handler with Retry Logic
+            async makeRequest(url, options = {}, retries = 3) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    this.updateConnectionStatus('connected');
+                    return data;
+
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    
+                    if (error.name === 'AbortError') {
+                        throw new Error('درخواست به دلیل تاخیر لغو شد');
+                    }
+
+                    if (retries > 0) {
+                        this.showToast('warning', 'تلاش مجدد', `تلاش مجدد در 2 ثانیه... (${4 - retries}/3)`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        return this.makeRequest(url, options, retries - 1);
+                    }
+
+                    this.updateConnectionStatus('disconnected');
+                    throw error;
+                }
+            }
+
+            // Enhanced Connection Status Management
+            updateConnectionStatus(status) {
+                const statusEl = document.getElementById('communicationStatus');
+                const indicatorEl = document.getElementById('connectionIndicator');
+                const textEl = document.getElementById('connectionText');
+
+                if (statusEl && indicatorEl && textEl) {
+                    statusEl.className = `communication-status ${status} show`;
+                    indicatorEl.className = `connection-indicator ${status}`;
+
+                    switch (status) {
+                        case 'connected':
+                            textEl.textContent = 'اتصال برقرار';
+                            break;
+                        case 'disconnected':
+                            textEl.textContent = 'اتصال قطع شد';
+                            break;
+                        case 'reconnecting':
+                            textEl.textContent = 'در حال اتصال مجدد...';
+                            break;
+                        default:
+                            textEl.textContent = 'بررسی اتصال...';
+                    }
+                }
+            }
+
+            // Enhanced Toast Notification System
+            showToast(type, title, message, duration = 5000) {
+                const container = document.getElementById('toastContainer');
+                if (!container) return;
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const iconMap = {
+                    success: 'check_circle',
+                    error: 'error',
+                    warning: 'warning',
+                    info: 'info'
+                };
+
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <span class="material-icon">${iconMap[type] || 'info'}</span>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                `;
+
+                container.appendChild(toast);
+
+                // Show animation
+                setTimeout(() => toast.classList.add('show'), 100);
+
+                // Auto remove
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+
+            // Initialize Enhanced Communication System
+            initializeCommunicationSystem() {
+                // Initial connection check
+                this.checkInitialConnection();
+                
+                // Set up periodic health checks
+                setInterval(() => {
+                    this.performHealthCheck();
+                }, 30000);
+            }
+
+            // Initial Connection Check
+            async checkInitialConnection() {
+                try {
+                    await this.makeRequest('/health');
+                    this.updateConnectionStatus('connected');
+                } catch (error) {
+                    this.updateConnectionStatus('disconnected');
+                }
+            }
+
+            // Periodic Health Check
+            async performHealthCheck() {
+                try {
+                    await this.makeRequest('/health');
+                    this.updateConnectionStatus('connected');
+                } catch (error) {
+                    this.updateConnectionStatus('disconnected');
+                }
+            }
+        }
+
+        // Initialize the enhanced UI
+        const enhancedUI = new EnhancedUI();
+
+        // Test functions
+        async function testConnection() {
+            try {
+                const result = await enhancedUI.makeRequest('/health');
+                enhancedUI.showToast('success', 'اتصال موفق', 'سرور در دسترس است');
+            } catch (error) {
+                enhancedUI.showToast('error', 'خطا در اتصال', 'سرور در دسترس نیست');
+            }
+        }
+
+        function showSuccessToast() {
+            enhancedUI.showToast('success', 'موفقیت', 'عملیات با موفقیت انجام شد');
+        }
+
+        function showErrorToast() {
+            enhancedUI.showToast('error', 'خطا', 'مشکلی در انجام عملیات پیش آمده');
+        }
+    </script>
+</body>
+</html>

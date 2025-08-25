@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم چند-عامله هوشمند تولید کد</title>
+    
+    <!-- Persian Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    
+    <!-- Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/@codesandbox/sandpack-client@2.6.9/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sandpack/sandpack-themes@2.0.21/dist/index.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
+    
+    <style>
+        :root {
+            /* Enhanced Color System */
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0284c7;
+            
+            /* Rich Background Palette */
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-quaternary: #475569;
+            --bg-glass: rgba(30, 41, 59, 0.95);
+            --bg-card: rgba(51, 65, 85, 0.95);
+            --bg-hover: rgba(99, 102, 241, 0.1);
+            --bg-active: rgba(99, 102, 241, 0.2);
+            
+            /* Enhanced Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: #f1f5f9;
+            --text-muted: #cbd5e1;
+            --text-accent: #c084fc;
+            --text-inverse: #0f172a;
+            
+            /* Border System */
+            --border-primary: #475569;
+            --border-secondary: #64748b;
+            --border-accent: rgba(99, 102, 241, 0.4);
+            --border-focus: rgba(99, 102, 241, 0.6);
+            --border-success: rgba(5, 150, 105, 0.4);
+            --border-warning: rgba(217, 119, 6, 0.4);
+            --border-danger: rgba(220, 38, 38, 0.4);
+            
+            /* Light Effects */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.35);
+            --shadow-glow: 0 0 32px rgba(99, 102, 241, 0.25);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            --gradient-secondary: linear-gradient(145deg, #0a0e1a 0%, #1e293b 50%, #334155 100%);
+            --blur: blur(24px);
+            
+            /* Border Radius */
+            --radius-xs: 6px;
+            --radius-sm: 10px;
+            --radius: 14px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+            --radius-2xl: 32px;
+            
+            /* Transitions */
+            --transition-fast: all 0.1s ease;
+            --transition: all 0.2s ease;
+            --transition-slow: all 0.3s ease;
+            
+            /* Typography */
+            --font-primary: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Tahoma', sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            --font-english: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            
+            /* Spacing */
+            --space-xs: 6px;
+            --space-sm: 10px;
+            --space: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+            --space-3xl: 64px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space);
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: var(--space-lg);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space);
+            margin-bottom: var(--space-xl);
+        }
+
+        .stat {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-accent);
+        }
+
+        .stat h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .stat p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xl);
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--space);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .card h2 .material-symbols-outlined {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: var(--space);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-sm);
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: var(--space);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: var(--space) var(--space-lg);
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-quaternary);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-small {
+            padding: var(--space-sm) var(--space);
+            font-size: 0.85rem;
+        }
+
+        /* Progress */
+        .progress-container {
+            margin-bottom: var(--space);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-sm);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        /* File Tree */
+        .file-tree {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .file-item {
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .file-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .file-item.selected {
+            background: var(--bg-active);
+            color: var(--primary);
+        }
+
+        .file-icon {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        /* Code Editor */
+        .editor-container {
+            height: 400px;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .editor-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .editor-tab {
+            padding: var(--space-sm) var(--space);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .editor-tab.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .editor-tab:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        #sandpack-container {
+            height: calc(400px - 40px);
+        }
+
+        /* Chat */
+        .chat-container {
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space);
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            margin-bottom: var(--space);
+        }
+
+        .chat-message {
+            margin-bottom: var(--space);
+            padding: var(--space-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+        }
+
+        .chat-message.agent {
+            background: var(--bg-primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .chat-message.system {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--info);
+        }
+
+        .chat-message.error {
+            background: rgba(220, 38, 38, 0.1);
+            border-left: 3px solid var(--danger);
+        }
+
+        .chat-message-header {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+        }
+
+        .chat-message-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            float: left;
+        }
+
+        /* Logs */
+        .logs-container {
+            height: 200px;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: var(--space);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .log-entry {
+            margin-bottom: var(--space-xs);
+            padding: var(--space-xs);
+            border-radius: var(--radius-xs);
+        }
+
+        .log-entry.info {
+            background: rgba(2, 132, 199, 0.1);
+            color: var(--info);
+        }
+
+        .log-entry.warning {
+            background: rgba(217, 119, 6, 0.1);
+            color: var(--warning);
+        }
+
+        .log-entry.error {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--danger);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--space);
+        }
+
+        .quick-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .quick-action:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+        }
+
+        .quick-action .material-symbols-outlined {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .quick-action span {
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* Recent Projects */
+        .project-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+            padding: var(--space);
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            margin-bottom: var(--space-sm);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .project-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .project-info h4 {
+            font-size: 0.9rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        .project-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .project-status {
+            margin-right: auto;
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-xs);
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .project-status.completed {
+            background: rgba(5, 150, 105, 0.2);
+            color: var(--success);
+        }
+
+        .project-status.running {
+            background: rgba(2, 132, 199, 0.2);
+            color: var(--info);
+        }
+
+        .project-status.failed {
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--danger);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space);
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-primary);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Connection Status */
+        .connection-status {
+            position: fixed;
+            top: var(--space);
+            left: var(--space);
+            padding: var(--space-sm) var(--space);
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            z-index: 100;
+        }
+
+        .connection-status.connected {
+            border-color: var(--border-success);
+            color: var(--success);
+        }
+
+        .connection-status.disconnected {
+            border-color: var(--border-danger);
+            color: var(--danger);
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Connection Status -->
+        <div class="connection-status" id="connectionStatus">
+            <div class="connection-dot"></div>
+            <span>اتصال برقرار</span>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <h1>سیستم چند-عامله هوشمند تولید کد</h1>
+            <p>پلتفرم پیشرفته تولید خودکار کد با هوش مصنوعی</p>
+        </header>
+
+        <!-- System Stats -->
+        <section class="stats" id="systemStats">
+            <div class="stat">
+                <h2 id="activeJobs">0</h2>
+                <p>پروژه فعال</p>
+            </div>
+            <div class="stat">
+                <h2 id="totalJobs">0</h2>
+                <p>کل پروژه‌ها</p>
+            </div>
+            <div class="stat">
+                <h2 id="cpuUsage">0%</h2>
+                <p>استفاده CPU</p>
+            </div>
+            <div class="stat">
+                <h2 id="memoryUsage">0%</h2>
+                <p>استفاده RAM</p>
+            </div>
+            <div class="stat">
+                <h2 id="avgResponseTime">0ms</h2>
+                <p>زمان پاسخ</p>
+            </div>
+            <div class="stat">
+                <h2 id="uptime">0h</h2>
+                <p>مدت فعالیت</p>
+            </div>
+        </section>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Project Generation Form -->
+                <div class="card">
+                    <h2>
+                        <span class="material-symbols-outlined">code</span>
+                        تولید پروژه جدید
+                    </h2>
+                    <form id="projectForm">
+                        <div class="form-group">
+                            <label for="projectName">نام پروژه</label>
+                            <input type="text" id="projectName" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="projectType">نوع پروژه</label>
+                            <select id="projectType" name="project_type" required>
+                                <option value="web_app">اپلیکیشن وب</option>
+                                <option value="api">API سرویس</option>
+                                <option value="mobile_app">اپلیکیشن موبایل</option>
+                                <option value="desktop_app">اپلیکیشن دسکتاپ</option>
+                                <option value="cli_tool">ابزار خط فرمان</option>
+                                <option value="library">کتابخانه</option>
+                                <option value="microservice">میکروسرویس</option>
+                                <option value="fullstack">فول‌استک</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="projectDescription">توضیحات پروژه</label>
+                            <textarea id="projectDescription" name="description" placeholder="پروژه خود را به تفصیل توضیح دهید..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="languages">زبان‌های برنامه‌نویسی</label>
+                            <select id="languages" name="languages" multiple>
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="typescript">TypeScript</option>
+                                <option value="java">Java</option>
+                                <option value="csharp">C#</option>
+                                <option value="go">Go</option>
+                                <option value="rust">Rust</option>
+                                <option value="php">PHP</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="frameworks">فریمورک‌ها</label>
+                            <input type="text" id="frameworks" name="frameworks" placeholder="React, FastAPI, Django, ...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="complexity">پیچیدگی</label>
+                            <select id="complexity" name="complexity">
+                                <option value="simple">ساده</option>
+                                <option value="moderate" selected>متوسط</option>
+                                <option value="complex">پیچیده</option>
+                                <option value="enterprise">سازمانی</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="features">ویژگی‌های خاص</label>
+                            <input type="text" id="features" name="features" placeholder="Authentication, Database, API, ...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mode">حالت تولید</label>
+                            <select id="mode" name="mode">
+                                <option value="full">کامل</option>
+                                <option value="dry">فقط برنامه‌ریزی</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn" id="generateBtn">
+                            <span class="material-symbols-outlined">smart_toy</span>
+                            شروع تولید هوشمند
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Progress -->
+                <div class="card" id="progressCard" style="display: none;">
+                    <h2>
+                        <span class="material-symbols-outlined">progress_activity</span>
+                        پیشرفت پروژه
+                    </h2>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">در حال آماده‌سازی...</div>
+                    </div>
+                    <p id="currentStep">مرحله 0 از 8</p>
+                </div>
+
+                <!-- File Tree -->
+                <div class="card" id="fileTreeCard" style="display: none;">
+                    <h2>
+                        <span class="material-symbols-outlined">folder</span>
+                        ساختار فایل‌ها
+                    </h2>
+                    <div class="file-tree" id="fileTree">
+                        <div class="file-item">
+                            <span class="material-symbols-outlined file-icon">description</span>
+                            <span>در حال بارگذاری...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- Code Editor -->
+                <div class="card">
+                    <h2>
+                        <span class="material-symbols-outlined">edit_note</span>
+                        ویرایشگر کد
+                    </h2>
+                    <div class="editor-container">
+                        <div class="editor-tabs">
+                            <button class="editor-tab active" data-tab="preview">پیش‌نمایش</button>
+                            <button class="editor-tab" data-tab="execute">اجرا</button>
+                        </div>
+                        <div id="sandpack-container">
+                            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                                <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem; display: block;">code</span>
+                                <p>فایلی انتخاب کنید تا مشاهده شود</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat with Agents -->
+                <div class="card">
+                    <h2>
+                        <span class="material-symbols-outlined">chat</span>
+                        گفتگو با عامل‌ها
+                    </h2>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-message system">
+                                <div class="chat-message-header">
+                                    سیستم
+                                    <span class="chat-message-time">اکنون</span>
+                                </div>
+                                <div>به سیستم چند-عامله تولید کد خوش آمدید!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Logs -->
+                <div class="card">
+                    <h2>
+                        <span class="material-symbols-outlined">terminal</span>
+                        لاگ سیستم
+                    </h2>
+                    <div class="logs-container" id="logsContainer">
+                        <div class="log-entry info">
+                            <span>[INFO]</span> سیستم آماده است
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Sections -->
+        <div class="main-layout">
+            <!-- Quick Actions -->
+            <div class="card">
+                <h2>
+                    <span class="material-symbols-outlined">flash_on</span>
+                    اقدامات سریع
+                </h2>
+                <div class="quick-actions">
+                    <a href="#" class="quick-action" id="uploadFileAction">
+                        <span class="material-symbols-outlined">upload</span>
+                        <span>آپلود فایل</span>
+                    </a>
+                    <a href="#" class="quick-action" id="downloadProjectAction">
+                        <span class="material-symbols-outlined">download</span>
+                        <span>دانلود پروژه</span>
+                    </a>
+                    <a href="#" class="quick-action" id="shareProjectAction">
+                        <span class="material-symbols-outlined">share</span>
+                        <span>اشتراک‌گذاری</span>
+                    </a>
+                    <a href="#" class="quick-action" id="templatesAction">
+                        <span class="material-symbols-outlined">template_add</span>
+                        <span>قالب‌ها</span>
+                    </a>
+                    <a href="#" class="quick-action" id="backupAction">
+                        <span class="material-symbols-outlined">backup</span>
+                        <span>پشتیبان‌گیری</span>
+                    </a>
+                    <a href="#" class="quick-action" id="settingsAction">
+                        <span class="material-symbols-outlined">settings</span>
+                        <span>تنظیمات</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Projects -->
+            <div class="card">
+                <h2>
+                    <span class="material-symbols-outlined">history</span>
+                    پروژه‌های اخیر
+                </h2>
+                <div id="recentProjects">
+                    <div class="project-item">
+                        <span class="material-symbols-outlined" style="color: var(--primary);">code</span>
+                        <div class="project-info">
+                            <h4>در حال بارگذاری...</h4>
+                            <p>در حال دریافت پروژه‌های اخیر</p>
+                        </div>
+                        <div class="project-status">در حال بارگذاری</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>تنظیمات</h2>
+                <button class="modal-close" onclick="closeModal('settingsModal')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="form-group">
+                <label for="apiKey">کلید API</label>
+                <input type="password" id="apiKey" placeholder="کلید API خود را وارد کنید">
+            </div>
+            <div class="form-group">
+                <label for="backendUrl">آدرس Backend</label>
+                <input type="url" id="backendUrl" value="http://localhost:8000">
+            </div>
+            <button class="btn" onclick="saveSettings()">ذخیره تنظیمات</button>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>آپلود فایل</h2>
+                <button class="modal-close" onclick="closeModal('uploadModal')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="form-group">
+                <label for="uploadFile">انتخاب فایل</label>
+                <input type="file" id="uploadFile" accept=".py,.js,.ts,.jsx,.tsx,.html,.css,.json,.md,.txt">
+            </div>
+            <div class="form-group">
+                <label for="uploadPath">مسیر (اختیاری)</label>
+                <input type="text" id="uploadPath" placeholder="src/components/NewComponent.tsx">
+            </div>
+            <button class="btn" onclick="uploadFile()">آپلود فایل</button>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        const state = {
+            currentJobId: null,
+            websocket: null,
+            authToken: null,
+            backendUrl: 'http://localhost:8000',
+            isConnected: false,
+            selectedFile: null,
+            sandpackClient: null
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Multi-Agent Code Generation System Starting...');
+            
+            // Load settings
+            loadSettings();
+            
+            // Initialize WebSocket
+            await connectWebSocket();
+            
+            // Load system stats
+            await updateSystemStats();
+            
+            // Load recent projects
+            await loadRecentProjects();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Check authentication
+            checkAuthentication();
+            
+            console.log('✅ Application initialized successfully');
+        });
+
+        // Settings Management
+        function loadSettings() {
+            const savedApiKey = localStorage.getItem('apiKey');
+            const savedBackendUrl = localStorage.getItem('backendUrl');
+            
+            if (savedApiKey) {
+                state.authToken = savedApiKey;
+                document.getElementById('apiKey').value = savedApiKey;
+            }
+            
+            if (savedBackendUrl) {
+                state.backendUrl = savedBackendUrl;
+                document.getElementById('backendUrl').value = savedBackendUrl;
+            }
+        }
+
+        function saveSettings() {
+            const apiKey = document.getElementById('apiKey').value;
+            const backendUrl = document.getElementById('backendUrl').value;
+            
+            if (apiKey) {
+                state.authToken = apiKey;
+                localStorage.setItem('apiKey', apiKey);
+            }
+            
+            if (backendUrl) {
+                state.backendUrl = backendUrl;
+                localStorage.setItem('backendUrl', backendUrl);
+            }
+            
+            closeModal('settingsModal');
+            showNotification('تنظیمات با موفقیت ذخیره شد', 'success');
+        }
+
+        // Authentication
+        async function checkAuthentication() {
+            if (!state.authToken) {
+                showModal('settingsModal');
+                return false;
+            }
+            
+            try {
+                const response = await fetch(`${state.backendUrl}/api/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${state.authToken}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    showModal('settingsModal');
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                return false;
+            }
+        }
+
+        // WebSocket Connection
+        async function connectWebSocket() {
+            try {
+                const wsUrl = state.backendUrl.replace('http', 'ws') + '/ws';
+                state.websocket = new WebSocket(wsUrl);
+                
+                state.websocket.onopen = function() {
+                    console.log('✅ WebSocket connected');
+                    state.isConnected = true;
+                    updateConnectionStatus(true);
+                };
+                
+                state.websocket.onmessage = function(event) {
+                    const message = JSON.parse(event.data);
+                    handleWebSocketMessage(message);
+                };
+                
+                state.websocket.onclose = function() {
+                    console.log('❌ WebSocket disconnected');
+                    state.isConnected = false;
+                    updateConnectionStatus(false);
+                    
+                    // Reconnect after 5 seconds
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                state.websocket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    state.isConnected = false;
+                    updateConnectionStatus(false);
+                };
+                
+            } catch (error) {
+                console.error('Failed to connect WebSocket:', error);
+                state.isConnected = false;
+                updateConnectionStatus(false);
+            }
+        }
+
+        function handleWebSocketMessage(message) {
+            console.log('📨 WebSocket message:', message);
+            
+            switch (message.type) {
+                case 'agent_message':
+                    addChatMessage(message.agent || 'عامل', message.content, 'agent');
+                    break;
+                case 'log':
+                    addLogEntry(message.content, 'info');
+                    break;
+                case 'progress':
+                    updateProgress(message.metadata);
+                    break;
+                case 'error':
+                    addChatMessage('خطا', message.content, 'error');
+                    addLogEntry(message.content, 'error');
+                    break;
+                case 'completion':
+                    handleJobCompletion(message);
+                    break;
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (connected) {
+                statusEl.className = 'connection-status connected';
+                statusEl.querySelector('span').textContent = 'متصل';
+            } else {
+                statusEl.className = 'connection-status disconnected';
+                statusEl.querySelector('span').textContent = 'قطع شده';
+            }
+        }
+
+        // API Requests
+        async function apiRequest(endpoint, options = {}) {
+            const url = `${state.backendUrl}${endpoint}`;
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            if (state.authToken) {
+                headers['Authorization'] = `Bearer ${state.authToken}`;
+            }
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showModal('settingsModal');
+                        throw new Error('غیر مجاز - لطفاً وارد شوید');
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`API request failed for ${endpoint}:`, error);
+                throw error;
+            }
+        }
+
+        // System Stats
+        async function updateSystemStats() {
+            try {
+                const stats = await apiRequest('/api/stats');
+                
+                document.getElementById('activeJobs').textContent = stats.active_jobs;
+                document.getElementById('totalJobs').textContent = stats.total_jobs;
+                document.getElementById('cpuUsage').textContent = `${Math.round(stats.cpu_usage)}%`;
+                document.getElementById('memoryUsage').textContent = `${Math.round(stats.memory_usage)}%`;
+                document.getElementById('avgResponseTime').textContent = `${Math.round(stats.avg_response_time)}ms`;
+                document.getElementById('uptime').textContent = `${Math.round(stats.uptime / 3600)}h`;
+                
+            } catch (error) {
+                console.error('Failed to update system stats:', error);
+            }
+        }
+
+        // Recent Projects
+        async function loadRecentProjects() {
+            try {
+                const response = await apiRequest('/admin/jobs?per_page=5');
+                const projectsContainer = document.getElementById('recentProjects');
+                
+                if (response.jobs && response.jobs.length > 0) {
+                    projectsContainer.innerHTML = response.jobs.map(job => `
+                        <div class="project-item" onclick="loadProject('${job.job_id}')">
+                            <span class="material-symbols-outlined" style="color: var(--primary);">code</span>
+                            <div class="project-info">
+                                <h4>${job.name}</h4>
+                                <p>${job.project_type} • ${job.languages.join(', ')}</p>
+                            </div>
+                            <div class="project-status ${job.status}">${getStatusText(job.status)}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    projectsContainer.innerHTML = `
+                        <div class="project-item">
+                            <span class="material-symbols-outlined" style="color: var(--text-muted);">info</span>
+                            <div class="project-info">
+                                <h4>هیچ پروژه‌ای یافت نشد</h4>
+                                <p>اولین پروژه خود را ایجاد کنید</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Failed to load recent projects:', error);
+                const projectsContainer = document.getElementById('recentProjects');
+                projectsContainer.innerHTML = `
+                    <div class="project-item">
+                        <span class="material-symbols-outlined" style="color: var(--danger);">error</span>
+                        <div class="project-info">
+                            <h4>خطا در بارگذاری</h4>
+                            <p>نتوانستیم پروژه‌های اخیر را بارگذاری کنیم</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'در انتظار',
+                'running': 'در حال اجرا',
+                'completed': 'تکمیل شده',
+                'failed': 'ناموفق',
+                'cancelled': 'لغو شده'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Project Management
+        async function generateProject(formData) {
+            try {
+                const response = await apiRequest('/api/generate', {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+                
+                state.currentJobId = response.job_id;
+                
+                showProgressCard();
+                addChatMessage('سیستم', `پروژه "${formData.name}" آغاز شد (ID: ${response.job_id})`, 'system');
+                addLogEntry(`پروژه جدید ایجاد شد: ${response.job_id}`, 'info');
+                
+                // Start polling for status
+                pollJobStatus();
+                
+                return response;
+            } catch (error) {
+                addChatMessage('خطا', `خطا در ایجاد پروژه: ${error.message}`, 'error');
+                addLogEntry(`خطا در ایجاد پروژه: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        async function pollJobStatus() {
+            if (!state.currentJobId) return;
+            
+            try {
+                const status = await apiRequest(`/status/${state.currentJobId}`);
+                
+                updateProgress({
+                    progress: status.progress,
+                    current_step: status.current_step,
+                    step_number: status.step_number,
+                    total_steps: status.total_steps
+                });
+                
+                if (status.files && status.files.length > 0) {
+                    updateFileTree(status.files);
+                }
+                
+                if (status.status === 'completed') {
+                    handleJobCompletion(status);
+                    return;
+                } else if (status.status === 'failed') {
+                    addChatMessage('خطا', `پروژه ناموفق: ${status.error_message}`, 'error');
+                    addLogEntry(`پروژه ناموفق: ${status.error_message}`, 'error');
+                    return;
+                }
+                
+                // Continue polling if job is still running
+                if (status.status === 'running' || status.status === 'pending') {
+                    setTimeout(pollJobStatus, 5000);
+                }
+                
+            } catch (error) {
+                console.error('Failed to poll job status:', error);
+                setTimeout(pollJobStatus, 10000); // Retry after 10 seconds
+            }
+        }
+
+        function updateProgress(progressData) {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const currentStep = document.getElementById('currentStep');
+            
+            if (progressData.progress !== undefined) {
+                progressFill.style.width = `${progressData.progress}%`;
+            }
+            
+            if (progressData.current_step) {
+                progressText.textContent = progressData.current_step;
+            }
+            
+            if (progressData.step_number !== undefined && progressData.total_steps !== undefined) {
+                currentStep.textContent = `مرحله ${progressData.step_number} از ${progressData.total_steps}`;
+            }
+        }
+
+        function showProgressCard() {
+            document.getElementById('progressCard').style.display = 'block';
+        }
+
+        function handleJobCompletion(data) {
+            addChatMessage('سیستم', 'پروژه با موفقیت تکمیل شد! 🎉', 'system');
+            addLogEntry('پروژه تکمیل شد', 'info');
+            
+            updateProgress({
+                progress: 100,
+                current_step: 'تکمیل شده',
+                step_number: 8,
+                total_steps: 8
+            });
+            
+            // Enable download action
+            const downloadBtn = document.getElementById('downloadProjectAction');
+            downloadBtn.style.opacity = '1';
+            downloadBtn.style.pointerEvents = 'auto';
+            
+            // Refresh recent projects
+            loadRecentProjects();
+        }
+
+        // File Management
+        function updateFileTree(files) {
+            const fileTree = document.getElementById('fileTree');
+            
+            if (!files || files.length === 0) {
+                fileTree.innerHTML = '<div class="file-item">هیچ فایلی یافت نشد</div>';
+                return;
+            }
+            
+            fileTree.innerHTML = files.map(file => `
+                <div class="file-item" onclick="loadFilePreview('${file}')">
+                    <span class="material-symbols-outlined file-icon">${getFileIcon(file)}</span>
+                    <span>${file}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('fileTreeCard').style.display = 'block';
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const iconMap = {
+                'py': 'code',
+                'js': 'javascript',
+                'ts': 'typescript',
+                'html': 'html',
+                'css': 'css',
+                'json': 'data_object',
+                'md': 'description',
+                'txt': 'description',
+                'yml': 'settings',
+                'yaml': 'settings'
+            };
+            return iconMap[ext] || 'description';
+        }
+
+        async function loadFilePreview(filename) {
+            if (!state.currentJobId) return;
+            
+            try {
+                const response = await apiRequest(`/preview/${state.currentJobId}/${filename}`);
+                
+                // Update selected file
+                document.querySelectorAll('.file-item').forEach(item => item.classList.remove('selected'));
+                event.target.closest('.file-item').classList.add('selected');
+                
+                state.selectedFile = {
+                    filename: response.filename,
+                    content: response.content,
+                    language: response.language
+                };
+                
+                // Load into Sandpack
+                loadIntoSandpack(response);
+                
+            } catch (error) {
+                console.error('Failed to load file preview:', error);
+                addChatMessage('خطا', `خطا در بارگذاری فایل: ${error.message}`, 'error');
+            }
+        }
+
+        function loadIntoSandpack(fileData) {
+            const container = document.getElementById('sandpack-container');
+            
+            // Simple code display for now - in a real implementation you'd use Sandpack
+            container.innerHTML = `
+                <div style="padding: 1rem; height: 100%; overflow-y: auto; background: var(--bg-secondary); font-family: var(--font-mono); font-size: 0.85rem;">
+                    <div style="background: var(--bg-primary); padding: 0.5rem; border-radius: var(--radius-xs); margin-bottom: 1rem;">
+                        <strong>${fileData.filename}</strong> (${fileData.language})
+                    </div>
+                    <pre style="white-space: pre-wrap; margin: 0;">${DOMPurify.sanitize(fileData.content)}</pre>
+                </div>
+            `;
+        }
+
+        // Chat and Logs
+        function addChatMessage(sender, content, type = 'agent') {
+            const chatMessages = document.getElementById('chatMessages');
+            const time = new Date().toLocaleTimeString('fa-IR');
+            
+            const messageEl = document.createElement('div');
+            messageEl.className = `chat-message ${type}`;
+            messageEl.innerHTML = `
+                <div class="chat-message-header">
+                    ${sender}
+                    <span class="chat-message-time">${time}</span>
+                </div>
+                <div>${DOMPurify.sanitize(content)}</div>
+            `;
+            
+            chatMessages.appendChild(messageEl);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addLogEntry(message, level = 'info') {
+            const logsContainer = document.getElementById('logsContainer');
+            const time = new Date().toLocaleTimeString('fa-IR');
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${level}`;
+            logEntry.innerHTML = `<span>[${level.toUpperCase()}]</span> ${time} - ${DOMPurify.sanitize(message)}`;
+            
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            
+            // Keep only last 100 entries
+            while (logsContainer.children.length > 100) {
+                logsContainer.removeChild(logsContainer.firstChild);
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Project form submission
+            document.getElementById('projectForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const projectData = {
+                    name: formData.get('name'),
+                    project_type: formData.get('project_type'),
+                    description: formData.get('description'),
+                    languages: Array.from(document.getElementById('languages').selectedOptions).map(opt => opt.value),
+                    frameworks: formData.get('frameworks') ? formData.get('frameworks').split(',').map(f => f.trim()) : [],
+                    complexity: formData.get('complexity'),
+                    features: formData.get('features') ? formData.get('features').split(',').map(f => f.trim()) : [],
+                    mode: formData.get('mode')
+                };
+                
+                try {
+                    const generateBtn = document.getElementById('generateBtn');
+                    generateBtn.innerHTML = '<div class="spinner"></div> در حال پردازش...';
+                    generateBtn.disabled = true;
+                    
+                    await generateProject(projectData);
+                    
+                } catch (error) {
+                    console.error('Project generation failed:', error);
+                } finally {
+                    const generateBtn = document.getElementById('generateBtn');
+                    generateBtn.innerHTML = '<span class="material-symbols-outlined">smart_toy</span> شروع تولید هوشمند';
+                    generateBtn.disabled = false;
+                }
+            });
+            
+            // Quick actions
+            document.getElementById('settingsAction').addEventListener('click', () => showModal('settingsModal'));
+            document.getElementById('uploadFileAction').addEventListener('click', () => showModal('uploadModal'));
+            document.getElementById('downloadProjectAction').addEventListener('click', downloadProject);
+            document.getElementById('templatesAction').addEventListener('click', loadTemplates);
+            
+            // Update stats periodically
+            setInterval(updateSystemStats, 10000);
+        }
+
+        // Quick Actions
+        async function downloadProject() {
+            if (!state.currentJobId) {
+                showNotification('هیچ پروژه‌ای برای دانلود انتخاب نشده', 'warning');
+                return;
+            }
+            
+            try {
+                const url = `${state.backendUrl}/download/${state.currentJobId}`;
+                const link = document.createElement('a');
+                link.href = url;
+                link.click();
+                
+                showNotification('دانلود آغاز شد', 'success');
+            } catch (error) {
+                showNotification('خطا در دانلود پروژه', 'error');
+            }
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('uploadFile');
+            const pathInput = document.getElementById('uploadPath');
+            
+            if (!fileInput.files[0]) {
+                showNotification('لطفاً فایلی انتخاب کنید', 'warning');
+                return;
+            }
+            
+            if (!state.currentJobId) {
+                showNotification('هیچ پروژه‌ای فعال نیست', 'warning');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('job_id', state.currentJobId);
+                if (pathInput.value) {
+                    formData.append('path', pathInput.value);
+                }
+                
+                const response = await fetch(`${state.backendUrl}/api/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${state.authToken}`
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    showNotification('فایل با موفقیت آپلود شد', 'success');
+                    closeModal('uploadModal');
+                    // Refresh file tree
+                    pollJobStatus();
+                } else {
+                    throw new Error('Upload failed');
+                }
+                
+            } catch (error) {
+                showNotification('خطا در آپلود فایل', 'error');
+            }
+        }
+
+        async function loadTemplates() {
+            try {
+                const response = await apiRequest('/api/templates');
+                console.log('Templates:', response.templates);
+                showNotification('قالب‌ها بارگذاری شدند', 'info');
+            } catch (error) {
+                showNotification('خطا در بارگذاری قالب‌ها', 'error');
+            }
+        }
+
+        // Modal Management
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Notifications
+        function showNotification(message, type = 'info') {
+            // Simple notification - in a real implementation you'd create a proper notification system
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            addLogEntry(message, type);
+        }
+
+        // Load project by ID
+        async function loadProject(jobId) {
+            state.currentJobId = jobId;
+            
+            try {
+                const status = await apiRequest(`/status/${jobId}`);
+                
+                if (status.files && status.files.length > 0) {
+                    updateFileTree(status.files);
+                }
+                
+                addChatMessage('سیستم', `پروژه "${status.job_id}" بارگذاری شد`, 'system');
+                
+                if (status.status === 'completed') {
+                    showProgressCard();
+                    updateProgress({
+                        progress: 100,
+                        current_step: 'تکمیل شده',
+                        step_number: status.total_steps,
+                        total_steps: status.total_steps
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Failed to load project:', error);
+                showNotification('خطا در بارگذاری پروژه', 'error');
+            }
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

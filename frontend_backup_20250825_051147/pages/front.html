@@ -1,0 +1,2814 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم چند-عامله هوشمند تولید کد</title>
+    
+    <!-- Enhanced Font Loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Enhanced Color Palette */
+            --primary: #6366f1;
+            --primary-light: #8b5cf6;
+            --primary-dark: #4f46e5;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            /* Advanced Background System */
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #151b2e;
+            --bg-tertiary: #1e2a42;
+            --bg-quaternary: #283548;
+            --bg-glass: rgba(15, 23, 42, 0.7);
+            --bg-glass-light: rgba(255, 255, 255, 0.05);
+            --bg-card: rgba(30, 42, 66, 0.8);
+            
+            /* Enhanced Text Colors */
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-accent: #a855f7;
+            
+            /* Border System */
+            --border-primary: #475569;
+            --border-secondary: #64748b;
+            --border-accent: rgba(168, 85, 247, 0.3);
+            --border-glow: rgba(99, 102, 241, 0.4);
+            
+            /* Advanced Effects */
+            --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.2);
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 40px 80px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 50px rgba(99, 102, 241, 0.3);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            --gradient-secondary: linear-gradient(145deg, #0a0e1a 0%, #151b2e 50%, #1e2a42 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #facc15 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            --blur: blur(32px);
+            --blur-strong: blur(48px);
+            
+            /* Enhanced Border Radius */
+            --radius-xs: 8px;
+            --radius-sm: 16px;
+            --radius: 24px;
+            --radius-lg: 32px;
+            --radius-xl: 48px;
+            
+            /* Animation System */
+            --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            /* Enhanced Typography */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-persian: 'Vazirmatn', sans-serif;
+            --font-icon: 'Material Symbols Outlined';
+            
+            /* Spacing System */
+            --space-xs: 8px;
+            --space-sm: 16px;
+            --space: 24px;
+            --space-lg: 32px;
+            --space-xl: 48px;
+            --space-2xl: 64px;
+            
+            /* Zoom Control System - 30% zoom out */
+            --zoom-scale: 0.7;
+            --zoom-scale-hover: 0.75;
+            --zoom-scale-active: 0.65;
+            
+            /* Enhanced Typography Scale */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --text-4xl: 2.25rem;
+            --text-5xl: 3rem;
+            --text-6xl: 3.75rem;
+            
+            /* Line Heights */
+            --leading-tight: 1.25;
+            --leading-snug: 1.375;
+            --leading-normal: 1.5;
+            --leading-relaxed: 1.625;
+            --leading-loose: 2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Global Zoom Application */
+        body {
+            transform: scale(var(--zoom-scale));
+            transform-origin: top center;
+            width: calc(100% / var(--zoom-scale));
+            height: calc(100vh / var(--zoom-scale));
+            font-family: var(--font-persian);
+            background: var(--gradient-secondary);
+            color: var(--text-primary);
+            line-height: var(--leading-relaxed);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-weight: 400;
+            position: relative;
+            font-size: var(--text-base);
+        }
+
+        /* Enhanced Typography Improvements */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            line-height: var(--leading-tight);
+            letter-spacing: -0.025em;
+        }
+
+        h1 { font-size: var(--text-5xl); }
+        h2 { font-size: var(--text-4xl); }
+        h3 { font-size: var(--text-3xl); }
+        h4 { font-size: var(--text-2xl); }
+        h5 { font-size: var(--text-xl); }
+        h6 { font-size: var(--text-lg); }
+
+        p {
+            font-size: var(--text-base);
+            line-height: var(--leading-relaxed);
+            margin-bottom: var(--space-sm);
+        }
+
+        /* Enhanced Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 50% 100%, rgba(217, 70, 239, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 100% 50%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -2;
+            animation: backgroundMove 20s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.01) 2px, rgba(255,255,255,0.01) 4px),
+                repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(99,102,241,0.02) 1px, rgba(99,102,241,0.02) 2px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes backgroundMove {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(90deg); }
+        }
+
+        /* Enhanced Container with Better Spacing */
+        .container {
+            max-width: 2000px;
+            margin: 0 auto;
+            padding: var(--space-xl);
+            position: relative;
+        }
+
+        /* Floating Particles Effect */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Enhanced Header with Better Typography */
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            margin-bottom: var(--space-2xl);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 1.2s var(--bounce);
+        }
+
+        .header:hover::before {
+            transform: scaleX(1);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-title {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space);
+            letter-spacing: -0.02em;
+            font-family: var(--font-primary);
+            line-height: var(--leading-tight);
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(1.125rem, 3vw, 1.75rem);
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto var(--space-lg);
+            opacity: 0.9;
+            font-family: var(--font-persian);
+            line-height: var(--leading-relaxed);
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+            margin-top: var(--space-lg);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: var(--space) var(--space-lg);
+            background: var(--bg-glass-light);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .stat-value {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            color: var(--primary-light);
+            font-family: var(--font-primary);
+        }
+
+        .stat-label {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        /* Main Layout Enhancement with Better Grid */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 500px 1fr 400px;
+            gap: var(--space-xl);
+            min-height: calc(100vh - 400px);
+        }
+
+        /* Enhanced Sidebar */
+        .sidebar, .right-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        /* Enhanced Card System */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            position: relative;
+            transition: var(--transition-slow);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space);
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .card-title {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            font-family: var(--font-primary);
+        }
+
+        /* Enhanced Form Elements with Better Typography */
+        .form-group {
+            margin-bottom: var(--space-lg);
+            position: relative;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            margin-bottom: var(--space-sm);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: var(--text-base);
+            font-family: var(--font-primary);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: var(--space) var(--space-lg);
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: var(--font-persian);
+            font-size: var(--text-base);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            background: var(--bg-secondary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            font-family: var(--font-mono);
+            resize: vertical;
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Enhanced Button System */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space) var(--space-lg);
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font-primary);
+            font-size: var(--text-base);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-sm {
+            padding: var(--space-xs) var(--space);
+            font-size: var(--text-sm);
+        }
+
+        /* API Configuration Section */
+        .api-config {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .api-provider {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-sm);
+            border: 1px solid var(--border-primary);
+            transition: var(--transition);
+        }
+
+        .api-provider:hover {
+            border-color: var(--border-glow);
+        }
+
+        .api-provider.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .api-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+        }
+
+        .api-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-xs);
+        }
+
+        .api-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .api-status.disconnected {
+            background: var(--danger);
+        }
+
+        /* Enhanced Agent Cards */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--space);
+        }
+
+        .agent-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            text-align: center;
+            transition: var(--transition-slow);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-accent);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .agent-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .agent-card.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.15);
+            transform: scale(1.05);
+        }
+
+        .agent-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin: 0 auto var(--space);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-3xl);
+            background: var(--gradient-primary);
+            color: white;
+            position: relative;
+        }
+
+        .agent-avatar::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Status Bar */
+        .status-bar {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+        }
+
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .status-working { background: var(--warning); }
+        .status-complete { background: var(--success); }
+        .status-error { background: var(--danger); }
+
+        /* Enhanced Progress Bar */
+        .progress-container {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: var(--space-lg);
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.8s ease-in-out;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Enhanced Tabs */
+        .tabs {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            padding: 8px;
+            margin-bottom: var(--space-lg);
+            gap: 4px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: var(--space) var(--space-lg);
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-family: var(--font-primary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+        }
+
+        .tab:hover {
+            background: var(--bg-glass-light);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        /* Enhanced Tab Content */
+        .tab-content {
+            display: none;
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            height: 700px;
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Real-time Logs */
+        .logs-container {
+            padding: var(--space-lg);
+            height: 100%;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            padding: var(--space) var(--space-lg);
+            margin-bottom: var(--space-sm);
+            border-radius: var(--radius-sm);
+            border-left: 4px solid;
+            background: rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.4s ease;
+            transition: var(--transition);
+        }
+
+        .log-entry:hover {
+            transform: translateX(8px);
+        }
+
+        .log-info { border-color: var(--info); }
+        .log-success { border-color: var(--success); }
+        .log-warning { border-color: var(--warning); }
+        .log-error { border-color: var(--danger); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* File Tree Enhancement */
+        .file-tree {
+            padding: var(--space-lg);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: var(--space) var(--space-lg);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-xs);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--space);
+            font-family: var(--font-mono);
+        }
+
+        .file-item:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(8px);
+        }
+
+        .file-item.active {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        /* Monitor Cards */
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space);
+        }
+
+        .monitor-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .monitor-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: var(--space-xs);
+            font-family: var(--font-primary);
+        }
+
+        .monitor-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space);
+        }
+
+        .chat-message {
+            display: flex;
+            gap: var(--space);
+            animation: slideIn 0.3s ease;
+        }
+
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: var(--bg-tertiary);
+            padding: var(--space) var(--space-lg);
+            border-radius: var(--radius);
+            max-width: 70%;
+            border: 1px solid var(--border-primary);
+        }
+
+        .chat-message.user .message-content {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .chat-input-container {
+            padding: var(--space-lg);
+            border-top: 1px solid var(--border-primary);
+            display: flex;
+            gap: var(--space);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: var(--space) var(--space-lg);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            font-family: var(--font-persian);
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            min-width: 350px;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.4s var(--bounce);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { border-color: var(--success); }
+        .notification.error { border-color: var(--danger); }
+        .notification.warning { border-color: var(--warning); }
+
+        /* Enhanced Empty States */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: var(--space-xl);
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: var(--space-lg);
+            opacity: 0.6;
+            animation: pulse 2s infinite;
+        }
+
+        /* Material Icons */
+        .material-icon {
+            font-family: var(--font-icon);
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+        }
+
+        /* Loading Animations */
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .main-layout {
+                grid-template-columns: 400px 1fr 300px;
+                gap: var(--space-lg);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: var(--space-lg);
+            }
+            
+            .sidebar { order: 2; }
+            .main-content { order: 1; }
+            .right-sidebar { order: 3; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space);
+            }
+            
+            .header {
+                padding: var(--space-lg);
+                margin-bottom: var(--space-lg);
+            }
+            
+            .card {
+                padding: var(--space);
+            }
+            
+            .header-stats {
+                flex-direction: column;
+                gap: var(--space);
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .btn:focus-visible,
+        .form-input:focus-visible,
+        .tab:focus-visible {
+            outline: 3px solid var(--primary-light);
+            outline-offset: 2px;
+        }
+
+        /* API Key Management Styles */
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: 0.875rem;
+        }
+
+        .auth-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        .auth-indicator.connected {
+            background: var(--success);
+        }
+
+        .auth-indicator.error {
+            background: var(--danger);
+        }
+
+        .auth-indicator.warning {
+            background: var(--warning);
+        }
+
+        .api-key-management {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group .form-input {
+            padding-right: 50px;
+        }
+
+        .btn-toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-toggle-password:hover {
+            color: var(--text-primary);
+            background: var(--bg-glass-light);
+        }
+
+        .api-key-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: var(--space-sm);
+        }
+
+        .api-key-actions .btn {
+            font-size: 0.875rem;
+            padding: var(--space-sm) var(--space);
+        }
+
+        .api-key-status {
+            padding: var(--space);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .api-key-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+            display: block;
+        }
+
+        .api-key-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+            display: block;
+        }
+
+        .api-key-status.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+            display: block;
+        }
+
+        .security-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            padding: var(--space);
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .security-notice .material-icon {
+            color: var(--primary);
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .form-help {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        .required {
+            color: var(--danger);
+            margin-left: 4px;
+        }
+
+        /* Enhanced Form Styles */
+        .form-input:invalid {
+            border-color: var(--danger);
+        }
+
+        .form-input:valid {
+            border-color: var(--success);
+        }
+
+        /* Loading States */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Enhanced Communication System */
+        .communication-status {
+            position: fixed;
+            bottom: var(--space-lg);
+            left: var(--space-lg);
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: var(--text-sm);
+            transition: var(--transition);
+            transform: translateY(100px);
+            opacity: 0;
+        }
+
+        .communication-status.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .communication-status.connected {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .communication-status.disconnected {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .communication-status.reconnecting {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .connection-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: pulse 2s infinite;
+        }
+
+        .connection-indicator.connected {
+            background: var(--success);
+        }
+
+        .connection-indicator.disconnected {
+            background: var(--danger);
+        }
+
+        .connection-indicator.reconnecting {
+            background: var(--warning);
+        }
+
+        /* Enhanced Error Handling */
+        .error-boundary {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            display: none;
+        }
+
+        .error-boundary.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .error-title {
+            color: var(--danger);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .error-message {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            line-height: var(--leading-relaxed);
+        }
+
+        .retry-button {
+            margin-top: var(--space);
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: var(--space-sm) var(--space);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: var(--text-sm);
+            transition: var(--transition);
+        }
+
+        .retry-button:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced Loading States */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 26, 0.8);
+            backdrop-filter: var(--blur);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition-slow);
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(99, 102, 241, 0.3);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: var(--space-lg);
+            color: var(--text-primary);
+            font-size: var(--text-lg);
+            font-weight: 500;
+        }
+
+        /* Enhanced Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .toast {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(100%);
+            transition: transform 0.3s var(--bounce);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .toast.warning {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .toast.info {
+            border-color: var(--info);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .toast.success .toast-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .toast.error .toast-icon {
+            background: var(--danger);
+            color: white;
+        }
+
+        .toast.warning .toast-icon {
+            background: var(--warning);
+            color: white;
+        }
+
+        .toast.info .toast-icon {
+            background: var(--info);
+            color: white;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            color: var(--text-primary);
+        }
+
+        .toast-message {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            color: var(--text-primary);
+            background: var(--bg-glass-light);
+        }
+
+        /* Responsive API Key Management */
+        @media (max-width: 768px) {
+            .api-key-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-status {
+                justify-self: flex-start;
+                margin-top: var(--space-xs);
+            }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Communication System -->
+    <div class="communication-status" id="communicationStatus">
+        <div class="connection-indicator" id="connectionIndicator"></div>
+        <span id="connectionText">بررسی اتصال...</span>
+    </div>
+
+    <!-- Enhanced Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">در حال بارگذاری...</div>
+        </div>
+    </div>
+
+    <!-- Enhanced Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Enhanced Error Boundary -->
+    <div class="error-boundary" id="errorBoundary">
+        <div class="error-title">
+            <span class="material-icon">error</span>
+            خطا در ارتباط با سرور
+        </div>
+        <div class="error-message" id="errorMessage">
+            مشکلی در ارتباط با سرور پیش آمده است. لطفاً دوباره تلاش کنید.
+        </div>
+        <button class="retry-button" onclick="app.retryConnection()">
+            <span class="material-icon">refresh</span>
+            تلاش مجدد
+        </button>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Enhanced Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="header-title">
+                    🚀 سیستم چند-عامله هوشمند تولید کد
+                </h1>
+                <p class="header-subtitle">
+                    پلتفرم پیشرفته تولید پروژه با هوش مصنوعی و چندین عامل هوشمند برای ساخت اپلیکیشن‌های کامل و حرفه‌ای با قابلیت‌های سفارشی‌سازی بی‌شتر و یکپارچگی API
+                </p>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">15</div>
+                        <div class="stat-label">پروژه فعال</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">عامل آنلاین</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">42</div>
+                        <div class="stat-label">API متصل</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">99.9%</div>
+                        <div class="stat-label">آپتایم</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Left Sidebar -->
+            <aside class="sidebar">
+                <!-- Project Generation -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">rocket_launch</span>
+                        <h3 class="card-title">تولید پروژه جدید</h3>
+                    </div>
+                    
+                    <form id="projectForm">
+                        <div class="form-group">
+                            <label for="project-name" class="form-label">
+                                <span class="material-icon">badge</span>
+                                نام پروژه
+                            </label>
+                            <input type="text" id="project-name" class="form-input" placeholder="مثال: اپلیکیشن فروشگاهی هوشمند" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-type" class="form-label">
+                                <span class="material-icon">category</span>
+                                نوع پروژه
+                            </label>
+                            <select id="project-type" class="form-select" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="web-app">وب اپلیکیشن</option>
+                                <option value="mobile-app">اپلیکیشن موبایل</option>
+                                <option value="desktop-app">اپلیکیشن دسکتاپ</option>
+                                <option value="api">API و بک‌اند</option>
+                                <option value="ai-ml">هوش مصنوعی/یادگیری ماشین</option>
+                                <option value="blockchain">بلاکچین</option>
+                                <option value="game">بازی</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-desc" class="form-label">
+                                <span class="material-icon">description</span>
+                                توضیحات پروژه
+                            </label>
+                            <textarea id="project-desc" class="form-textarea" placeholder="توضیح کامل در مورد پروژه، نیازمندی‌ها، قابلیت‌های مورد نظر و جزئیات تکنیکی..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-lang" class="form-label">
+                                <span class="material-icon">code</span>
+                                زبان‌های برنامه نویسی
+                            </label>
+                            <input type="text" id="project-lang" class="form-input" placeholder="مثال: Python, JavaScript, TypeScript, Rust">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-framework" class="form-label">
+                                <span class="material-icon">extension</span>
+                                فریم‌ورک‌ها و کتابخانه‌ها
+                            </label>
+                            <input type="text" id="project-framework" class="form-input" placeholder="مثال: Django, React, FastAPI, TensorFlow">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-complexity" class="form-label">
+                                <span class="material-icon">tune</span>
+                                سطح پیچیدگی
+                            </label>
+                            <select id="project-complexity" class="form-select">
+                                <option value="simple">ساده (1-3 روز)</option>
+                                <option value="medium" selected>متوسط (1-2 هفته)</option>
+                                <option value="complex">پیچیده (1-2 ماه)</option>
+                                <option value="enterprise">سازمانی (3+ ماه)</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <span class="material-icon">play_arrow</span>
+                            شروع تولید
+                        </button>
+                    </form>
+                </div>
+
+                <!-- API Key Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">vpn_key</span>
+                        <h3 class="card-title">مدیریت کلید API</h3>
+                        <div class="auth-status" id="authStatus">
+                            <span class="auth-indicator" id="authIndicator"></span>
+                            <span class="auth-text" id="authText">بررسی...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="api-key-management">
+                        <div class="form-group">
+                            <label for="api-key" class="form-label">
+                                <span class="material-icon">key</span>
+                                کلید API
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="password" id="api-key" class="form-input" placeholder="کلید API خود را وارد کنید" autocomplete="off">
+                                <button type="button" class="btn-toggle-password" id="toggleApiKey">
+                                    <span class="material-icon">visibility</span>
+                                </button>
+                            </div>
+                            <div class="form-help">
+                                کلید API برای احراز هویت و دسترسی به سرویس مورد نیاز است
+                            </div>
+                        </div>
+                        
+                        <div class="api-key-actions">
+                            <button type="button" class="btn btn-primary" id="validateApiKey">
+                                <span class="material-icon">verified</span>
+                                اعتبارسنجی کلید
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="saveApiKey">
+                                <span class="material-icon">save</span>
+                                ذخیره محلی
+                            </button>
+                            <button type="button" class="btn btn-danger" id="clearApiKey">
+                                <span class="material-icon">delete</span>
+                                پاک کردن
+                            </button>
+                        </div>
+                        
+                        <div class="api-key-status" id="apiKeyStatus"></div>
+                        
+                        <div class="security-notice">
+                            <span class="material-icon">security</span>
+                            <div>
+                                <strong>توجه امنیتی:</strong>
+                                کلید API شما به صورت محلی ذخیره می‌شود و هیچ‌گاه به سرورهای خارجی ارسال نمی‌شود.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Configuration -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">api</span>
+                        <h3 class="card-title">تنظیمات API</h3>
+                    </div>
+                    
+                    <div class="api-config">
+                        <div class="api-provider active" data-provider="avalai">
+                            <div class="api-info">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E" alt="Aval AI" class="api-logo">
+                                <div>
+                                    <div style="font-weight: 600;">Aval AI</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">سرویس هوش مصنوعی محلی</div>
+                                </div>
+                            </div>
+                            <div class="api-status" id="avalApiStatus"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="api-base-url" class="form-label">
+                                <span class="material-icon">link</span>
+                                آدرس پایه API
+                            </label>
+                            <input type="url" id="api-base-url" class="form-input" value="https://api.avalai.ir/v1" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-mode" class="form-label">
+                                <span class="material-icon">play_circle</span>
+                                حالت اجرا
+                            </label>
+                            <select id="project-mode" class="form-select">
+                                <option value="dry">آزمایشی (بدون اجرا)</option>
+                                <option value="live">زنده (اجرای کامل)</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-secondary btn-full" id="testConnection">
+                            <span class="material-icon">wifi_tethering</span>
+                            تست اتصال
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Agent Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">group</span>
+                        <h3 class="card-title">وضعیت عامل‌ها</h3>
+                    </div>
+                    <div class="agents-grid">
+                        <div class="agent-card active">
+                            <div class="agent-avatar">🤖</div>
+                            <div class="agent-name">مدیر پروژه</div>
+                            <div class="agent-status">در حال کار</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">👨‍💻</div>
+                            <div class="agent-name">برنامه نویس</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">🎨</div>
+                            <div class="agent-name">طراح UI/UX</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">🧪</div>
+                            <div class="agent-name">تستر</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">🔒</div>
+                            <div class="agent-name">امنیت</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-avatar">📊</div>
+                            <div class="agent-name">تحلیلگر</div>
+                            <div class="agent-status">آماده</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Status Bar -->
+                <div class="status-bar">
+                    <div class="status-info">
+                        <div class="status-indicator status-working"></div>
+                        <span class="status-text">در حال تولید پروژه...</span>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-text">گام 1 از 10</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 10%;" id="progressBar"></div>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" data-tab-target="#logs-tab">
+                        <span class="material-icon">terminal</span>
+                        لاگ‌ها
+                    </button>
+                    <button class="tab" data-tab-target="#files-tab">
+                        <span class="material-icon">folder</span>
+                        فایل‌ها
+                    </button>
+                    <button class="tab" data-tab-target="#preview-tab">
+                        <span class="material-icon">preview</span>
+                        پیش‌نمایش
+                    </button>
+                    <button class="tab" data-tab-target="#chat-tab">
+                        <span class="material-icon">chat</span>
+                        چت با عامل‌ها
+                    </button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div id="logs-tab" class="tab-content active">
+                    <div class="logs-container" id="logsContainer">
+                        <div class="log-entry log-info">
+                            <span>[00:00:01]</span> سیستم با موفقیت راه‌اندازی شد
+                        </div>
+                        <div class="log-entry log-success">
+                            <span>[00:00:02]</span> اتصال به APIهای هوش مصنوعی برقرار شد
+                        </div>
+                        <div class="log-entry log-warning">
+                            <span>[00:00:05]</span> عامل "مدیر پروژه" در حال بررسی نیازمندی‌ها
+                        </div>
+                    </div>
+                </div>
+
+                <div id="files-tab" class="tab-content">
+                    <div class="file-tree" id="fileTree">
+                        <div class="empty-state">
+                            <span class="material-icon" style="font-size: 80px;">folder_open</span>
+                            <h3>هنوز فایلی ایجاد نشده</h3>
+                            <p>پس از شروع فرآیند تولید، فایل‌های پروژه اینجا نمایش داده خواهند شد.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="preview-tab" class="tab-content">
+                    <div class="empty-state">
+                        <span class="material-icon" style="font-size: 80px;">visibility</span>
+                        <h3>پیش‌نمایشی برای نمایش وجود ندارد</h3>
+                        <p>پس از تولید کد، می‌توانید پیش‌نمایش آن را در اینجا مشاهده کنید.</p>
+                    </div>
+                </div>
+
+                <div id="chat-tab" class="tab-content">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-message">
+                                <div class="message-avatar">🤖</div>
+                                <div class="message-content">
+                                    سلام! من مدیر پروژه هستم. چه پروژه‌ای می‌خواهید بسازیم؟
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <textarea class="chat-input" placeholder="پیام خود را بنویسید..." id="chatInput"></textarea>
+                            <button class="btn btn-primary" id="sendChatBtn">
+                                <span class="material-icon">send</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="right-sidebar">
+                <!-- System Monitor -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">monitor_heart</span>
+                        <h3 class="card-title">مانیتور سیستم</h3>
+                    </div>
+                    <div class="monitor-grid">
+                        <div class="monitor-card">
+                            <div class="monitor-value">87%</div>
+                            <div class="monitor-label">CPU</div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-value">12.4GB</div>
+                            <div class="monitor-label">RAM</div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-value">42ms</div>
+                            <div class="monitor-label">API Latency</div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-value">1.2M</div>
+                            <div class="monitor-label">Tokens/hr</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Projects -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">history</span>
+                        <h3 class="card-title">پروژه‌های اخیر</h3>
+                    </div>
+                    <div class="file-tree">
+                        <div class="file-item">
+                            <span class="material-icon">web</span>
+                            <div>
+                                <div>فروشگاه آنلاین</div>
+                                <div class="file-meta">2 ساعت پیش</div>
+                            </div>
+                        </div>
+                        <div class="file-item">
+                            <span class="material-icon">smartphone</span>
+                            <div>
+                                <div>اپ موبایل</div>
+                                <div class="file-meta">1 روز پیش</div>
+                            </div>
+                        </div>
+                        <div class="file-item">
+                            <span class="material-icon">psychology</span>
+                            <div>
+                                <div>AI Chatbot</div>
+                                <div class="file-meta">3 روز پیش</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icon">flash_on</span>
+                        <h3 class="card-title">اقدامات سریع</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button class="btn btn-secondary btn-full btn-sm">
+                            <span class="material-icon">upload_file</span>
+                            آپلود فایل
+                        </button>
+                        <button class="btn btn-secondary btn-full btn-sm">
+                            <span class="material-icon">file_download</span>
+                            دانلود پروژه
+                        </button>
+                        <button class="btn btn-secondary btn-full btn-sm">
+                            <span class="material-icon">share</span>
+                            اشتراک‌گذاری
+                        </button>
+                        <button class="btn btn-secondary btn-full btn-sm">
+                            <span class="material-icon">backup</span>
+                            پشتیبان‌گیری
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification success" id="notification">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="material-icon">check_circle</span>
+            <div>
+                <div style="font-weight: 600;">عملیات موفق</div>
+                <div style="font-size: 0.875rem; opacity: 0.8;">پروژه با موفقیت ایجاد شد!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced JavaScript functionality
+        class EnhancedAICodeGenerator {
+            constructor() {
+                this.init();
+                this.setupEventListeners();
+                this.createParticles();
+                this.startSystemMonitoring();
+                this.simulateProgress();
+                this.initializeCommunicationSystem();
+            }
+
+            init() {
+                this.currentStep = 0;
+                this.totalSteps = 10;
+                this.agents = [
+                    { name: 'مدیر پروژه', status: 'active', emoji: '🤖' },
+                    { name: 'برنامه نویس', status: 'ready', emoji: '👨‍💻' },
+                    { name: 'طراح UI/UX', status: 'ready', emoji: '🎨' },
+                    { name: 'تستر', status: 'ready', emoji: '🧪' },
+                    { name: 'امنیت', status: 'ready', emoji: '🔒' },
+                    { name: 'تحلیلگر', status: 'ready', emoji: '📊' }
+                ];
+                this.apis = {
+                    openai: { connected: true, latency: 42 },
+                    anthropic: { connected: true, latency: 38 },
+                    google: { connected: false, latency: 0 }
+                };
+            }
+
+            setupEventListeners() {
+                // Tab functionality
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => this.switchTab(tab));
+                });
+
+                // Form submission
+                document.getElementById('projectForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.startProjectGeneration();
+                });
+
+                // Chat functionality
+                document.getElementById('sendChatBtn').addEventListener('click', () => {
+                    this.sendChatMessage();
+                });
+
+                document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendChatMessage();
+                    }
+                });
+
+                // API provider selection
+                document.querySelectorAll('.api-provider').forEach(provider => {
+                    provider.addEventListener('click', () => this.selectAPIProvider(provider));
+                });
+
+                // Agent card interactions
+                document.querySelectorAll('.agent-card').forEach(card => {
+                    card.addEventListener('click', () => this.selectAgent(card));
+                });
+
+                // API Key Management
+                this.setupAPIKeyManagement();
+            }
+
+            setupAPIKeyManagement() {
+                // API Key toggle visibility
+                const toggleApiKey = document.getElementById('toggleApiKey');
+                const apiKeyInput = document.getElementById('api-key');
+                
+                if (toggleApiKey && apiKeyInput) {
+                    toggleApiKey.addEventListener('click', () => {
+                        const isPassword = apiKeyInput.type === 'password';
+                        apiKeyInput.type = isPassword ? 'text' : 'password';
+                        toggleApiKey.querySelector('.material-icon').textContent = 
+                            isPassword ? 'visibility_off' : 'visibility';
+                    });
+                }
+
+                // API Key validation
+                const validateBtn = document.getElementById('validateApiKey');
+                if (validateBtn) {
+                    validateBtn.addEventListener('click', () => this.validateAPIKey());
+                }
+
+                // API Key save
+                const saveBtn = document.getElementById('saveApiKey');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', () => this.saveAPIKey());
+                }
+
+                // API Key clear
+                const clearBtn = document.getElementById('clearApiKey');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', () => this.clearAPIKey());
+                }
+
+                // Test connection
+                const testBtn = document.getElementById('testConnection');
+                if (testBtn) {
+                    testBtn.addEventListener('click', () => this.testConnection());
+                }
+
+                // Load saved API key and check authentication status
+                this.loadSavedAPIKey();
+                this.checkAuthenticationStatus();
+            }
+
+            // Enhanced Communication System
+            async validateAPIKey() {
+                const apiKeyInput = document.getElementById('api-key');
+                const validateBtn = document.getElementById('validateApiKey');
+                const statusDiv = document.getElementById('apiKeyStatus');
+                
+                const apiKey = apiKeyInput.value.trim();
+                
+                if (!apiKey) {
+                    this.showToast('error', 'خطا', 'لطفاً کلید API را وارد کنید');
+                    return;
+                }
+
+                // Show loading state
+                validateBtn.classList.add('loading');
+                validateBtn.disabled = true;
+                this.showLoading('در حال بررسی کلید API...');
+
+                try {
+                    const response = await this.makeRequest('/api/validate-key', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': apiKey
+                        },
+                        body: JSON.stringify({ api_key: apiKey })
+                    });
+
+                    if (response.valid) {
+                        this.showToast('success', 'موفقیت', 'کلید API معتبر است ✓');
+                        this.updateAuthStatus('connected', 'احراز هویت موفق');
+                        this.showAPIKeyStatus('success', 'کلید API معتبر است ✓');
+                    } else {
+                        this.showToast('error', 'خطا', response.message || 'کلید API نامعتبر است');
+                        this.updateAuthStatus('error', 'خطا در احراز هویت');
+                        this.showAPIKeyStatus('error', response.message || 'کلید API نامعتبر است');
+                    }
+                } catch (error) {
+                    console.error('API key validation error:', error);
+                    this.showToast('error', 'خطا در اتصال', 'خطا در اتصال به سرور');
+                    this.updateAuthStatus('error', 'خطا در اتصال');
+                    this.showAPIKeyStatus('error', 'خطا در اتصال به سرور');
+                } finally {
+                    validateBtn.classList.remove('loading');
+                    validateBtn.disabled = false;
+                    this.hideLoading();
+                }
+            }
+
+            // Enhanced Request Handler with Retry Logic
+            async makeRequest(url, options = {}, retries = 3) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    this.updateConnectionStatus('connected');
+                    return data;
+
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    
+                    if (error.name === 'AbortError') {
+                        throw new Error('درخواست به دلیل تاخیر لغو شد');
+                    }
+
+                    if (retries > 0) {
+                        this.showToast('warning', 'تلاش مجدد', `تلاش مجدد در 2 ثانیه... (${4 - retries}/3)`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        return this.makeRequest(url, options, retries - 1);
+                    }
+
+                    this.updateConnectionStatus('disconnected');
+                    throw error;
+                }
+            }
+
+            // Enhanced Connection Status Management
+            updateConnectionStatus(status) {
+                const statusEl = document.getElementById('communicationStatus');
+                const indicatorEl = document.getElementById('connectionIndicator');
+                const textEl = document.getElementById('connectionText');
+
+                if (statusEl && indicatorEl && textEl) {
+                    statusEl.className = `communication-status ${status} show`;
+                    indicatorEl.className = `connection-indicator ${status}`;
+
+                    switch (status) {
+                        case 'connected':
+                            textEl.textContent = 'اتصال برقرار';
+                            break;
+                        case 'disconnected':
+                            textEl.textContent = 'اتصال قطع شد';
+                            break;
+                        case 'reconnecting':
+                            textEl.textContent = 'در حال اتصال مجدد...';
+                            break;
+                        default:
+                            textEl.textContent = 'بررسی اتصال...';
+                    }
+                }
+            }
+
+            // Enhanced Loading Management
+            showLoading(message = 'در حال بارگذاری...') {
+                const overlay = document.getElementById('loadingOverlay');
+                const text = document.getElementById('loadingText');
+                
+                if (overlay && text) {
+                    text.textContent = message;
+                    overlay.classList.add('show');
+                }
+            }
+
+            hideLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    overlay.classList.remove('show');
+                }
+            }
+
+            // Enhanced Toast Notification System
+            showToast(type, title, message, duration = 5000) {
+                const container = document.getElementById('toastContainer');
+                if (!container) return;
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const iconMap = {
+                    success: 'check_circle',
+                    error: 'error',
+                    warning: 'warning',
+                    info: 'info'
+                };
+
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <span class="material-icon">${iconMap[type] || 'info'}</span>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <span class="material-icon">close</span>
+                    </button>
+                `;
+
+                container.appendChild(toast);
+
+                // Show animation
+                setTimeout(() => toast.classList.add('show'), 100);
+
+                // Auto remove
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+
+            // Enhanced Error Handling
+            showError(message, retryCallback = null) {
+                const errorEl = document.getElementById('errorBoundary');
+                const messageEl = document.getElementById('errorMessage');
+                
+                if (errorEl && messageEl) {
+                    messageEl.textContent = message;
+                    errorEl.classList.add('show');
+                    
+                    if (retryCallback) {
+                        const retryBtn = errorEl.querySelector('.retry-button');
+                        if (retryBtn) {
+                            retryBtn.onclick = retryCallback;
+                        }
+                    }
+                }
+            }
+
+            hideError() {
+                const errorEl = document.getElementById('errorBoundary');
+                if (errorEl) {
+                    errorEl.classList.remove('show');
+                }
+            }
+
+            // Retry Connection Method
+            retryConnection() {
+                this.hideError();
+                this.updateConnectionStatus('reconnecting');
+                this.checkAuthenticationStatus();
+            }
+
+            // Initialize Enhanced Communication System
+            initializeCommunicationSystem() {
+                // Initial connection check
+                this.checkInitialConnection();
+                
+                // Set up periodic health checks
+                setInterval(() => {
+                    this.performHealthCheck();
+                }, 30000); // Check every 30 seconds
+                
+                // Set up connection status monitoring
+                this.startConnectionMonitoring();
+            }
+
+            // Initial Connection Check
+            async checkInitialConnection() {
+                try {
+                    await this.makeRequest('/health');
+                    this.updateConnectionStatus('connected');
+                    this.hideError();
+                } catch (error) {
+                    this.updateConnectionStatus('disconnected');
+                    this.showError('خطا در اتصال اولیه به سرور', () => this.retryConnection());
+                }
+            }
+
+            // Periodic Health Check
+            async performHealthCheck() {
+                try {
+                    await this.makeRequest('/health');
+                    this.updateConnectionStatus('connected');
+                } catch (error) {
+                    this.updateConnectionStatus('disconnected');
+                }
+            }
+
+            // Connection Monitoring
+            startConnectionMonitoring() {
+                // Monitor online/offline status
+                window.addEventListener('online', () => {
+                    this.updateConnectionStatus('reconnecting');
+                    this.checkInitialConnection();
+                });
+
+                window.addEventListener('offline', () => {
+                    this.updateConnectionStatus('disconnected');
+                    this.showToast('warning', 'اتصال اینترنت', 'اتصال اینترنت قطع شد');
+                });
+
+                // Monitor page visibility for better resource management
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        // Page is hidden, reduce monitoring frequency
+                        this.isPageHidden = true;
+                    } else {
+                        // Page is visible, resume normal monitoring
+                        this.isPageHidden = false;
+                        this.performHealthCheck();
+                    }
+                });
+            }
+
+            saveAPIKey() {
+                const apiKeyInput = document.getElementById('api-key');
+                const apiKey = apiKeyInput.value.trim();
+                
+                if (!apiKey) {
+                    this.showAPIKeyStatus('warning', 'هیچ کلیدی برای ذخیره وجود ندارد');
+                    return;
+                }
+
+                try {
+                    localStorage.setItem('api_key', apiKey);
+                    this.showAPIKeyStatus('success', 'کلید API با موفقیت ذخیره شد');
+                } catch (error) {
+                    console.error('Error saving API key:', error);
+                    this.showAPIKeyStatus('error', 'خطا در ذخیره کلید API');
+                }
+            }
+
+            loadSavedAPIKey() {
+                try {
+                    const savedApiKey = localStorage.getItem('api_key');
+                    if (savedApiKey) {
+                        const apiKeyInput = document.getElementById('api-key');
+                        if (apiKeyInput) {
+                            apiKeyInput.value = savedApiKey;
+                            this.showAPIKeyStatus('success', 'کلید ذخیره شده بارگذاری شد');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading saved API key:', error);
+                }
+            }
+
+            clearAPIKey() {
+                const apiKeyInput = document.getElementById('api-key');
+                const statusDiv = document.getElementById('apiKeyStatus');
+                
+                if (confirm('آیا مطمئن هستید که می‌خواهید کلید API را پاک کنید؟')) {
+                    apiKeyInput.value = '';
+                    localStorage.removeItem('api_key');
+                    statusDiv.className = 'api-key-status';
+                    statusDiv.textContent = '';
+                    this.updateAuthStatus('', 'بررسی...');
+                }
+            }
+
+            async testConnection() {
+                const testBtn = document.getElementById('testConnection');
+                
+                testBtn.classList.add('loading');
+                testBtn.disabled = true;
+                this.showLoading('در حال آزمایش اتصال...');
+
+                try {
+                    const result = await this.makeRequest('/health');
+
+                    this.showToast('success', 'اتصال موفق', 'اتصال به سرور با موفقیت برقرار شد');
+                    this.updateAPIStatus('avalai', true);
+                    this.updateConnectionStatus('connected');
+                } catch (error) {
+                    console.error('Connection test error:', error);
+                    this.showToast('error', 'خطا در اتصال', 'خطا در برقراری ارتباط با سرور');
+                    this.updateAPIStatus('avalai', false);
+                    this.updateConnectionStatus('disconnected');
+                } finally {
+                    testBtn.classList.remove('loading');
+                    testBtn.disabled = false;
+                    this.hideLoading();
+                }
+            }
+
+            async checkAuthenticationStatus() {
+                try {
+                    const result = await this.makeRequest('/health');
+
+                    if (result.authentication) {
+                        const isEnabled = result.authentication.enabled;
+                        const totalKeys = result.authentication.total_keys;
+                        
+                        if (isEnabled) {
+                            this.updateAuthStatus('warning', `احراز هویت فعال (${totalKeys} کلید)`);
+                        } else {
+                            this.updateAuthStatus('connected', 'احراز هویت غیرفعال');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking auth status:', error);
+                    this.updateAuthStatus('error', 'خطا در بررسی وضعیت');
+                }
+            }
+
+            showAPIKeyStatus(type, message) {
+                const statusDiv = document.getElementById('apiKeyStatus');
+                if (statusDiv) {
+                    statusDiv.className = `api-key-status ${type}`;
+                    statusDiv.textContent = message;
+                }
+            }
+
+            updateAuthStatus(status, text) {
+                const indicator = document.getElementById('authIndicator');
+                const textEl = document.getElementById('authText');
+                
+                if (indicator && textEl) {
+                    indicator.className = `auth-indicator ${status}`;
+                    textEl.textContent = text;
+                }
+            }
+
+            updateAPIStatus(provider, connected) {
+                const statusEl = document.getElementById(`${provider}ApiStatus`);
+                if (statusEl) {
+                    statusEl.className = `api-status ${connected ? '' : 'disconnected'}`;
+                }
+            }
+
+            createParticles() {
+                const particlesContainer = document.getElementById('particles');
+                const particleCount = 50;
+
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 10 + 's';
+                    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                    particlesContainer.appendChild(particle);
+                }
+            }
+
+            switchTab(activeTab) {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding content
+                activeTab.classList.add('active');
+                const targetContent = document.querySelector(activeTab.dataset.tabTarget);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            }
+
+            async startProjectGeneration() {
+                const form = document.getElementById('projectForm');
+                const projectName = document.getElementById('project-name').value.trim();
+                const projectDesc = document.getElementById('project-desc').value.trim();
+                const projectType = document.getElementById('project-type').value;
+                const projectComplexity = document.getElementById('project-complexity').value;
+                const projectMode = document.getElementById('project-mode').value || 'dry';
+                const apiKey = document.getElementById('api-key').value.trim();
+                
+                // Validation
+                if (!projectName) {
+                    this.showToast('error', 'خطا', 'نام پروژه الزامی است');
+                    return;
+                }
+                
+                if (!projectDesc || projectDesc.length < 10) {
+                    this.showToast('error', 'خطا', 'توضیحات پروژه باید حداقل 10 کاراکتر باشد');
+                    return;
+                }
+
+                // Check API key if authentication is enabled
+                try {
+                    const healthData = await this.makeRequest('/health');
+                    
+                    if (healthData.authentication && healthData.authentication.enabled && !apiKey) {
+                        this.showToast('error', 'خطا', 'کلید API برای ادامه الزامی است');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error checking authentication status:', error);
+                    this.showToast('warning', 'هشدار', 'نمی‌توان وضعیت احراز هویت را بررسی کرد');
+                }
+                
+                // Prepare request data
+                const requestData = {
+                    description: `پروژه: ${projectName}\nنوع: ${projectType}\nسطح پیچیدگی: ${projectComplexity}\n\nتوضیحات:\n${projectDesc}`,
+                    mode: projectMode,
+                    rounds: 3
+                };
+                
+                // Add API key if provided
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (apiKey) {
+                    headers['X-API-Key'] = apiKey;
+                }
+                
+                this.showToast('info', 'شروع تولید پروژه', 'در حال ارسال درخواست...');
+                this.addLog('شروع فرآیند تولید پروژه: ' + projectName, 'info');
+                this.showLoading('در حال ایجاد پروژه...');
+                
+                try {
+                    const result = await this.makeRequest('/api/generate', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(requestData)
+                    });
+                    
+                    this.showToast('success', 'درخواست ثبت شد', `شناسه پروژه: ${result.job_id}`);
+                    this.addLog(`پروژه با شناسه ${result.job_id} ایجاد شد`, 'success');
+                    
+                    // Start monitoring the job progress
+                    this.monitorJobProgress(result.job_id);
+                } catch (error) {
+                    console.error('Project generation error:', error);
+                    this.showToast('error', 'خطا در اتصال', 'عدم دسترسی به سرور');
+                    this.addLog('خطا در اتصال به سرور', 'error');
+                    this.showError('خطا در ایجاد پروژه. لطفاً دوباره تلاش کنید.', () => this.startProjectGeneration());
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            async monitorJobProgress(jobId) {
+                const maxAttempts = 100;
+                let attempts = 0;
+                let consecutiveErrors = 0;
+                
+                const checkProgress = async () => {
+                    if (attempts >= maxAttempts) {
+                        this.addLog('زمان بررسی پروژه به پایان رسید', 'warning');
+                        this.showToast('warning', 'زمان به پایان رسید', 'زمان بررسی پروژه به پایان رسید');
+                        return;
+                    }
+                    
+                    try {
+                        const status = await this.makeRequest(`/api/status/${jobId}`);
+                        
+                        this.updateProgress(status.progress, status.message);
+                        this.addLog(`${status.message} (${status.progress}%)`, 'info');
+                        consecutiveErrors = 0; // Reset error counter on success
+                        
+                        if (status.status === 'completed') {
+                            this.showToast('success', 'پروژه تکمیل شد', 'فایل‌های پروژه آماده دانلود است');
+                            this.addLog('پروژه با موفقیت تکمیل شد', 'success');
+                            this.hideLoading();
+                            return;
+                        } else if (status.status === 'failed') {
+                            this.showToast('error', 'خطا در تولید پروژه', status.message);
+                            this.addLog('خطا در تولید پروژه: ' + status.message, 'error');
+                            this.hideLoading();
+                            return;
+                        }
+                        
+                        // Continue monitoring with adaptive interval
+                        const interval = Math.min(2000 + (attempts * 100), 10000); // Increase interval gradually
+                        setTimeout(checkProgress, interval);
+                        
+                    } catch (error) {
+                        console.error('Error monitoring job progress:', error);
+                        this.addLog('خطا در بررسی پیشرفت پروژه', 'error');
+                        consecutiveErrors++;
+                        
+                        if (consecutiveErrors >= 3) {
+                            this.showToast('error', 'خطا در نظارت', 'خطاهای متوالی در بررسی پیشرفت پروژه');
+                            this.hideLoading();
+                            return;
+                        }
+                        
+                        // Retry with exponential backoff
+                        const retryDelay = Math.min(2000 * Math.pow(2, consecutiveErrors - 1), 10000);
+                        setTimeout(checkProgress, retryDelay);
+                    }
+                    
+                    attempts++;
+                };
+                
+                checkProgress();
+            }
+
+            updateProgress(progress, message) {
+                const progressBar = document.getElementById('progressBar');
+                const statusText = document.querySelector('.status-text');
+                
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+                
+                if (statusText) {
+                    statusText.textContent = message || `پیشرفت: ${progress}%`;
+                }
+            }
+
+            simulateProjectSteps() {
+                const steps = [
+                    'تحلیل نیازمندی‌ها',
+                    'طراحی معماری',
+                    'ایجاد ساختار پروژه',
+                    'تولید کد بک‌اند',
+                    'تولید کد فرانت‌اند',
+                    'ایجاد دیتابیس',
+                    'پیاده‌سازی API',
+                    'تست واحد',
+                    'تست یکپارچه‌سازی',
+                    'نهایی‌سازی و بستن بسته'
+                ];
+
+                let currentStep = 0;
+                const stepInterval = setInterval(() => {
+                    if (currentStep < steps.length) {
+                        this.addLog(`گام ${currentStep + 1}: ${steps[currentStep]}`, 'info');
+                        this.updateProgress((currentStep + 1) / steps.length * 100);
+                        
+                        // Simulate agent work
+                        if (currentStep < this.agents.length) {
+                            this.activateAgent(currentStep);
+                        }
+                        
+                        // Simulate file creation
+                        if (currentStep > 2) {
+                            this.addFileToTree(`step_${currentStep}.py`, 'python');
+                        }
+                        
+                        currentStep++;
+                    } else {
+                        clearInterval(stepInterval);
+                        this.completeProject();
+                    }
+                }, 2000);
+            }
+
+            completeProject() {
+                this.addLog('پروژه با موفقیت تولید شد!', 'success');
+                this.showToast('success', 'پروژه تکمیل شد', 'پروژه با موفقیت تولید شد!');
+                this.updateProgress(100);
+                
+                // Reset all agents to ready
+                document.querySelectorAll('.agent-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+            }
+
+            activateAgent(index) {
+                document.querySelectorAll('.agent-card').forEach((card, i) => {
+                    card.classList.remove('active');
+                    if (i === index) {
+                        card.classList.add('active');
+                        const agentName = card.querySelector('.agent-name').textContent;
+                        this.addLog(`عامل "${agentName}" فعال شد`, 'warning');
+                    }
+                });
+            }
+
+            addLog(message, type = 'info') {
+                const logsContainer = document.getElementById('logsContainer');
+                const timestamp = new Date().toLocaleTimeString('fa-IR');
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.innerHTML = `<span>[${timestamp}]</span> ${message}`;
+                logsContainer.appendChild(logEntry);
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+
+            updateProgress(percentage) {
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = percentage + '%';
+                
+                const statusText = document.querySelector('.status-text');
+                if (percentage >= 100) {
+                    statusText.textContent = 'تولید پروژه کامل شد';
+                    document.querySelector('.status-indicator').className = 'status-indicator status-complete';
+                }
+            }
+
+            addFileToTree(filename, type) {
+                const fileTree = document.getElementById('fileTree');
+                const emptyState = fileTree.querySelector('.empty-state');
+                
+                if (emptyState) {
+                    emptyState.remove();
+                }
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const icon = type === 'python' ? 'code' : 'description';
+                fileItem.innerHTML = `
+                    <span class="material-icon">${icon}</span>
+                    <div>
+                        <div>${filename}</div>
+                        <div class="file-meta">همین الان</div>
+                    </div>
+                `;
+                
+                fileTree.appendChild(fileItem);
+            }
+
+            sendChatMessage() {
+                const chatInput = document.getElementById('chatInput');
+                const message = chatInput.value.trim();
+                
+                if (message) {
+                    this.addChatMessage(message, 'user');
+                    chatInput.value = '';
+                    
+                    // Simulate AI response
+                    setTimeout(() => {
+                        const responses = [
+                            'درخواست شما در حال بررسی است...',
+                            'اطلاعات بیشتری در مورد این قسمت نیاز دارم.',
+                            'این ایده جالبی است! بیایید آن را پیاده‌سازی کنیم.',
+                            'من این کار را انجام می‌دهم.'
+                        ];
+                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                        this.addChatMessage(randomResponse, 'assistant');
+                    }, 1000);
+                }
+            }
+
+            addChatMessage(message, sender) {
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${sender}`;
+                
+                const avatar = sender === 'user' ? 'U' : '🤖';
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">${avatar}</div>
+                    <div class="message-content">${message}</div>
+                `;
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            selectAPIProvider(provider) {
+                document.querySelectorAll('.api-provider').forEach(p => p.classList.remove('active'));
+                provider.classList.add('active');
+                
+                const providerName = provider.dataset.provider;
+                this.addLog(`API ${providerName} انتخاب شد`, 'info');
+            }
+
+            selectAgent(agent) {
+                document.querySelectorAll('.agent-card').forEach(a => a.classList.remove('active'));
+                agent.classList.add('active');
+                
+                const agentName = agent.querySelector('.agent-name').textContent;
+                this.addLog(`عامل "${agentName}" انتخاب شد`, 'info');
+            }
+
+            showNotification(message, type = 'info') {
+                // Legacy method - now uses enhanced toast system
+                this.showToast(type, 'اعلان سیستم', message);
+            }
+
+            startSystemMonitoring() {
+                setInterval(() => {
+                    // Update system stats randomly
+                    document.querySelectorAll('.monitor-value').forEach((element, index) => {
+                        if (index === 0) { // CPU
+                            element.textContent = (Math.random() * 40 + 60).toFixed(0) + '%';
+                        } else if (index === 1) { // RAM
+                            element.textContent = (Math.random() * 4 + 10).toFixed(1) + 'GB';
+                        } else if (index === 2) { // Latency
+                            element.textContent = (Math.random() * 30 + 30).toFixed(0) + 'ms';
+                        } else if (index === 3) { // Tokens
+                            element.textContent = (Math.random() * 0.5 + 1).toFixed(1) + 'M';
+                        }
+                    });
+                }, 3000);
+            }
+
+            simulateProgress() {
+                // Initial welcome message
+                setTimeout(() => {
+                    this.addLog('سیستم چند-عامله آماده است', 'success');
+                    this.addLog('برای شروع، لطفاً اطلاعات پروژه را وارد کنید', 'info');
+                }, 1000);
+            }
+        }
+
+        // Initialize the enhanced system
+        document.addEventListener('DOMContentLoaded', () => {
+            new EnhancedAICodeGenerator();
+        });
+    </script>
+</body>
+</html>
