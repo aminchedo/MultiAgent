@@ -216,23 +216,100 @@ async def general_exception_handler(request: Request, exc: Exception):
 # Health check endpoints
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": time.time(),
-        "memory_usage": "N/A",
-        "system_info": {
-            "python_version": "3.9+",
-            "fastapi_version": "latest",
-            "agents_status": "operational"
-        },
-        "endpoints": {
-            "api": "/api/",
-            "docs": "/docs",
-            "frontend": "/static/index.html",
-            "health": "/health"
+    """Enhanced health check endpoint with real system metrics"""
+    try:
+        import psutil
+        import sys
+        import platform
+        from datetime import datetime
+        
+        # Get real system metrics
+        memory = psutil.virtual_memory()
+        cpu_percent = psutil.cpu_percent(interval=1)
+        disk = psutil.disk_usage('/')
+        
+        health_status = {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "uptime_seconds": time.time() - getattr(app, 'start_time', time.time()),
+            "version": settings.app_version,
+            "system_metrics": {
+                "memory_usage_percent": memory.percent,
+                "memory_available_mb": round(memory.available / (1024 * 1024), 2),
+                "cpu_usage_percent": cpu_percent,
+                "disk_usage_percent": round((disk.used / disk.total) * 100, 2),
+                "disk_free_gb": round(disk.free / (1024**3), 2)
+            },
+            "system_info": {
+                "python_version": sys.version.split()[0],
+                "platform": platform.system(),
+                "fastapi_version": "latest",
+                "agents_status": "operational"
+            },
+            "endpoints": {
+                "api": "/api/",
+                "docs": "/docs" if settings.debug else None,
+                "frontend": "/static/index.html",
+                "health": "/health",
+                "metrics": "/metrics"
+            }
         }
-    }
+        
+        # Test critical dependencies
+        health_checks = {}
+        
+        # Test database connection if configured
+        try:
+            stats = await db_manager.get_system_stats()
+            health_checks["database"] = "connected"
+            health_status["database_stats"] = stats
+        except Exception as e:
+            health_checks["database"] = f"error: {str(e)}"
+            health_status["status"] = "degraded"
+        
+        # Test agents directory
+        try:
+            import os
+            agents_dir = "agents/"
+            if os.path.exists(agents_dir):
+                agent_files = [f for f in os.listdir(agents_dir) if f.endswith('.py')]
+                health_checks["agents"] = f"found_{len(agent_files)}_files"
+            else:
+                health_checks["agents"] = "directory_not_found"
+                health_status["status"] = "degraded"
+        except Exception as e:
+            health_checks["agents"] = f"error: {str(e)}"
+            health_status["status"] = "degraded"
+        
+        health_status["health_checks"] = health_checks
+        
+        return health_status
+        
+    except ImportError:
+        # Fallback if psutil not available
+        return {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "message": "Limited health check - psutil not available",
+            "system_info": {
+                "python_version": "3.11+",
+                "fastapi_version": "latest",
+                "agents_status": "operational"
+            },
+            "endpoints": {
+                "api": "/api/",
+                "docs": "/docs",
+                "frontend": "/static/index.html",
+                "health": "/health"
+            }
+        }
+    except Exception as e:
+        logger.error("Health check failed", error=str(e))
+        return {
+            "status": "error",
+            "timestamp": datetime.now().isoformat(),
+            "error": str(e)
+        }
 
 
 @app.get("/health/ready")
@@ -265,6 +342,103 @@ async def liveness_check():
         "timestamp": time.time(),
         "version": settings.app_version
     }
+
+
+# Production metrics endpoint
+@app.get("/metrics")
+async def get_metrics():
+    """Production metrics endpoint for monitoring"""
+    try:
+        import psutil
+        from datetime import datetime
+        
+        # Get application metrics
+        app_start_time = getattr(app, 'start_time', time.time())
+        uptime = time.time() - app_start_time
+        
+        # System metrics
+        memory = psutil.virtual_memory()
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        disk = psutil.disk_usage('/')
+        
+        # Network I/O
+        net_io = psutil.net_io_counters()
+        
+        # Process metrics
+        process = psutil.Process()
+        process_memory = process.memory_info()
+        
+        metrics = {
+            "timestamp": datetime.now().isoformat(),
+            "application": {
+                "name": settings.app_name,
+                "version": settings.app_version,
+                "uptime_seconds": uptime,
+                "status": "running"
+            },
+            "system": {
+                "cpu_percent": cpu_percent,
+                "memory_percent": memory.percent,
+                "memory_total_mb": round(memory.total / (1024 * 1024), 2),
+                "memory_available_mb": round(memory.available / (1024 * 1024), 2),
+                "memory_used_mb": round(memory.used / (1024 * 1024), 2),
+                "disk_usage_percent": round((disk.used / disk.total) * 100, 2),
+                "disk_total_gb": round(disk.total / (1024**3), 2),
+                "disk_free_gb": round(disk.free / (1024**3), 2),
+                "disk_used_gb": round(disk.used / (1024**3), 2)
+            },
+            "process": {
+                "memory_rss_mb": round(process_memory.rss / (1024 * 1024), 2),
+                "memory_vms_mb": round(process_memory.vms / (1024 * 1024), 2),
+                "cpu_percent": process.cpu_percent(),
+                "num_threads": process.num_threads(),
+                "num_fds": process.num_fds() if hasattr(process, 'num_fds') else "N/A"
+            },
+            "network": {
+                "bytes_sent": net_io.bytes_sent,
+                "bytes_recv": net_io.bytes_recv,
+                "packets_sent": net_io.packets_sent,
+                "packets_recv": net_io.packets_recv
+            }
+        }
+        
+        # Add database metrics if available
+        try:
+            db_stats = await db_manager.get_system_stats()
+            metrics["database"] = {
+                "status": "connected",
+                "stats": db_stats
+            }
+        except Exception as e:
+            metrics["database"] = {
+                "status": "error",
+                "error": str(e)
+            }
+        
+        # Add agent metrics placeholder
+        metrics["agents"] = {
+            "total_agents": 1,  # Will be updated when agent metrics are implemented
+            "status": "operational"
+        }
+        
+        return metrics
+        
+    except ImportError:
+        return {
+            "error": "psutil not installed - limited metrics available",
+            "basic_metrics": {
+                "timestamp": datetime.now().isoformat(),
+                "application": {
+                    "name": settings.app_name,
+                    "version": settings.app_version,
+                    "uptime_seconds": time.time() - getattr(app, 'start_time', time.time()),
+                    "status": "running"
+                }
+            }
+        }
+    except Exception as e:
+        logger.error("Metrics collection failed", error=str(e))
+        return {"error": str(e), "timestamp": datetime.now().isoformat()}
 
 
 # Include API routes
