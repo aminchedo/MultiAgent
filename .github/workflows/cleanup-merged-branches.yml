@@ -1,0 +1,98 @@
+name: Cleanup Merged Branches
+
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    # Allow manual trigger
+
+jobs:
+  cleanup:
+    if: github.event.pull_request.merged == true || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      # Allow deleting branches
+      actions: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+      - name: Fetch latest changes
+        run: |
+          git fetch origin
+          git checkout main
+          git pull origin main
+
+      - name: Find merged branches
+        id: find_branches
+        run: |
+          # Find all merged remote branches (excluding main, HEAD, and recent branches)
+          MERGED_BRANCHES=$(git branch -r --merged main | grep -v "main\|HEAD" | grep "origin/cursor/" | sed 's/origin\///' || true)
+          echo "Found merged branches:"
+          echo "$MERGED_BRANCHES"
+          
+          # Count branches
+          BRANCH_COUNT=$(echo "$MERGED_BRANCHES" | wc -w)
+          echo "branch_count=$BRANCH_COUNT" >> $GITHUB_OUTPUT
+          
+          # Save branches to file for next step
+          echo "$MERGED_BRANCHES" > merged_branches.txt
+
+      - name: Delete merged branches
+        if: steps.find_branches.outputs.branch_count > 0
+        run: |
+          echo "Deleting merged branches..."
+          
+          # Read branches from file and delete them
+          while IFS= read -r branch; do
+            if [ ! -z "$branch" ]; then
+              echo "Deleting branch: $branch"
+              git push --delete origin "$branch" || echo "Failed to delete $branch (may already be deleted)"
+            fi
+          done < merged_branches.txt
+          
+          # Clean up local tracking references
+          git remote prune origin
+
+      - name: Create summary comment (for PR trigger)
+        if: github.event_name == 'pull_request' && steps.find_branches.outputs.branch_count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchCount = '${{ steps.find_branches.outputs.branch_count }}';
+            const body = `🧹 **Automated Branch Cleanup**
+            
+            ✅ Successfully cleaned up ${branchCount} merged branches after PR merge.
+            
+            This helps keep the repository clean and organized.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Cleanup summary
+        run: |
+          echo "=== Branch Cleanup Summary ==="
+          echo "Branches processed: ${{ steps.find_branches.outputs.branch_count }}"
+          echo "Cleanup completed successfully!"
+          
+          # Show current branch status
+          echo "Remaining remote branches:"
+          git branch -r | wc -l
