@@ -17,43 +17,48 @@ import {
 const agents = [
   {
     id: 'planner',
-    name: 'Project Planner',
+    name: '🧠 Vibe Planner',
     icon: FileText,
     color: 'text-blue-400',
     bgColor: 'bg-blue-400/10',
-    description: 'Analyzing requirements and creating project structure'
+    description: 'Analyzing your vibe and decomposing it into technical requirements',
+    vibeTask: 'Understanding your vision and creating a detailed technical plan'
   },
   {
-    id: 'code_generator',
-    name: 'Code Generator',
+    id: 'coder',
+    name: '👨‍💻 Vibe Coder',
     icon: Code,
     color: 'text-green-400',
     bgColor: 'bg-green-400/10',
-    description: 'Generating React components and application logic'
+    description: 'Generating code that perfectly matches your vibe',
+    vibeTask: 'Writing clean, modern code that brings your vision to life'
   },
   {
-    id: 'tester',
-    name: 'Test Engineer',
-    icon: TestTube,
+    id: 'critic',
+    name: '🔍 Vibe Critic',
+    icon: CheckCircle,
     color: 'text-yellow-400',
     bgColor: 'bg-yellow-400/10',
-    description: 'Creating unit tests and integration tests'
+    description: 'Reviewing code quality and ensuring vibe alignment',
+    vibeTask: 'Making sure the code truly captures your original vibe'
   },
   {
-    id: 'doc_generator',
-    name: 'Documentation Writer',
+    id: 'file_manager',
+    name: '📁 File Manager',
     icon: BookOpen,
     color: 'text-purple-400',
     bgColor: 'bg-purple-400/10',
-    description: 'Writing documentation and README files'
+    description: 'Organizing project structure and creating download package',
+    vibeTask: 'Packaging your complete project for download'
   },
   {
-    id: 'reviewer',
-    name: 'Code Reviewer',
-    icon: CheckCircle,
+    id: 'orchestrator',
+    name: '🎭 Workflow Orchestrator',
+    icon: Sparkles,
     color: 'text-pink-400',
     bgColor: 'bg-pink-400/10',
-    description: 'Reviewing code quality and optimization'
+    description: 'Coordinating the entire vibe coding process',
+    vibeTask: 'Ensuring perfect collaboration between all agents'
   }
 ]
 
@@ -171,12 +176,21 @@ export default function GenerationPage() {
           </motion.div>
           
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">
-            AI Agents at Work
+            {currentJob.mode === 'vibe' ? '✨ Vibe Coding in Progress' : 'AI Agents at Work'}
           </h1>
           
           <p className="text-gray-300 mb-4">
-            {currentJob.description}
+            {currentJob.mode === 'vibe' 
+              ? `Bringing your vibe to life: "${currentJob.description}"` 
+              : currentJob.description
+            }
           </p>
+          
+          {currentJob.mode === 'vibe' && (
+            <p className="text-sm text-purple-300 mb-4">
+              🤖 Watch 5 specialized AI agents collaborate to transform your vision into reality
+            </p>
+          )}
           
           {/* Progress Bar */}
           <div className="w-full bg-gray-800 rounded-full h-3 mb-4">
@@ -207,7 +221,17 @@ export default function GenerationPage() {
                   <h3 className="text-xl font-semibold text-white">
                     {currentAgent.name} is working...
                   </h3>
-                  <p className="text-gray-300">{currentAgent.description}</p>
+                  <p className="text-gray-300">
+                    {currentJob.mode === 'vibe' && currentAgent.vibeTask 
+                      ? currentAgent.vibeTask 
+                      : currentAgent.description
+                    }
+                  </p>
+                  {currentJob.mode === 'vibe' && (
+                    <p className="text-sm text-purple-300 mt-1">
+                      ✨ Specially tuned for vibe-based project generation
+                    </p>
+                  )}
                 </div>
                 <Loader2 className="w-6 h-6 animate-spin ml-auto text-purple-400" />
               </div>
@@ -242,7 +266,9 @@ export default function GenerationPage() {
                   }`} />
                   <div className="flex-1">
                     <h3 className="font-semibold text-white">{agent.name}</h3>
-                    <p className="text-sm text-gray-400">{agent.description}</p>
+                    <p className="text-sm text-gray-400">
+                      {currentJob.mode === 'vibe' && agent.vibeTask ? agent.vibeTask : agent.description}
+                    </p>
                   </div>
                   {isActive && <Loader2 className="w-5 h-5 animate-spin text-purple-400" />}
                   {isDone && <CheckCircle className="w-5 h-5 text-green-400" />}

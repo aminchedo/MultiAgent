@@ -65,20 +65,57 @@ export class ProductionClient {
     });
   }
 
-  // Create vibe job endpoint
+  // Create vibe job endpoint using the enhanced vibe coding workflow
   async createVibeJob(vibe: string, options: any = {}): Promise<{ data: { id: string }, error?: string }> {
-    const response = await this.request<{ job_id: string }>('/api/jobs', {
-      method: 'POST',
-      body: JSON.stringify({ 
-        prompt: vibe,
-        ...options 
-      }),
-    });
-    
-    return {
-      data: { id: response.job_id },
-      error: undefined
-    };
+    try {
+      // Try the new dedicated vibe coding endpoint first
+      const vibeData = new URLSearchParams({
+        vibe_prompt: vibe,
+        project_type: options.projectType || 'web',
+        complexity: options.complexity || 'simple',
+        ...(options.framework && { framework: options.framework }),
+        ...(options.styling && { styling: options.styling })
+      });
+
+      const response = await this.request<{ job_id: string }>('/api/vibe-coding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: vibeData,
+      });
+      
+      return {
+        data: { id: response.job_id },
+        error: undefined
+      };
+    } catch (vibeError) {
+      console.warn('Vibe endpoint failed, falling back to standard endpoint:', vibeError);
+      
+      // Fallback to traditional endpoint for backward compatibility
+      try {
+        const response = await this.request<{ job_id: string }>('/api/jobs', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            prompt: vibe,
+            description: vibe,
+            name: `Vibe Project: ${vibe.slice(0, 30)}...`,
+            mode: 'vibe',
+            ...options 
+          }),
+        });
+        
+        return {
+          data: { id: response.job_id },
+          error: undefined
+        };
+      } catch (fallbackError: any) {
+        return {
+          data: { id: '' },
+          error: fallbackError.message || 'Failed to create vibe project'
+        };
+      }
+    }
   }
 
   // Status endpoint
