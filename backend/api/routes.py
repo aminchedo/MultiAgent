@@ -852,3 +852,185 @@ async def websocket_endpoint(websocket: WebSocket, job_id: Optional[str] = None)
                 
     except WebSocketDisconnect:
         manager.disconnect(connection_id)
+
+
+# Vibe Coding Endpoints
+@router.post("/api/vibe-coding")
+@limiter.limit("3/minute")
+async def vibe_coding_endpoint(
+    request: Request,
+    vibe_request: Dict[str, Any],
+    current_user: Optional[Dict] = Depends(get_current_user)
+):
+    """
+    Vibe Coding endpoint - Generate projects using vibe prompt analysis.
+    
+    This endpoint orchestrates the entire vibe workflow:
+    1. VibePlannerAgent - Analyzes vibe prompt
+    2. VibeCoderAgent - Generates code
+    3. VibeCriticAgent - Reviews quality
+    4. VibeFileManagerAgent - Organizes files
+    """
+    try:
+        # Import vibe agents
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        from agents.vibe_workflow_orchestrator_agent import VibeWorkflowOrchestratorAgent
+        
+        # Validate request
+        if not vibe_request.get('vibe_prompt'):
+            raise HTTPException(
+                status_code=400,
+                detail="vibe_prompt is required"
+            )
+        
+        # Initialize orchestrator
+        orchestrator = VibeWorkflowOrchestratorAgent()
+        
+        # Execute vibe workflow
+        logger.info(f"🚀 Starting vibe coding workflow for: {vibe_request['vibe_prompt'][:50]}...")
+        workflow_result = orchestrator.orchestrate_vibe_project(vibe_request)
+        
+        # Return result
+        return {
+            "success": workflow_result.get('workflow_status') == 'completed',
+            "workflow_id": workflow_result.get('workflow_id'),
+            "project_id": workflow_result.get('project_id'),
+            "workflow_status": workflow_result.get('workflow_status'),
+            "progress": workflow_result.get('progress', {}),
+            "project_data": workflow_result.get('project_data', {}),
+            "summary": workflow_result.get('summary', {}),
+            "error_log": workflow_result.get('error_log', []),
+            "timing": workflow_result.get('timing', {}),
+            "agent_results": {
+                agent: {
+                    "success": result.get('success', False),
+                    "agent": result.get('agent', agent)
+                } for agent, result in workflow_result.get('agent_results', {}).items()
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Vibe coding workflow failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Vibe coding workflow failed: {str(e)}"
+        )
+
+
+@router.get("/api/vibe-projects/{project_id}")
+@limiter.limit("30/minute")
+async def get_vibe_project(
+    request: Request,
+    project_id: int,
+    current_user: Optional[Dict] = Depends(get_current_user)
+):
+    """Get vibe project details by ID."""
+    try:
+        # Import database utilities
+        import sqlite3
+        import json
+        
+        conn = sqlite3.connect("backend/vibe_projects.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT id, vibe_prompt, project_type, status, created_at, completed_at, project_files, error_message
+            FROM vibe_projects 
+            WHERE id = ?
+        """, (project_id,))
+        
+        result = cursor.fetchone()
+        conn.close()
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Vibe project not found")
+        
+        return {
+            "id": result[0],
+            "vibe_prompt": result[1],
+            "project_type": result[2],
+            "status": result[3],
+            "created_at": result[4],
+            "completed_at": result[5],
+            "project_files": json.loads(result[6]) if result[6] else {},
+            "error_message": result[7]
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get vibe project: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/api/vibe-metrics")
+@limiter.limit("10/minute")
+async def get_vibe_metrics(
+    request: Request,
+    current_user: Optional[Dict] = Depends(get_current_user)
+):
+    """Get vibe agents metrics and performance data."""
+    try:
+        # Import orchestrator to get agent metrics
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        from agents.vibe_workflow_orchestrator_agent import VibeWorkflowOrchestratorAgent
+        
+        orchestrator = VibeWorkflowOrchestratorAgent()
+        agent_metrics = orchestrator.get_agent_metrics()
+        
+        # Get database metrics
+        import sqlite3
+        conn = sqlite3.connect("backend/vibe_projects.db")
+        cursor = conn.cursor()
+        
+        # Get project statistics
+        cursor.execute("SELECT COUNT(*) FROM vibe_projects")
+        total_projects = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM vibe_projects WHERE status = 'completed'")
+        completed_projects = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM vibe_projects WHERE status = 'failed'")
+        failed_projects = cursor.fetchone()[0]
+        
+        # Get agent operation statistics
+        cursor.execute("""
+            SELECT agent_name, COUNT(*) as operations, 
+                   SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful_operations,
+                   AVG(response_time) as avg_response_time
+            FROM agent_metrics 
+            GROUP BY agent_name
+        """)
+        agent_stats = cursor.fetchall()
+        
+        conn.close()
+        
+        # Calculate success rate
+        success_rate = (completed_projects / total_projects * 100) if total_projects > 0 else 0
+        
+        return {
+            "vibe_platform_metrics": {
+                "total_projects": total_projects,
+                "completed_projects": completed_projects,
+                "failed_projects": failed_projects,
+                "success_rate": round(success_rate, 2)
+            },
+            "agent_metrics": agent_metrics,
+            "agent_statistics": [
+                {
+                    "agent_name": stat[0],
+                    "total_operations": stat[1],
+                    "successful_operations": stat[2],
+                    "success_rate": round((stat[2] / stat[1] * 100) if stat[1] > 0 else 0, 2),
+                    "avg_response_time": round(stat[3], 3) if stat[3] else 0
+                } for stat in agent_stats
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get vibe metrics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
