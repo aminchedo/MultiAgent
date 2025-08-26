@@ -5,17 +5,13 @@ import json
 import asyncio
 import uuid
 import os
-<<<<<<< HEAD
 import zipfile
 import tempfile
 import time
-=======
 import sys
->>>>>>> cursor/bc-e2fa0403-b40e-4c65-9a69-dda967a8b502-84c3
 from typing import Dict, Any
 from pathlib import Path
 import structlog
-import sys
 sys.path.append('/workspace')
 
 # Add agents to Python path
@@ -60,16 +56,14 @@ app.add_middleware(
 # Store active WebSocket connections
 active_connections: Dict[str, WebSocket] = {}
 
-<<<<<<< HEAD
-# Store job data
+# Store job data (from main branch)
 job_data: Dict[str, Dict] = {}
 
-# Store generated projects
+# Store generated projects (from main branch)
 generated_projects: Dict[str, Dict] = {}
-=======
-# Job storage for tracking vibe coding progress
+
+# Job storage for tracking vibe coding progress (from feature branch)
 job_store: Dict[str, Dict[str, Any]] = {}
->>>>>>> cursor/bc-e2fa0403-b40e-4c65-9a69-dda967a8b502-84c3
 
 @app.get("/health")
 async def health_check():
@@ -98,255 +92,146 @@ async def get_templates():
                 "category": "backend"
             },
             {
-                "id": "fullstack",
-                "name": "Full Stack App",
-                "description": "React frontend + Node.js backend",
-                "category": "fullstack"
+                "id": "landing-page",
+                "name": "Landing Page",
+                "description": "Marketing landing page",
+                "category": "marketing"
+            },
+            {
+                "id": "dashboard",
+                "name": "Admin Dashboard",
+                "description": "Administrative dashboard",
+                "category": "admin"
             }
         ]
     }
 
-@app.post("/api/vibe-coding")
-async def create_vibe_project(
-    vibe_request: Dict[str, Any],
-    background_tasks: BackgroundTasks
-):
-    """Create a project from a natural language vibe description using real agents."""
-    try:
-        # Import the real vibe agents - add full path
-        import sys
-        import os
-        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-        from agents.vibe_planner_agent import VibePlannerAgent
-        from agents.vibe_coder_agent import VibeCoderAgent
-        from agents.vibe_critic_agent import VibeCriticAgent
-        from agents.vibe_file_manager_agent import VibeFileManagerAgent
-        
-        # Validate request
-        if not vibe_request.get('prompt'):
-            raise HTTPException(status_code=400, detail="prompt is required")
-        
-        # Generate job ID
-        job_id = str(uuid.uuid4())
-        
-        # Store job data
-        job_data[job_id] = {
-            "job_id": job_id,
-            "prompt": vibe_request['prompt'],
-            "project_type": vibe_request.get('project_type', 'web'),
-            "status": "processing",
-            "created_at": time.time(),
-            "progress": 0,
-            "current_step": "Planning",
-            "agents": {
-                "planner": {"status": "starting", "progress": 0},
-                "coder": {"status": "pending", "progress": 0},
-                "critic": {"status": "pending", "progress": 0},
-                "file_manager": {"status": "pending", "progress": 0}
-            }
-        }
-        
-        # Start background task for real agent processing
-        background_tasks.add_task(
-            execute_real_vibe_workflow,
-            job_id,
-            vibe_request
-        )
-        
-        logger.info("🚀 Real vibe project generation started", 
-                   job_id=job_id, 
-                   prompt=vibe_request['prompt'][:100])
-        
-        return {
-            "success": True,
-            "message": "🚀 Your vibe project is being created! Real AI agents are working on your vision.",
-            "job_id": job_id,
-            "estimated_duration": 120
-        }
-        
-    except Exception as e:
-        logger.error("Failed to start vibe project generation", error=str(e))
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to start vibe project generation: {str(e)}"
-        )
-
-@app.post("/api/jobs")
-async def create_job(job_request: Dict[str, Any]):
-    """Create a new code generation job."""
-    job_id = f"job_{len(job_data) + 1}"
+@app.post("/api/generate")
+async def generate_project():
+    """Generate a new project."""
+    job_id = str(uuid.uuid4())
     
-    logger.info("Job created", job_id=job_id, description=job_request.get("description"))
-    
-    return {
-        "job_id": job_id,
-        "status": "created",
-        "message": "Job created successfully"
+    # Initialize job data
+    job_data[job_id] = {
+        "id": job_id,
+        "status": "processing",
+        "progress": 0,
+        "current_step": "Initializing",
+        "created_at": time.time(),
+        "updated_at": time.time(),
+        "agents": {
+            "planner": {"status": "pending", "progress": 0},
+            "coder": {"status": "pending", "progress": 0},
+            "critic": {"status": "pending", "progress": 0},
+            "file_manager": {"status": "pending", "progress": 0}
+        }
     }
+    
+    # Start background task
+    asyncio.create_task(execute_real_vibe_workflow(job_id, {
+        "prompt": "Create a modern React application",
+        "project_type": "web"
+    }))
+    
+    return {"job_id": job_id, "status": "started"}
 
-@app.get("/api/status/{job_id}")
+@app.get("/api/job/{job_id}")
 async def get_job_status(job_id: str):
-    """Get real job status and progress."""
+    """Get job status."""
     if job_id not in job_data:
         raise HTTPException(status_code=404, detail="Job not found")
+    return job_data[job_id]
+
+@app.get("/api/job/{job_id}/files")
+async def get_job_files(job_id: str):
+    """Get generated files for a job."""
+    if job_id not in generated_projects:
+        raise HTTPException(status_code=404, detail="Project not found")
     
-    job = job_data[job_id]
+    project = generated_projects[job_id]
     files = []
     
-    # Get generated files if job is completed
-    if job_id in generated_projects:
-        project = generated_projects[job_id]
-        files = list(project.get('files', {}).keys())
+    for path, content in project.get("files", {}).items():
+        files.append({
+            "path": path,
+            "content": content if isinstance(content, str) else str(content),
+            "language": path.split('.')[-1] if '.' in path else "text"
+        })
     
-    return {
-        "success": True,
-        "message": "Job status retrieved successfully",
-        "job_id": job_id,
-        "status": job["status"],
-        "progress": job["progress"],
-        "current_step": job["current_step"],
-        "step_number": job["progress"] // 25,
-        "total_steps": 4,
-        "files": files,
-        "error_message": job.get("error_message"),
-        "created_at": job["created_at"],
-        "updated_at": job.get("updated_at", job["created_at"]),
-        "estimated_completion": job.get("completed_at")
-    }
+    return {"files": files}
 
-@app.get("/api/download/{job_id}")
+@app.get("/api/job/{job_id}/download")
 async def download_project(job_id: str):
-    """Download the generated project as a ZIP file."""
-    if job_id not in job_data:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    job = job_data[job_id]
-    if job["status"] != "completed":
-        raise HTTPException(status_code=400, detail="Job is not completed yet")
-    
+    """Download project as ZIP."""
     if job_id not in generated_projects:
-        raise HTTPException(status_code=404, detail="No project files found")
+        raise HTTPException(status_code=404, detail="Project not found")
     
     project = generated_projects[job_id]
     
-    # Create ZIP file in memory
-    import io
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        files_dict = project.get('files', {})
-        
-        # Handle the case where files is a dict of file objects vs. simple strings
-        if isinstance(files_dict, dict):
-            for file_path, file_data in files_dict.items():
-                # If file_data is a dict with content, use that
-                if isinstance(file_data, dict) and 'content' in file_data:
-                    content = file_data['content']
-                else:
-                    # Otherwise treat it as the content itself
-                    content = str(file_data) if file_data else f"# {file_path}\n\n# Generated by Vibe Coding Platform"
-                
-                zip_file.writestr(file_path, content)
-        
-        # If no files, add a basic structure
-        if not files_dict:
-            zip_file.writestr("README.md", "# Vibe Generated Project\n\nThis project was generated by the Vibe Coding Platform.")
-            zip_file.writestr("package.json", json.dumps({
-                "name": "vibe-generated-project",
-                "version": "1.0.0",
-                "description": "Generated by Vibe Coding Platform",
-                "main": "index.js"
-            }, indent=2))
+    # Create temporary ZIP file
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.zip')
     
-    zip_buffer.seek(0)
+    with zipfile.ZipFile(temp_file.name, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for file_path, content in project.get("files", {}).items():
+            zipf.writestr(file_path, content if isinstance(content, str) else str(content))
     
     return StreamingResponse(
-        io.BytesIO(zip_buffer.read()),
-        media_type="application/zip",
-        headers={"Content-Disposition": f"attachment; filename=vibe_project_{job_id[:8]}.zip"}
+        iter([open(temp_file.name, 'rb').read()]),
+        media_type='application/zip',
+        headers={'Content-Disposition': f'attachment; filename="project-{job_id}.zip"'}
     )
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+@app.get("/api/projects")
+async def list_projects():
+    """List all generated projects."""
+    projects = []
+    for job_id, project in generated_projects.items():
+        projects.append({
+            "id": job_id,
+            "files_count": len(project.get("files", {})),
+            "created_at": job_data.get(job_id, {}).get("created_at"),
+            "status": job_data.get(job_id, {}).get("status", "unknown")
+        })
+    return {"projects": projects}
+
+@app.websocket("/ws/{connection_id}")
+async def websocket_endpoint(websocket: WebSocket, connection_id: str):
     """WebSocket endpoint for real-time updates."""
     await websocket.accept()
-    
-    # Generate a unique connection ID
-    connection_id = f"conn_{len(active_connections) + 1}"
     active_connections[connection_id] = websocket
     
-    logger.info("WebSocket connected", connection_id=connection_id)
-    
     try:
-        # Send initial connection message
-        await websocket.send_text(json.dumps({
-            "type": "connection_established",
-            "connection_id": connection_id,
-            "message": "Connected to Vibe Coding Platform"
-        }))
+        logger.info("WebSocket connected", connection_id=connection_id)
         
-        # Simulate agent progress updates
-        for i in range(5):
-            await asyncio.sleep(2)
-            
-            progress_data = {
-                "type": "agent_progress",
-                "agent_type": "code_generator",
-                "data": {
-                    "progress": (i + 1) * 20,
-                    "status": "running",
-                    "current_task": f"Generating file {i + 1}",
-                    "messages": [f"Created component {i + 1}"]
-                }
-            }
-            
-            await websocket.send_text(json.dumps(progress_data))
-            
-            # Simulate file generation
-            if i % 2 == 0:
-                file_data = {
-                    "type": "file_generated",
-                    "data": {
-                        "path": f"src/components/Component{i + 1}.tsx",
-                        "content": f"// Component {i + 1}\nimport React from 'react';\n\nexport default function Component{i + 1}() {{\n  return <div>Component {i + 1}</div>;\n}}",
-                        "language": "typescript",
-                        "size": 150 + i * 50,
-                        "created_by": "code_generator",
-                        "is_binary": False,
-                        "type": "file"
-                    }
-                }
-                await websocket.send_text(json.dumps(file_data))
+        # Send initial connection confirmation
+        await websocket.send_json({
+            "type": "connection",
+            "status": "connected",
+            "connection_id": connection_id
+        })
         
-        # Send completion message
-        await websocket.send_text(json.dumps({
-            "type": "job_complete",
-            "data": {
-                "status": "completed",
-                "message": "Project generation completed successfully!"
-            }
-        }))
-        
-        # Keep connection alive and handle messages
+        # Keep connection alive and handle incoming messages
         while True:
             try:
-                data = await websocket.receive_text()
-                message = json.loads(data)
-                logger.info("Received message", message=message)
+                # Wait for messages with timeout
+                data = await asyncio.wait_for(websocket.receive_json(), timeout=30.0)
                 
-                # Handle different message types
-                if message.get("type") == "test":
-                    # Echo back for testing
-                    await websocket.send_text(json.dumps({
-                        "type": "echo",
-                        "data": message
-                    }))
-                else:
-                    # Echo back for other messages
-                    await websocket.send_text(json.dumps({
-                        "type": "echo",
-                        "data": message
-                    }))
+                # Handle ping/pong for connection health
+                if data.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
                 
+                # Handle job status requests
+                elif data.get("type") == "get_job_status":
+                    job_id = data.get("job_id")
+                    if job_id in job_data:
+                        await websocket.send_json({
+                            "type": "job_status",
+                            "data": job_data[job_id]
+                        })
+                        
+            except asyncio.TimeoutError:
+                # Send ping to check if connection is still alive
+                await websocket.send_json({"type": "ping"})
             except WebSocketDisconnect:
                 break
                 
@@ -358,7 +243,6 @@ async def websocket_endpoint(websocket: WebSocket):
         if connection_id in active_connections:
             del active_connections[connection_id]
 
-<<<<<<< HEAD
 async def execute_real_vibe_workflow(job_id: str, vibe_request: Dict[str, Any]):
     """Execute the real vibe workflow using existing agents."""
     try:
@@ -461,7 +345,7 @@ async def execute_real_vibe_workflow(job_id: str, vibe_request: Dict[str, Any]):
         job_data[job_id]["status"] = "failed"
         job_data[job_id]["error_message"] = str(e)
         job_data[job_id]["updated_at"] = time.time()
-=======
+
 @app.post("/api/vibe-coding")
 async def vibe_coding_endpoint(vibe_request: Dict[str, Any], background_tasks: BackgroundTasks):
     """
@@ -647,7 +531,6 @@ async def process_vibe_request_real(job_id: str, vibe_request: Dict[str, Any]):
         job_store[job_id]["message"] = f"Generation failed: {str(e)}"
         job_store[job_id]["error_log"].append(str(e))
         logger.error(f"❌ Vibe coding error for job {job_id}: {e}")
->>>>>>> cursor/bc-e2fa0403-b40e-4c65-9a69-dda967a8b502-84c3
 
 if __name__ == "__main__":
     import uvicorn
