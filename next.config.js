@@ -5,9 +5,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  experimental: {
-    appDir: false,
-  },
+  // Using pages directory (traditional Next.js)
   
   // Static file handling
   trailingSlash: true,

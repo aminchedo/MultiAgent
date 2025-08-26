@@ -70,7 +70,7 @@ async def generate_vibe_project(request: VibeRequest, background_tasks: Backgrou
         "status": "processing",
         "message": "Agent processing started",
         "created_at": datetime.now().isoformat(),
-        "agent_status": AgentStatus().dict(),
+        "agent_status": AgentStatus().model_dump(),
         "prompt": request.prompt,
         "project_type": request.project_type,
         "framework": request.framework,
