@@ -1,37 +1,91 @@
 """
 VibeWorkflowOrchestratorAgent - Coordinate execution flow between all agents and manage project state
+Enhanced with real-time WebSocket updates and production error handling
 """
 
 import asyncio
 import time
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Callable
 from agents.vibe_base_agent import VibeBaseAgent
 from agents.vibe_planner_agent import VibePlannerAgent
 from agents.vibe_coder_agent import VibeCoderAgent
 from agents.vibe_critic_agent import VibeCriticAgent
 from agents.vibe_file_manager_agent import VibeFileManagerAgent
 import logging
+import traceback
+from dataclasses import dataclass
+from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+class WorkflowStatus(Enum):
+    """Workflow execution status"""
+    IDLE = "idle"
+    STARTING = "starting"
+    PLANNING = "planning"
+    CODING = "coding"
+    REVIEWING = "reviewing"
+    ORGANIZING = "organizing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+@dataclass
+class AgentTask:
+    """Agent task definition"""
+    agent_name: str
+    display_name: str
+    description: str
+    timeout: int = 300
+    retries: int = 2
 
 class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
-    """Master agent that coordinates the entire vibe project workflow."""
+    """Master agent that coordinates the entire vibe project workflow with real-time updates."""
     
-    def __init__(self):
+    def __init__(self, progress_callback: Optional[Callable] = None):
         super().__init__()
-        self.agent_instances = {}
+        self.progress_callback = progress_callback
+        self.current_job_id = None
+        self.workflow_status = WorkflowStatus.IDLE
+        
+        # Define workflow steps with enhanced metadata
         self.workflow_steps = [
-            {'agent': 'planner', 'name': 'Vibe Analysis & Planning'},
-            {'agent': 'coder', 'name': 'Code Generation'},
-            {'agent': 'critic', 'name': 'Quality Review'},
-            {'agent': 'file_manager', 'name': 'File Organization'}
+            AgentTask(
+                agent_name='planner',
+                display_name='Project Planner',
+                description='Analyzing requirements and creating project structure',
+                timeout=120,
+                retries=2
+            ),
+            AgentTask(
+                agent_name='coder',
+                display_name='Code Generator',
+                description='Generating production-ready code files',
+                timeout=300,
+                retries=3
+            ),
+            AgentTask(
+                agent_name='critic',
+                display_name='Code Reviewer',
+                description='Reviewing code quality and best practices',
+                timeout=180,
+                retries=2
+            ),
+            AgentTask(
+                agent_name='file_manager',
+                display_name='File Manager',
+                description='Organizing project structure and creating deployment config',
+                timeout=120,
+                retries=2
+            )
         ]
+        
+        self.agent_instances = {}
         self._initialize_agents()
     
     def _initialize_agents(self):
-        """Initialize all vibe agent instances."""
+        """Initialize all vibe agent instances with error handling."""
         try:
             self.agent_instances = {
                 'planner': VibePlannerAgent(),
@@ -42,64 +96,80 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
             logger.info("✅ All vibe agents initialized successfully")
         except Exception as e:
             logger.error(f"❌ Failed to initialize agents: {e}")
-            raise
+            raise RuntimeError(f"Agent initialization failed: {e}")
     
     def get_capabilities(self) -> List[str]:
         """Return list of orchestrator capabilities."""
         return [
             "workflow_coordination",
-            "agent_management",
-            "project_state_tracking",
-            "error_recovery",
-            "progress_monitoring"
+            "real_time_progress_tracking",
+            "error_recovery_management",
+            "agent_failure_handling",
+            "project_state_management",
+            "websocket_integration",
+            "production_deployment_preparation"
         ]
     
-    def validate_input(self, input_data: Dict[str, Any]) -> bool:
-        """Validate input data for orchestration."""
-        required_fields = ['vibe_prompt']
-        return all(field in input_data for field in required_fields)
+    async def send_progress_update(self, agent_name: str, status: str, progress: float, 
+                                 current_task: str, details: Optional[Dict] = None):
+        """Send progress update via callback if available."""
+        if self.progress_callback and self.current_job_id:
+            try:
+                await self.progress_callback(
+                    self.current_job_id, agent_name, status, progress, current_task, details
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send progress update: {e}")
     
-    def orchestrate_vibe_project(self, vibe_request: Dict[str, Any]) -> Dict[str, Any]:
+    def execute_vibe_workflow(self, vibe_request: Dict[str, Any], job_id: Optional[str] = None) -> Dict[str, Any]:
         """
-        MANDATORY IMPLEMENTATION - Coordinate entire agent workflow
-        MUST implement: 1->2->3->4 agent flow, error recovery, progress tracking
-        MUST integrate: with existing FastAPI backend endpoints
+        Execute the complete vibe workflow with real-time progress updates.
+        This is the main entry point for project generation.
         """
-        if not self.validate_input(vibe_request):
-            raise ValueError("Invalid vibe request structure")
+        start_time = time.time()
+        self.current_job_id = job_id
+        self.workflow_status = WorkflowStatus.STARTING
         
+        # Initialize workflow result structure
         workflow_result = {
-            'workflow_id': self._generate_workflow_id(),
-            'workflow_status': 'started',
+            'workflow_status': 'starting',
+            'start_time': start_time,
+            'job_id': job_id,
+            'vibe_request': vibe_request,
             'agent_results': {},
-            'project_data': {},
-            'error_log': [],
+            'project_data': {
+                'files': {},
+                'metadata': {},
+                'deployment_config': {},
+                'statistics': {
+                    'total_files': 0,
+                    'total_lines': 0,
+                    'components_created': 0
+                }
+            },
+            'timing': {
+                'total_time': 0,
+                'step_times': {}
+            },
             'progress': {
                 'current_step': 0,
                 'total_steps': len(self.workflow_steps),
                 'percentage': 0
             },
-            'timing': {
-                'start_time': time.time(),
-                'step_times': {},
-                'total_duration': 0
-            }
+            'error_log': [],
+            'recovery_attempts': {}
         }
         
         try:
-            # Extract vibe request data
-            vibe_prompt = vibe_request['vibe_prompt']
-            project_type = vibe_request.get('project_type', 'app')
-            complexity = vibe_request.get('complexity', 'simple')
+            logger.info(f"🚀 Starting enhanced vibe workflow execution for job: {job_id}")
             
-            logger.info(f"🚀 Starting vibe workflow for: {vibe_prompt[:50]}...")
+            # Send initial status
+            asyncio.create_task(self.send_progress_update(
+                "orchestrator", "starting", 5.0, "Initializing workflow coordination"
+            ))
             
-            # Create vibe project in database
-            project_id = self._create_vibe_project(vibe_prompt, project_type)
-            workflow_result['project_id'] = project_id
-            
-            # Execute workflow steps
-            self._execute_workflow_steps(workflow_result, vibe_request)
+            # Execute workflow steps with enhanced error handling
+            asyncio.create_task(self._execute_workflow_steps_async(workflow_result, vibe_request))
             
             # Finalize workflow
             self._finalize_workflow(workflow_result)
@@ -107,79 +177,170 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
             return workflow_result
             
         except Exception as e:
-            logger.error(f"❌ Workflow failed: {e}")
+            logger.error(f"❌ Workflow execution failed: {e}")
+            logger.error(traceback.format_exc())
+            
             workflow_result['workflow_status'] = 'failed'
             workflow_result['error_log'].append({
                 'step': 'orchestration',
                 'error': str(e),
-                'timestamp': time.time()
+                'timestamp': time.time(),
+                'traceback': traceback.format_exc()
             })
+            
+            # Send error status
+            asyncio.create_task(self.send_progress_update(
+                "orchestrator", "error", 0.0, f"Workflow failed: {str(e)}"
+            ))
+            
             return workflow_result
     
-    def _execute_workflow_steps(self, workflow_result: Dict[str, Any], vibe_request: Dict[str, Any]):
-        """Execute all workflow steps in sequence."""
-        for i, step in enumerate(self.workflow_steps):
-            workflow_result['progress']['current_step'] = i + 1
-            workflow_result['progress']['percentage'] = ((i + 1) / len(self.workflow_steps)) * 100
-            
-            step_name = step['name']
-            agent_name = step['agent']
-            
-            logger.info(f"📋 Step {i + 1}/{len(self.workflow_steps)}: {step_name}")
-            
-            step_start_time = time.time()
-            
+    async def _execute_workflow_steps_async(self, workflow_result: Dict[str, Any], vibe_request: Dict[str, Any]):
+        """Execute all workflow steps asynchronously with progress updates."""
+        try:
+            for i, step in enumerate(self.workflow_steps):
+                workflow_result['progress']['current_step'] = i + 1
+                base_progress = (i / len(self.workflow_steps)) * 100
+                workflow_result['progress']['percentage'] = base_progress
+                
+                step_name = step.display_name
+                agent_name = step.agent_name
+                
+                logger.info(f"📋 Step {i + 1}/{len(self.workflow_steps)}: {step_name}")
+                
+                # Send step start update
+                await self.send_progress_update(
+                    agent_name, "starting", base_progress, f"Starting {step.description}"
+                )
+                
+                step_start_time = time.time()
+                
+                try:
+                    # Execute agent step with timeout and retries
+                    step_result = await self._execute_agent_step_with_retries(
+                        agent_name, workflow_result, vibe_request, step
+                    )
+                    
+                    # Record results
+                    workflow_result['agent_results'][agent_name] = step_result
+                    workflow_result['timing']['step_times'][agent_name] = time.time() - step_start_time
+                    
+                    # Update project data
+                    self._update_project_data(workflow_result, agent_name, step_result)
+                    
+                    # Send completion update
+                    completion_progress = ((i + 1) / len(self.workflow_steps)) * 100
+                    await self.send_progress_update(
+                        agent_name, "completed", 100.0, f"{step_name} completed successfully"
+                    )
+                    
+                    logger.info(f"✅ Step {i + 1} completed: {step_name}")
+                    
+                except Exception as e:
+                    logger.error(f"❌ Step {i + 1} failed: {step_name} - {e}")
+                    workflow_result['error_log'].append({
+                        'step': step_name,
+                        'agent': agent_name,
+                        'error': str(e),
+                        'timestamp': time.time(),
+                        'traceback': traceback.format_exc()
+                    })
+                    
+                    # Send error update
+                    await self.send_progress_update(
+                        agent_name, "error", 0.0, f"Failed: {str(e)}"
+                    )
+                    
+                    # Attempt recovery
+                    if not await self._attempt_step_recovery(workflow_result, agent_name, e, step):
+                        raise e
+                        
+        except Exception as e:
+            logger.error(f"❌ Workflow steps execution failed: {e}")
+            raise
+    
+    async def _execute_agent_step_with_retries(self, agent_name: str, workflow_result: Dict[str, Any], 
+                                             vibe_request: Dict[str, Any], step: AgentTask) -> Dict[str, Any]:
+        """Execute agent step with timeout and retry logic."""
+        last_error = None
+        
+        for attempt in range(step.retries + 1):
             try:
-                # Execute agent step
-                step_result = self._execute_agent_step(agent_name, workflow_result, vibe_request)
+                if attempt > 0:
+                    await self.send_progress_update(
+                        agent_name, "retrying", 0.0, f"Retry attempt {attempt}/{step.retries}"
+                    )
+                    logger.warning(f"🔄 Retrying {agent_name} step (attempt {attempt + 1}/{step.retries + 1})")
                 
-                # Record results
-                workflow_result['agent_results'][agent_name] = step_result
-                workflow_result['timing']['step_times'][agent_name] = time.time() - step_start_time
+                # Set active status
+                await self.send_progress_update(
+                    agent_name, "active", 25.0, step.description
+                )
                 
-                # Update project data
-                self._update_project_data(workflow_result, agent_name, step_result)
+                # Execute with timeout
+                result = await asyncio.wait_for(
+                    self._execute_agent_step_sync(agent_name, workflow_result, vibe_request),
+                    timeout=step.timeout
+                )
                 
-                logger.info(f"✅ Step {i + 1} completed: {step_name}")
+                return result
+                
+            except asyncio.TimeoutError:
+                last_error = TimeoutError(f"Agent {agent_name} timed out after {step.timeout}s")
+                await self.send_progress_update(
+                    agent_name, "timeout", 0.0, f"Timeout after {step.timeout}s"
+                )
                 
             except Exception as e:
-                logger.error(f"❌ Step {i + 1} failed: {step_name} - {e}")
-                workflow_result['error_log'].append({
-                    'step': step_name,
-                    'agent': agent_name,
-                    'error': str(e),
-                    'timestamp': time.time()
-                })
+                last_error = e
+                await self.send_progress_update(
+                    agent_name, "error", 0.0, f"Error: {str(e)}"
+                )
                 
-                # Attempt recovery
-                if not self._attempt_step_recovery(workflow_result, agent_name, e):
-                    raise e
-    
-    def _execute_agent_step(self, agent_name: str, workflow_result: Dict[str, Any], vibe_request: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a specific agent step."""
-        agent = self.agent_instances[agent_name]
+            # Wait before retry
+            if attempt < step.retries:
+                await asyncio.sleep(2 ** attempt)  # Exponential backoff
         
-        if agent_name == 'planner':
-            return self._execute_planner_step(agent, vibe_request)
-        elif agent_name == 'coder':
-            return self._execute_coder_step(agent, workflow_result)
-        elif agent_name == 'critic':
-            return self._execute_critic_step(agent, workflow_result)
-        elif agent_name == 'file_manager':
-            return self._execute_file_manager_step(agent, workflow_result)
-        else:
-            raise ValueError(f"Unknown agent: {agent_name}")
+        # All retries failed
+        raise last_error or Exception(f"Agent {agent_name} failed after all retries")
+    
+    async def _execute_agent_step_sync(self, agent_name: str, workflow_result: Dict[str, Any], 
+                                     vibe_request: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute agent step synchronously (wrapped in async for timeout)."""
+        def sync_execution():
+            if agent_name == 'planner':
+                return self._execute_planner_step(self.agent_instances[agent_name], vibe_request)
+            elif agent_name == 'coder':
+                return self._execute_coder_step(self.agent_instances[agent_name], workflow_result)
+            elif agent_name == 'critic':
+                return self._execute_critic_step(self.agent_instances[agent_name], workflow_result)
+            elif agent_name == 'file_manager':
+                return self._execute_file_manager_step(self.agent_instances[agent_name], workflow_result)
+            else:
+                raise ValueError(f"Unknown agent: {agent_name}")
+        
+        # Run synchronous function in thread pool
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, sync_execution)
     
     def _execute_planner_step(self, agent: VibePlannerAgent, vibe_request: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the planner agent step."""
+        """Execute the planner agent step with enhanced validation."""
         vibe_prompt = vibe_request['vibe_prompt']
         project_data = vibe_request.get('project_data', {})
         
+        logger.info(f"🎯 Planner analyzing vibe prompt: {vibe_prompt[:100]}...")
+        
         result = agent.decompose_vibe_prompt(vibe_prompt, project_data)
         
-        # Validate planner result
+        # Enhanced validation
         if not result or 'vibe_analysis' not in result:
             raise ValueError("Planner failed to generate valid analysis")
+            
+        if not result.get('technical_requirements'):
+            raise ValueError("Planner failed to generate technical requirements")
+            
+        if not result.get('implementation_steps'):
+            raise ValueError("Planner failed to generate implementation steps")
         
         return {
             'success': True,
@@ -187,38 +348,54 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
             'analysis': result['vibe_analysis'],
             'technical_requirements': result['technical_requirements'],
             'implementation_steps': result['implementation_steps'],
-            'estimated_time': result.get('estimated_time', 'Unknown')
+            'estimated_time': result.get('estimated_time', 'Unknown'),
+            'framework': result.get('recommended_framework', 'react'),
+            'complexity': result.get('complexity_assessment', 'intermediate')
         }
     
     def _execute_coder_step(self, agent: VibeCoderAgent, workflow_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the coder agent step."""
+        """Execute the coder agent step with enhanced file generation."""
         planner_result = workflow_result['agent_results']['planner']
-        project_id = workflow_result.get('project_id', 0)
+        project_id = workflow_result.get('project_id', int(time.time()))
         
-        # Prepare plan for coder
+        # Prepare comprehensive plan for coder
         plan = {
             'technical_requirements': planner_result['technical_requirements'],
             'vibe_analysis': planner_result['analysis'],
-            'implementation_steps': planner_result['implementation_steps']
+            'implementation_steps': planner_result['implementation_steps'],
+            'framework': planner_result.get('framework', 'react'),
+            'complexity': planner_result.get('complexity', 'intermediate')
         }
+        
+        logger.info(f"💻 Coder generating files for {plan['framework']} project...")
         
         result = agent.generate_code_from_plan(plan, project_id)
         
-        # Validate coder result
+        # Enhanced validation
         if not result or not result.get('success', False):
             raise ValueError("Coder failed to generate valid code")
+            
+        if not result.get('generated_files'):
+            raise ValueError("Coder failed to generate any files")
+            
+        file_count = len(result.get('generated_files', {}))
+        if file_count == 0:
+            raise ValueError("Coder generated empty file set")
+        
+        logger.info(f"📁 Generated {file_count} files")
         
         return {
             'success': True,
             'agent': 'coder',
             'framework': result['framework'],
             'generated_files': result['generated_files'],
-            'file_count': result['file_count'],
-            'components_created': result.get('components_created', 0)
+            'file_count': file_count,
+            'components_created': result.get('components_created', 0),
+            'total_lines': sum(len(content.split('\n')) for content in result['generated_files'].values())
         }
     
     def _execute_critic_step(self, agent: VibeCriticAgent, workflow_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the critic agent step."""
+        """Execute the critic agent step with comprehensive review."""
         coder_result = workflow_result['agent_results']['coder']
         planner_result = workflow_result['agent_results']['planner']
         
@@ -227,33 +404,42 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
         for file_path, content in coder_result['generated_files'].items():
             files.append({
                 'path': file_path,
-                'content': content
+                'content': content,
+                'type': file_path.split('.')[-1] if '.' in file_path else 'unknown'
             })
         
         # Prepare plan for review
         plan = {
             'technical_requirements': planner_result['technical_requirements'],
-            'vibe_analysis': planner_result['analysis']
+            'vibe_analysis': planner_result['analysis'],
+            'framework': coder_result['framework']
         }
+        
+        logger.info(f"🔍 Critic reviewing {len(files)} generated files...")
         
         result = agent.review_generated_code(files, plan)
         
-        # Validate critic result
+        # Enhanced validation
         if 'overall_score' not in result:
             raise ValueError("Critic failed to generate valid review")
+            
+        overall_score = result.get('overall_score', 0)
+        if overall_score < 0.5:  # Score is typically 0-1
+            logger.warning(f"⚠️ Low code quality score: {overall_score}")
         
         return {
             'success': True,
             'agent': 'critic',
-            'overall_score': result['overall_score'],
+            'overall_score': overall_score,
             'category_scores': result.get('category_scores', {}),
             'recommendations': result.get('recommendations', []),
             'issues_found': len(result.get('issues_found', [])),
-            'compliance_report': result.get('compliance_report', {})
+            'compliance_report': result.get('compliance_report', {}),
+            'quality_grade': self._calculate_quality_grade(overall_score)
         }
     
     def _execute_file_manager_step(self, agent: VibeFileManagerAgent, workflow_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the file manager agent step."""
+        """Execute the file manager agent step with deployment preparation."""
         coder_result = workflow_result['agent_results']['coder']
         planner_result = workflow_result['agent_results']['planner']
         
@@ -263,307 +449,170 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
             files.append({
                 'path': file_path,
                 'filename': file_path,
-                'content': content
+                'content': content,
+                'size': len(content.encode('utf-8'))
             })
         
-        project_type = planner_result['analysis']['detected_project_type']
+        project_type = planner_result['analysis'].get('detected_project_type', 'web')
+        framework = coder_result.get('framework', 'react')
+        
+        logger.info(f"📁 File manager organizing {framework} {project_type} project...")
         
         result = agent.organize_project_structure(files, project_type)
         
-        # Validate file manager result
+        # Enhanced validation
         if not result.get('success', False):
             raise ValueError("File manager failed to organize project")
+            
+        if not result.get('organized_files'):
+            raise ValueError("File manager failed to organize any files")
         
         return {
             'success': True,
             'agent': 'file_manager',
-            'framework': result['framework'],
+            'framework': framework,
             'organized_files': result['organized_files'],
-            'file_manifest': result['file_manifest'],
-            'deployment_config': result['deployment_config'],
+            'file_manifest': result.get('file_manifest', {}),
+            'deployment_config': result.get('deployment_config', {}),
             'zip_file': result.get('zip_file', {}),
-            'total_files': result['total_files']
+            'total_files': len(result.get('organized_files', {})),
+            'project_size': sum(len(str(content).encode('utf-8')) for content in result.get('organized_files', {}).values())
         }
+    
+    def _calculate_quality_grade(self, score: float) -> str:
+        """Calculate quality grade from score."""
+        if score >= 0.9:
+            return "A+"
+        elif score >= 0.8:
+            return "A"
+        elif score >= 0.7:
+            return "B+"
+        elif score >= 0.6:
+            return "B"
+        elif score >= 0.5:
+            return "C+"
+        else:
+            return "C"
     
     def _update_project_data(self, workflow_result: Dict[str, Any], agent_name: str, step_result: Dict[str, Any]):
         """Update cumulative project data with step results."""
         if 'project_data' not in workflow_result:
-            workflow_result['project_data'] = {}
+            workflow_result['project_data'] = {
+                'files': {},
+                'metadata': {},
+                'deployment_config': {},
+                'statistics': {}
+            }
         
         project_data = workflow_result['project_data']
         
         if agent_name == 'planner':
-            project_data.update({
+            project_data['metadata'].update({
                 'vibe_analysis': step_result['analysis'],
                 'technical_requirements': step_result['technical_requirements'],
                 'implementation_steps': step_result['implementation_steps'],
-                'estimated_time': step_result['estimated_time']
+                'estimated_time': step_result['estimated_time'],
+                'framework': step_result.get('framework', 'react'),
+                'complexity': step_result.get('complexity', 'intermediate')
             })
-        
+            
         elif agent_name == 'coder':
-            project_data.update({
-                'framework': step_result['framework'],
-                'generated_files': step_result['generated_files'],
+            project_data['files'].update(step_result['generated_files'])
+            project_data['metadata'].update({
                 'file_count': step_result['file_count'],
-                'components_created': step_result['components_created']
+                'components_created': step_result.get('components_created', 0),
+                'total_lines': step_result.get('total_lines', 0)
             })
-        
+            
         elif agent_name == 'critic':
-            project_data.update({
+            project_data['metadata'].update({
                 'quality_score': step_result['overall_score'],
-                'quality_categories': step_result['category_scores'],
-                'recommendations': step_result['recommendations'],
-                'issues_count': step_result['issues_found']
+                'quality_grade': step_result.get('quality_grade', 'Unknown'),
+                'code_review': {
+                    'category_scores': step_result.get('category_scores', {}),
+                    'recommendations': step_result.get('recommendations', []),
+                    'issues_found': step_result.get('issues_found', 0)
+                }
             })
-        
+            
         elif agent_name == 'file_manager':
-            project_data.update({
-                'organized_files': step_result['organized_files'],
-                'file_manifest': step_result['file_manifest'],
-                'deployment_config': step_result['deployment_config'],
-                'project_zip': step_result.get('zip_file', {})
+            # Update files with organized structure
+            project_data['files'] = step_result['organized_files']
+            project_data['deployment_config'] = step_result.get('deployment_config', {})
+            project_data['metadata'].update({
+                'file_manifest': step_result.get('file_manifest', {}),
+                'total_files': step_result.get('total_files', 0),
+                'project_size': step_result.get('project_size', 0)
             })
     
-    def _attempt_step_recovery(self, workflow_result: Dict[str, Any], agent_name: str, error: Exception) -> bool:
+    async def _attempt_step_recovery(self, workflow_result: Dict[str, Any], agent_name: str, 
+                                   error: Exception, step: AgentTask) -> bool:
         """Attempt to recover from step failure."""
-        recovery_strategies = {
-            'planner': self._recover_planner_step,
-            'coder': self._recover_coder_step,
-            'critic': self._recover_critic_step,
-            'file_manager': self._recover_file_manager_step
-        }
+        recovery_key = f"{agent_name}_recovery"
         
-        recovery_func = recovery_strategies.get(agent_name)
-        if recovery_func:
-            try:
-                return recovery_func(workflow_result, error)
-            except Exception as recovery_error:
-                logger.error(f"Recovery failed for {agent_name}: {recovery_error}")
+        if recovery_key not in workflow_result['recovery_attempts']:
+            workflow_result['recovery_attempts'][recovery_key] = 0
         
-        return False
-    
-    def _recover_planner_step(self, workflow_result: Dict[str, Any], error: Exception) -> bool:
-        """Attempt to recover from planner failure."""
-        # Create minimal fallback plan
-        fallback_result = {
-            'success': True,
-            'agent': 'planner',
-            'analysis': {
-                'detected_ui_styles': ['modern'],
-                'detected_project_type': 'app',
-                'detected_technologies': ['react'],
-                'detected_features': [],
-                'complexity': 'simple'
-            },
-            'technical_requirements': {
-                'framework': 'react',
-                'styling': 'tailwind',
-                'components': ['App', 'Header'],
-                'features': []
-            },
-            'implementation_steps': [
-                {'step': 1, 'title': 'Basic Setup', 'estimated_time': '30 minutes'}
-            ],
-            'estimated_time': '1h'
-        }
+        workflow_result['recovery_attempts'][recovery_key] += 1
         
-        workflow_result['agent_results']['planner'] = fallback_result
-        logger.info("🔄 Planner step recovered with fallback plan")
-        return True
-    
-    def _recover_coder_step(self, workflow_result: Dict[str, Any], error: Exception) -> bool:
-        """Attempt to recover from coder failure."""
-        # Create minimal code structure
-        fallback_files = {
-            'package.json': '{"name": "vibe-app", "version": "1.0.0"}',
-            'src/App.tsx': 'import React from "react"; export default function App() { return <div>Hello Vibe!</div>; }',
-            'src/main.tsx': 'import React from "react"; import ReactDOM from "react-dom/client"; ReactDOM.createRoot(document.getElementById("root")!).render(<App />);'
-        }
-        
-        fallback_result = {
-            'success': True,
-            'agent': 'coder',
-            'framework': 'react',
-            'generated_files': fallback_files,
-            'file_count': len(fallback_files),
-            'components_created': 1
-        }
-        
-        workflow_result['agent_results']['coder'] = fallback_result
-        logger.info("🔄 Coder step recovered with minimal files")
-        return True
-    
-    def _recover_critic_step(self, workflow_result: Dict[str, Any], error: Exception) -> bool:
-        """Attempt to recover from critic failure."""
-        # Provide basic quality assessment
-        fallback_result = {
-            'success': True,
-            'agent': 'critic',
-            'overall_score': 75.0,
-            'category_scores': {
-                'type_safety': 70.0,
-                'structure': 80.0,
-                'accessibility': 75.0
-            },
-            'recommendations': [
-                {'priority': 'low', 'title': 'Review code quality', 'description': 'Manual review recommended'}
-            ],
-            'issues_found': 0,
-            'compliance_report': {'compliance_level': 'fair'}
-        }
-        
-        workflow_result['agent_results']['critic'] = fallback_result
-        logger.info("🔄 Critic step recovered with basic assessment")
-        return True
-    
-    def _recover_file_manager_step(self, workflow_result: Dict[str, Any], error: Exception) -> bool:
-        """Attempt to recover from file manager failure."""
-        coder_result = workflow_result['agent_results']['coder']
-        
-        # Basic file organization
-        fallback_result = {
-            'success': True,
-            'agent': 'file_manager',
-            'framework': coder_result.get('framework', 'react'),
-            'organized_files': coder_result.get('generated_files', {}),
-            'file_manifest': {
-                'total_files': coder_result.get('file_count', 0),
-                'framework': coder_result.get('framework', 'react')
-            },
-            'deployment_config': {
-                'build_command': 'npm run build',
-                'output_directory': 'dist'
-            },
-            'total_files': coder_result.get('file_count', 0)
-        }
-        
-        workflow_result['agent_results']['file_manager'] = fallback_result
-        logger.info("🔄 File manager step recovered with basic organization")
-        return True
+        # Simple recovery strategies
+        if isinstance(error, TimeoutError):
+            logger.info(f"🔄 Attempting timeout recovery for {agent_name}")
+            # Could implement timeout-specific recovery
+            return False
+            
+        elif "connection" in str(error).lower():
+            logger.info(f"🔄 Attempting connection recovery for {agent_name}")
+            # Could implement connection retry
+            await asyncio.sleep(5)
+            return workflow_result['recovery_attempts'][recovery_key] <= 2
+            
+        else:
+            logger.info(f"🔄 No recovery strategy for {agent_name} error: {error}")
+            return False
     
     def _finalize_workflow(self, workflow_result: Dict[str, Any]):
-        """Finalize the workflow execution."""
+        """Finalize workflow execution and prepare results."""
         end_time = time.time()
-        start_time = workflow_result['timing']['start_time']
+        workflow_result['timing']['total_time'] = end_time - workflow_result['start_time']
+        workflow_result['end_time'] = end_time
         
-        workflow_result['timing']['total_duration'] = end_time - start_time
-        workflow_result['workflow_status'] = 'completed'
-        workflow_result['progress']['percentage'] = 100
-        
-        # Update database project status
-        project_id = workflow_result.get('project_id')
-        if project_id:
-            project_files = workflow_result['project_data'].get('organized_files', {})
-            self._update_vibe_project(project_id, 'completed', project_files)
-        
-        # Generate final summary
-        workflow_result['summary'] = self._generate_workflow_summary(workflow_result)
-        
-        logger.info(f"🎉 Workflow completed in {workflow_result['timing']['total_duration']:.2f}s")
-    
-    def _generate_workflow_summary(self, workflow_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate a summary of the workflow execution."""
-        project_data = workflow_result.get('project_data', {})
-        
-        return {
-            'workflow_id': workflow_result['workflow_id'],
-            'status': workflow_result['workflow_status'],
-            'duration': f"{workflow_result['timing']['total_duration']:.2f}s",
-            'framework': project_data.get('framework', 'unknown'),
-            'files_generated': project_data.get('file_count', 0),
-            'quality_score': project_data.get('quality_score', 0),
-            'components_created': project_data.get('components_created', 0),
-            'errors': len(workflow_result.get('error_log', [])),
-            'recommendations': len(project_data.get('recommendations', [])),
-            'success_rate': self._calculate_success_rate(workflow_result)
-        }
-    
-    def _calculate_success_rate(self, workflow_result: Dict[str, Any]) -> float:
-        """Calculate the overall success rate of the workflow."""
-        total_steps = len(self.workflow_steps)
-        successful_steps = len([result for result in workflow_result['agent_results'].values() if result.get('success', False)])
-        
-        return round((successful_steps / total_steps) * 100, 2) if total_steps > 0 else 0
-    
-    def _generate_workflow_id(self) -> str:
-        """Generate a unique workflow ID."""
-        import uuid
-        return f"vibe_{int(time.time())}_{str(uuid.uuid4())[:8]}"
-    
-    def _create_vibe_project(self, vibe_prompt: str, project_type: str) -> int:
-        """Create a vibe project in the database."""
-        try:
-            # Use the base agent's database methods
-            import sqlite3
-            conn = sqlite3.connect("backend/vibe_projects.db")
-            cursor = conn.cursor()
+        # Determine final status
+        if len(workflow_result['agent_results']) == len(self.workflow_steps):
+            workflow_result['workflow_status'] = 'completed'
+            self.workflow_status = WorkflowStatus.COMPLETED
             
-            cursor.execute("""
-                INSERT INTO vibe_projects (vibe_prompt, project_type, status)
-                VALUES (?, ?, 'pending')
-            """, (vibe_prompt, project_type))
+            # Calculate final statistics
+            stats = workflow_result['project_data']['statistics'] = {
+                'total_files': len(workflow_result['project_data']['files']),
+                'total_lines': sum(len(str(content).split('\n')) for content in workflow_result['project_data']['files'].values()),
+                'components_created': workflow_result['project_data']['metadata'].get('components_created', 0),
+                'quality_score': workflow_result['project_data']['metadata'].get('quality_score', 0),
+                'generation_time': workflow_result['timing']['total_time']
+            }
             
-            project_id = cursor.lastrowid
-            conn.commit()
-            conn.close()
+            logger.info(f"✅ Workflow completed successfully!")
+            logger.info(f"📊 Generated {stats['total_files']} files, {stats['total_lines']} lines in {stats['generation_time']:.2f}s")
             
-            return project_id
-        except Exception as e:
-            logger.error(f"Failed to create vibe project: {e}")
-            return 0
-    
-    def _update_vibe_project(self, project_id: int, status: str, project_files: Optional[Dict] = None):
-        """Update vibe project status and files."""
-        try:
-            import sqlite3
-            conn = sqlite3.connect("backend/vibe_projects.db")
-            cursor = conn.cursor()
+        else:
+            workflow_result['workflow_status'] = 'failed'
+            self.workflow_status = WorkflowStatus.FAILED
             
-            if status == 'completed':
-                cursor.execute("""
-                    UPDATE vibe_projects 
-                    SET status = ?, project_files = ?, completed_at = CURRENT_TIMESTAMP
-                    WHERE id = ?
-                """, (status, json.dumps(project_files) if project_files else None, project_id))
-            else:
-                cursor.execute("""
-                    UPDATE vibe_projects 
-                    SET status = ?
-                    WHERE id = ?
-                """, (status, project_id))
-            
-            conn.commit()
-            conn.close()
-        except Exception as e:
-            logger.error(f"Failed to update vibe project: {e}")
-    
-    def get_workflow_status(self, workflow_id: str) -> Dict[str, Any]:
-        """Get the status of a specific workflow."""
-        # This would typically query a workflow tracking system
-        # For now, return a placeholder response
-        return {
-            'workflow_id': workflow_id,
-            'status': 'unknown',
-            'message': 'Workflow status tracking not yet implemented'
-        }
-    
-    def cancel_workflow(self, workflow_id: str) -> bool:
-        """Cancel a running workflow."""
-        # This would typically cancel a running workflow
-        # For now, return a placeholder response
-        logger.info(f"Workflow cancellation requested for: {workflow_id}")
-        return False
-    
-    def get_agent_metrics(self) -> Dict[str, Any]:
-        """Get metrics for all managed agents."""
-        metrics = {}
+        workflow_result['progress']['percentage'] = 100 if workflow_result['workflow_status'] == 'completed' else 0
         
-        for agent_name, agent in self.agent_instances.items():
-            try:
-                agent_metrics = agent.get_metrics() if hasattr(agent, 'get_metrics') else {}
-                metrics[agent_name] = agent_metrics
-            except Exception as e:
-                logger.error(f"Failed to get metrics for {agent_name}: {e}")
-                metrics[agent_name] = {'error': str(e)}
-        
-        return metrics
+        # Reset job tracking
+        self.current_job_id = None
+    
+    def orchestrate_vibe_project(self, vibe_request: Dict[str, Any]) -> Dict[str, Any]:
+        """Legacy method name for backward compatibility."""
+        return self.execute_vibe_workflow(vibe_request)
+    
+    def get_workflow_status(self) -> str:
+        """Get current workflow status."""
+        return self.workflow_status.value
+    
+    def cancel_workflow(self):
+        """Cancel current workflow execution."""
+        if self.workflow_status not in [WorkflowStatus.COMPLETED, WorkflowStatus.FAILED]:
+            self.workflow_status = WorkflowStatus.CANCELLED
+            logger.info("🛑 Workflow cancelled by user request")

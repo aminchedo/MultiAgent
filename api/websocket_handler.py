@@ -6,22 +6,75 @@ Provides live updates during code generation process
 import json
 import asyncio
 import logging
-from typing import Dict, Set, Any, Optional
+from typing import Dict, Set, Any, Optional, List
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 import uuid
+import time
+from dataclasses import dataclass, asdict
+from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+class MessageType(Enum):
+    """WebSocket message types"""
+    AGENT_STATUS = "agent_status"
+    PROGRESS_UPDATE = "progress_update"
+    ERROR = "error"
+    SUCCESS = "success"
+    CONNECTION_STATUS = "connection_status"
+    HEARTBEAT = "heartbeat"
+    PROJECT_COMPLETE = "project_complete"
+    FILE_GENERATED = "file_generated"
+
+class AgentStatus(Enum):
+    """Agent status states"""
+    IDLE = "idle"
+    STARTING = "starting"
+    ACTIVE = "active"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    ERROR = "error"
+    TIMEOUT = "timeout"
+
+@dataclass
+class AgentUpdate:
+    """Agent status update data structure"""
+    agent_name: str
+    status: AgentStatus
+    progress: float
+    current_task: str
+    timestamp: float
+    details: Optional[Dict[str, Any]] = None
+    error_message: Optional[str] = None
+
+@dataclass
+class ProjectUpdate:
+    """Project generation update data structure"""
+    job_id: str
+    overall_progress: float
+    current_phase: str
+    agents: Dict[str, AgentUpdate]
+    files_generated: int
+    estimated_completion: Optional[float] = None
+    timestamp: float = None
+
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = time.time()
+
 class ConnectionManager:
-    """Manages WebSocket connections and message broadcasting"""
+    """Enhanced WebSocket connection manager with agent status tracking"""
     
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.user_connections: Dict[str, Set[str]] = {}  # user_id -> connection_ids
+        self.job_connections: Dict[str, Set[str]] = {}  # job_id -> connection_ids
         self.connection_metadata: Dict[str, Dict[str, Any]] = {}
+        self.agent_status: Dict[str, Dict[str, AgentUpdate]] = {}  # job_id -> agent_name -> status
+        self.heartbeat_tasks: Dict[str, asyncio.Task] = {}
         
-    async def connect(self, websocket: WebSocket, user_id: Optional[str] = None) -> str:
+    async def connect(self, websocket: WebSocket, user_id: Optional[str] = None, job_id: Optional[str] = None) -> str:
         """Accept a WebSocket connection and return connection ID"""
         await websocket.accept()
         
@@ -34,13 +87,33 @@ class ConnectionManager:
                 self.user_connections[user_id] = set()
             self.user_connections[user_id].add(connection_id)
         
+        # Track job connections if job_id provided
+        if job_id:
+            if job_id not in self.job_connections:
+                self.job_connections[job_id] = set()
+            self.job_connections[job_id].add(connection_id)
+        
         self.connection_metadata[connection_id] = {
             'user_id': user_id,
-            'connected_at': asyncio.get_event_loop().time(),
-            'last_ping': asyncio.get_event_loop().time()
+            'job_id': job_id,
+            'connected_at': time.time(),
+            'last_ping': time.time()
         }
         
-        logger.info(f"WebSocket connected: {connection_id} (user: {user_id})")
+        # Start heartbeat for this connection
+        self.heartbeat_tasks[connection_id] = asyncio.create_task(
+            self._heartbeat_loop(connection_id)
+        )
+        
+        # Send connection confirmation
+        await self.send_personal_message({
+            'type': MessageType.CONNECTION_STATUS.value,
+            'status': 'connected',
+            'connection_id': connection_id,
+            'timestamp': time.time()
+        }, connection_id)
+        
+        logger.info(f"WebSocket connected: {connection_id} (user: {user_id}, job: {job_id})")
         return connection_id
     
     def disconnect(self, connection_id: str):
@@ -48,6 +121,12 @@ class ConnectionManager:
         if connection_id in self.active_connections:
             metadata = self.connection_metadata.get(connection_id, {})
             user_id = metadata.get('user_id')
+            job_id = metadata.get('job_id')
+            
+            # Cancel heartbeat task
+            if connection_id in self.heartbeat_tasks:
+                self.heartbeat_tasks[connection_id].cancel()
+                del self.heartbeat_tasks[connection_id]
             
             # Remove from user connections
             if user_id and user_id in self.user_connections:
@@ -55,11 +134,32 @@ class ConnectionManager:
                 if not self.user_connections[user_id]:
                     del self.user_connections[user_id]
             
+            # Remove from job connections
+            if job_id and job_id in self.job_connections:
+                self.job_connections[job_id].discard(connection_id)
+                if not self.job_connections[job_id]:
+                    del self.job_connections[job_id]
+            
             # Clean up
             del self.active_connections[connection_id]
             del self.connection_metadata[connection_id]
             
-            logger.info(f"WebSocket disconnected: {connection_id} (user: {user_id})")
+            logger.info(f"WebSocket disconnected: {connection_id} (user: {user_id}, job: {job_id})")
+    
+    async def _heartbeat_loop(self, connection_id: str):
+        """Send periodic heartbeat messages"""
+        try:
+            while connection_id in self.active_connections:
+                await asyncio.sleep(30)  # 30 second intervals
+                if connection_id in self.active_connections:
+                    await self.send_personal_message({
+                        'type': MessageType.HEARTBEAT.value,
+                        'timestamp': time.time()
+                    }, connection_id)
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            logger.error(f"Heartbeat error for {connection_id}: {e}")
     
     async def send_personal_message(self, message: Dict[str, Any], connection_id: str):
         """Send message to specific connection"""
@@ -67,7 +167,10 @@ class ConnectionManager:
             websocket = self.active_connections[connection_id]
             try:
                 if websocket.client_state == WebSocketState.CONNECTED:
-                    await websocket.send_text(json.dumps(message))
+                    await websocket.send_text(json.dumps(message, default=str))
+                    # Update last ping time
+                    if connection_id in self.connection_metadata:
+                        self.connection_metadata[connection_id]['last_ping'] = time.time()
                 else:
                     self.disconnect(connection_id)
             except Exception as e:
@@ -81,6 +184,13 @@ class ConnectionManager:
             for connection_id in connection_ids:
                 await self.send_personal_message(message, connection_id)
     
+    async def send_to_job(self, message: Dict[str, Any], job_id: str):
+        """Send message to all connections tracking a specific job"""
+        if job_id in self.job_connections:
+            connection_ids = list(self.job_connections[job_id])
+            for connection_id in connection_ids:
+                await self.send_personal_message(message, connection_id)
+    
     async def broadcast(self, message: Dict[str, Any], exclude_connections: Set[str] = None):
         """Broadcast message to all active connections"""
         exclude_connections = exclude_connections or set()
@@ -90,202 +200,162 @@ class ConnectionManager:
             if connection_id not in exclude_connections:
                 await self.send_personal_message(message, connection_id)
     
-    async def send_generation_progress(self, job_id: str, progress: float, status: str, user_id: str = None):
-        """Send project generation progress update"""
+    async def update_agent_status(self, job_id: str, agent_name: str, status: AgentStatus, 
+                                progress: float, current_task: str, details: Optional[Dict] = None,
+                                error_message: Optional[str] = None):
+        """Update agent status and broadcast to relevant connections"""
+        # Create agent update
+        agent_update = AgentUpdate(
+            agent_name=agent_name,
+            status=status,
+            progress=progress,
+            current_task=current_task,
+            timestamp=time.time(),
+            details=details,
+            error_message=error_message
+        )
+        
+        # Store agent status
+        if job_id not in self.agent_status:
+            self.agent_status[job_id] = {}
+        self.agent_status[job_id][agent_name] = agent_update
+        
+        # Broadcast update
         message = {
-            'type': 'generation_progress',
+            'type': MessageType.AGENT_STATUS.value,
             'job_id': job_id,
-            'progress': progress,
-            'status': status,
-            'timestamp': asyncio.get_event_loop().time()
+            'agent_update': asdict(agent_update),
+            'timestamp': time.time()
         }
         
-        if user_id:
-            await self.send_to_user(message, user_id)
-        else:
-            await self.broadcast(message)
+        await self.send_to_job(message, job_id)
+        
+        logger.info(f"Agent status updated: {job_id}/{agent_name} -> {status.value} ({progress}%)")
     
-    async def send_file_update(self, file_id: str, updates: Dict[str, Any], user_id: str = None):
-        """Send file update notification"""
+    async def update_project_progress(self, job_id: str, overall_progress: float, 
+                                    current_phase: str, files_generated: int = 0,
+                                    estimated_completion: Optional[float] = None):
+        """Update overall project progress"""
+        # Get current agent statuses
+        agents = self.agent_status.get(job_id, {})
+        
+        # Create project update
+        project_update = ProjectUpdate(
+            job_id=job_id,
+            overall_progress=overall_progress,
+            current_phase=current_phase,
+            agents=agents,
+            files_generated=files_generated,
+            estimated_completion=estimated_completion
+        )
+        
+        # Broadcast update
         message = {
-            'type': 'file_update',
-            'file_id': file_id,
-            'updates': updates,
-            'timestamp': asyncio.get_event_loop().time()
+            'type': MessageType.PROGRESS_UPDATE.value,
+            'project_update': asdict(project_update),
+            'timestamp': time.time()
         }
         
-        if user_id:
-            await self.send_to_user(message, user_id)
-        else:
-            await self.broadcast(message)
+        await self.send_to_job(message, job_id)
+        
+        logger.info(f"Project progress updated: {job_id} -> {overall_progress}% ({current_phase})")
     
-    async def send_log_update(self, log_entry: Dict[str, Any], user_id: str = None):
-        """Send log update"""
+    async def send_error(self, job_id: str, error_message: str, error_type: str = "general",
+                        agent_name: Optional[str] = None):
+        """Send error message to job connections"""
         message = {
-            'type': 'log_update',
-            'log': log_entry,
-            'timestamp': asyncio.get_event_loop().time()
+            'type': MessageType.ERROR.value,
+            'job_id': job_id,
+            'error_message': error_message,
+            'error_type': error_type,
+            'agent_name': agent_name,
+            'timestamp': time.time()
         }
         
-        if user_id:
-            await self.send_to_user(message, user_id)
-        else:
-            await self.broadcast(message)
+        await self.send_to_job(message, job_id)
+        
+        logger.error(f"Error sent for job {job_id}: {error_message}")
     
-    async def send_api_status_update(self, provider: str, status: str, user_id: str = None):
-        """Send API status update"""
+    async def send_file_generated(self, job_id: str, file_path: str, file_type: str):
+        """Notify about a newly generated file"""
         message = {
-            'type': 'api_status_update',
-            'provider': provider,
-            'status': status,
-            'timestamp': asyncio.get_event_loop().time()
+            'type': MessageType.FILE_GENERATED.value,
+            'job_id': job_id,
+            'file_path': file_path,
+            'file_type': file_type,
+            'timestamp': time.time()
         }
         
-        if user_id:
-            await self.send_to_user(message, user_id)
-        else:
-            await self.broadcast(message)
+        await self.send_to_job(message, job_id)
     
-    def get_connection_count(self) -> int:
-        """Get total number of active connections"""
-        return len(self.active_connections)
-    
-    def get_user_count(self) -> int:
-        """Get number of unique users connected"""
-        return len(self.user_connections)
-    
-    async def cleanup_stale_connections(self):
-        """Remove stale connections that haven't responded to ping"""
-        current_time = asyncio.get_event_loop().time()
-        stale_threshold = 60  # 60 seconds
+    async def send_project_complete(self, job_id: str, total_files: int, 
+                                  generation_time: float, download_url: str):
+        """Notify about project completion"""
+        message = {
+            'type': MessageType.PROJECT_COMPLETE.value,
+            'job_id': job_id,
+            'total_files': total_files,
+            'generation_time': generation_time,
+            'download_url': download_url,
+            'timestamp': time.time()
+        }
         
-        stale_connections = []
-        for connection_id, metadata in self.connection_metadata.items():
-            if current_time - metadata.get('last_ping', 0) > stale_threshold:
-                stale_connections.append(connection_id)
+        await self.send_to_job(message, job_id)
         
-        for connection_id in stale_connections:
-            logger.warning(f"Removing stale connection: {connection_id}")
-            self.disconnect(connection_id)
+        # Clean up job from agent status tracking
+        if job_id in self.agent_status:
+            del self.agent_status[job_id]
+        
+        logger.info(f"Project completed: {job_id} ({total_files} files, {generation_time:.2f}s)")
+    
+    def get_connection_stats(self) -> Dict[str, Any]:
+        """Get current connection statistics"""
+        return {
+            'total_connections': len(self.active_connections),
+            'user_connections': len(self.user_connections),
+            'job_connections': len(self.job_connections),
+            'active_jobs': len(self.agent_status),
+            'heartbeat_tasks': len(self.heartbeat_tasks)
+        }
+    
+    def get_job_status(self, job_id: str) -> Optional[Dict[str, Any]]:
+        """Get current status for a specific job"""
+        if job_id not in self.agent_status:
+            return None
+        
+        agents = {}
+        for agent_name, agent_update in self.agent_status[job_id].items():
+            agents[agent_name] = asdict(agent_update)
+        
+        return {
+            'job_id': job_id,
+            'agents': agents,
+            'connected_clients': len(self.job_connections.get(job_id, set())),
+            'last_update': max([agent.timestamp for agent in self.agent_status[job_id].values()])
+        }
 
 # Global connection manager instance
 connection_manager = ConnectionManager()
 
-async def websocket_endpoint(websocket: WebSocket, user_id: Optional[str] = None):
-    """Main WebSocket endpoint handler"""
-    connection_id = await connection_manager.connect(websocket, user_id)
-    
-    try:
-        # Send initial connection confirmation
-        await connection_manager.send_personal_message({
-            'type': 'connection_established',
-            'connection_id': connection_id,
-            'user_id': user_id,
-            'timestamp': asyncio.get_event_loop().time()
-        }, connection_id)
-        
-        # Handle incoming messages
-        while True:
-            try:
-                # Wait for message with timeout
-                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
-                message = json.loads(data)
-                
-                await handle_websocket_message(message, connection_id, user_id)
-                
-                # Update last ping time
-                if connection_id in connection_manager.connection_metadata:
-                    connection_manager.connection_metadata[connection_id]['last_ping'] = asyncio.get_event_loop().time()
-                    
-            except asyncio.TimeoutError:
-                # Send ping to check if connection is alive
-                await connection_manager.send_personal_message({
-                    'type': 'ping',
-                    'timestamp': asyncio.get_event_loop().time()
-                }, connection_id)
-                
-            except WebSocketDisconnect:
-                break
-                
-            except json.JSONDecodeError:
-                await connection_manager.send_personal_message({
-                    'type': 'error',
-                    'message': 'Invalid JSON format',
-                    'timestamp': asyncio.get_event_loop().time()
-                }, connection_id)
-                
-            except Exception as e:
-                logger.error(f"Error handling WebSocket message: {e}")
-                await connection_manager.send_personal_message({
-                    'type': 'error',
-                    'message': 'Internal server error',
-                    'timestamp': asyncio.get_event_loop().time()
-                }, connection_id)
-                
-    except WebSocketDisconnect:
-        pass
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
-    finally:
-        connection_manager.disconnect(connection_id)
+# Helper functions for agents to send updates
+async def send_agent_status(job_id: str, agent_name: str, status: str, progress: float, 
+                           current_task: str, details: Optional[Dict] = None,
+                           error_message: Optional[str] = None):
+    """Helper function for agents to send status updates"""
+    agent_status = AgentStatus(status) if isinstance(status, str) else status
+    await connection_manager.update_agent_status(
+        job_id, agent_name, agent_status, progress, current_task, details, error_message
+    )
 
-async def handle_websocket_message(message: Dict[str, Any], connection_id: str, user_id: Optional[str]):
-    """Handle incoming WebSocket message"""
-    message_type = message.get('type')
-    
-    if message_type == 'pong':
-        # Response to ping - update last ping time
-        if connection_id in connection_manager.connection_metadata:
-            connection_manager.connection_metadata[connection_id]['last_ping'] = asyncio.get_event_loop().time()
-    
-    elif message_type == 'subscribe_to_job':
-        # Subscribe to updates for specific job
-        job_id = message.get('job_id')
-        if job_id:
-            # Add subscription logic here
-            await connection_manager.send_personal_message({
-                'type': 'subscription_confirmed',
-                'job_id': job_id,
-                'timestamp': asyncio.get_event_loop().time()
-            }, connection_id)
-    
-    elif message_type == 'unsubscribe_from_job':
-        # Unsubscribe from job updates
-        job_id = message.get('job_id')
-        if job_id:
-            await connection_manager.send_personal_message({
-                'type': 'unsubscription_confirmed',
-                'job_id': job_id,
-                'timestamp': asyncio.get_event_loop().time()
-            }, connection_id)
-    
-    elif message_type == 'request_status':
-        # Send current status
-        await connection_manager.send_personal_message({
-            'type': 'status_response',
-            'connections': connection_manager.get_connection_count(),
-            'users': connection_manager.get_user_count(),
-            'timestamp': asyncio.get_event_loop().time()
-        }, connection_id)
-    
-    else:
-        # Unknown message type
-        await connection_manager.send_personal_message({
-            'type': 'error',
-            'message': f'Unknown message type: {message_type}',
-            'timestamp': asyncio.get_event_loop().time()
-        }, connection_id)
+async def send_project_progress(job_id: str, progress: float, phase: str, files_count: int = 0):
+    """Helper function to send project progress updates"""
+    await connection_manager.update_project_progress(job_id, progress, phase, files_count)
 
-# Background task to cleanup stale connections
-async def connection_cleanup_task():
-    """Background task to clean up stale connections"""
-    while True:
-        try:
-            await connection_manager.cleanup_stale_connections()
-            await asyncio.sleep(30)  # Run every 30 seconds
-        except Exception as e:
-            logger.error(f"Error in connection cleanup task: {e}")
-            await asyncio.sleep(60)  # Wait longer if error occurred
+async def send_error_notification(job_id: str, error: str, error_type: str = "general", 
+                                agent: Optional[str] = None):
+    """Helper function to send error notifications"""
+    await connection_manager.send_error(job_id, error, error_type, agent)
 
-# Start cleanup task when module is imported
-asyncio.create_task(connection_cleanup_task())
+async def send_completion_notification(job_id: str, files_count: int, duration: float, download_url: str):
+    """Helper function to send completion notifications"""
+    await connection_manager.send_project_complete(job_id, files_count, duration, download_url)
