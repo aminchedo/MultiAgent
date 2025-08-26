@@ -1309,105 +1309,192 @@
         // Project Management
         async function generateProject(formData) {
             try {
-                const response = await apiRequest('/api/generate', {
+                // Convert form data to vibe prompt format
+                const vibeRequest = {
+                    vibe_prompt: formData.description || formData.name,
+                    project_type: formData.project_type || 'web',
+                    framework: formData.frameworks && formData.frameworks.length > 0 ? formData.frameworks[0] : 'react'
+                };
+                
+                // Call real vibe-coding API
+                const response = await apiRequest('/api/vibe-coding', {
                     method: 'POST',
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(vibeRequest)
                 });
                 
                 state.currentJobId = response.job_id;
                 
                 showProgressCard();
-                addChatMessage('سیستم', `پروژه "${formData.name}" آغاز شد (ID: ${response.job_id})`, 'system');
-                addLogEntry(`پروژه جدید ایجاد شد: ${response.job_id}`, 'info');
+                addChatMessage('سیستم', `پروژه vibe "${vibeRequest.vibe_prompt}" آغاز شد (ID: ${response.job_id})`, 'system');
                 
-                // Start polling for status
-                pollJobStatus();
+                // Start real-time monitoring of vibe coding progress
+                monitorVibeProgress(response.job_id);
                 
-                return response;
             } catch (error) {
-                addChatMessage('خطا', `خطا در ایجاد پروژه: ${error.message}`, 'error');
-                addLogEntry(`خطا در ایجاد پروژه: ${error.message}`, 'error');
+                console.error('خطا در تولید پروژه:', error);
                 throw error;
             }
         }
 
-        async function pollJobStatus() {
-            if (!state.currentJobId) return;
-            
-            try {
-                const status = await apiRequest(`/status/${state.currentJobId}`);
-                
-                updateProgress({
-                    progress: status.progress,
-                    current_step: status.current_step,
-                    step_number: status.step_number,
-                    total_steps: status.total_steps
-                });
-                
-                if (status.files && status.files.length > 0) {
-                    updateFileTree(status.files);
+        // Monitor real vibe coding progress
+        async function monitorVibeProgress(jobId) {
+            const pollInterval = setInterval(async () => {
+                try {
+                    const response = await apiRequest(`/api/vibe-coding/status/${jobId}`);
+                    
+                    // Update progress based on real agent status
+                    updateVibeProgress(response);
+                    
+                    if (response.status === 'completed') {
+                        clearInterval(pollInterval);
+                        await handleVibeCompletion(jobId, response);
+                    } else if (response.status === 'failed') {
+                        clearInterval(pollInterval);
+                        handleVibeError(response.message);
+                    }
+                    
+                } catch (error) {
+                    console.error('خطا در نظارت بر پیشرفت:', error);
+                    clearInterval(pollInterval);
                 }
-                
-                if (status.status === 'completed') {
-                    handleJobCompletion(status);
-                    return;
-                } else if (status.status === 'failed') {
-                    addChatMessage('خطا', `پروژه ناموفق: ${status.error_message}`, 'error');
-                    addLogEntry(`پروژه ناموفق: ${status.error_message}`, 'error');
-                    return;
-                }
-                
-                // Continue polling if job is still running
-                if (status.status === 'running' || status.status === 'pending') {
-                    setTimeout(pollJobStatus, 5000);
-                }
-                
-            } catch (error) {
-                console.error('Failed to poll job status:', error);
-                setTimeout(pollJobStatus, 10000); // Retry after 10 seconds
-            }
+            }, 3000); // Poll every 3 seconds
         }
 
-        function updateProgress(progressData) {
+        // Update progress based on real agent status
+        function updateVibeProgress(response) {
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');
             const currentStep = document.getElementById('currentStep');
             
-            if (progressData.progress !== undefined) {
-                progressFill.style.width = `${progressData.progress}%`;
+            if (progressFill) {
+                progressFill.style.width = `${response.progress || 0}%`;
             }
             
-            if (progressData.current_step) {
-                progressText.textContent = progressData.current_step;
+            if (progressText) {
+                progressText.textContent = response.message || 'در حال پردازش...';
             }
             
-            if (progressData.step_number !== undefined && progressData.total_steps !== undefined) {
-                currentStep.textContent = `مرحله ${progressData.step_number} از ${progressData.total_steps}`;
+            if (currentStep) {
+                currentStep.textContent = response.message || 'در حال پردازش...';
+            }
+        }
+
+        // Handle completion of vibe coding
+        async function handleVibeCompletion(jobId, response) {
+            try {
+                addChatMessage('سیستم', 'پروژه با موفقیت تولید شد! 🎉', 'system');
+                
+                // Get generated files list
+                const filesResponse = await apiRequest(`/api/vibe-coding/files/${jobId}`);
+                displayGeneratedFiles(filesResponse.files);
+                
+                // Enable download
+                enableDownload(jobId);
+                
+                updateProgressBar(100);
+                
+            } catch (error) {
+                console.error('خطا در تکمیل پروژه:', error);
+                handleVibeError('خطا در تکمیل پروژه');
+            }
+        }
+
+        // Display real generated files
+        function displayGeneratedFiles(files) {
+            const filesList = document.getElementById('generatedFilesList');
+            if (filesList && files.length > 0) {
+                filesList.innerHTML = files.map(file => `
+                    <div class="file-item">
+                        <span class="file-icon">${getFileIcon(file.type)}</span>
+                        <span class="file-name">${file.name}</span>
+                        <span class="file-size">${formatFileSize(file.size)}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Enable real download functionality
+        function enableDownload(jobId) {
+            const downloadBtn = document.getElementById('downloadProjectAction');
+            if (downloadBtn) {
+                downloadBtn.disabled = false;
+                downloadBtn.onclick = () => downloadVibeProject(jobId);
+            }
+        }
+
+        // Download real generated project
+        async function downloadVibeProject(jobId) {
+            try {
+                const response = await fetch(`${state.backendUrl}/api/download/${jobId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${state.authToken}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('دانلود ناموفق');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `vibe-project-${jobId}.zip`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                addChatMessage('سیستم', 'فایل پروژه با موفقیت دانلود شد! 📁', 'success');
+                
+            } catch (error) {
+                console.error('خطا در دانلود:', error);
+                addChatMessage('سیستم', 'خطا در دانلود فایل پروژه', 'error');
+            }
+        }
+
+        // Utility functions
+        function getFileIcon(type) {
+            const icons = {
+                'typescript-react': '⚛️',
+                'javascript-react': '⚛️', 
+                'stylesheet': '🎨',
+                'configuration': '⚙️',
+                'documentation': '📄',
+                'markup': '🌐'
+            };
+            return icons[type] || '📄';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+            return Math.round(bytes / (1024 * 1024)) + ' MB';
+        }
+
+        function handleVibeError(message) {
+            addChatMessage('سیستم', `خطا: ${message}`, 'error');
+            const generateBtn = document.getElementById('generateBtn');
+            if (generateBtn) {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = 'تولید مجدد';
+            }
+        }
+
+        function updateProgressBar(progress) {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            if (progressFill) {
+                progressFill.style.width = `${progress}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${Math.round(progress)}%`;
             }
         }
 
         function showProgressCard() {
-            document.getElementById('progressCard').style.display = 'block';
-        }
-
-        function handleJobCompletion(data) {
-            addChatMessage('سیستم', 'پروژه با موفقیت تکمیل شد! 🎉', 'system');
-            addLogEntry('پروژه تکمیل شد', 'info');
-            
-            updateProgress({
-                progress: 100,
-                current_step: 'تکمیل شده',
-                step_number: 8,
-                total_steps: 8
-            });
-            
-            // Enable download action
-            const downloadBtn = document.getElementById('downloadProjectAction');
-            downloadBtn.style.opacity = '1';
-            downloadBtn.style.pointerEvents = 'auto';
-            
-            // Refresh recent projects
-            loadRecentProjects();
+            const progressCard = document.getElementById('progressCard');
+            if (progressCard) {
+                progressCard.style.display = 'block';
+            }
         }
 
         // File Management
@@ -1618,7 +1705,7 @@
                     showNotification('فایل با موفقیت آپلود شد', 'success');
                     closeModal('uploadModal');
                     // Refresh file tree
-                    pollJobStatus();
+                    monitorVibeProgress(state.currentJobId); // Use monitorVibeProgress for file updates
                 } else {
                     throw new Error('Upload failed');
                 }

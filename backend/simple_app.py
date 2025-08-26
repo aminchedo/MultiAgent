@@ -5,13 +5,25 @@ import json
 import asyncio
 import uuid
 import os
+<<<<<<< HEAD
 import zipfile
 import tempfile
 import time
+=======
+import sys
+>>>>>>> cursor/bc-e2fa0403-b40e-4c65-9a69-dda967a8b502-84c3
 from typing import Dict, Any
+from pathlib import Path
 import structlog
 import sys
 sys.path.append('/workspace')
+
+# Add agents to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import the sophisticated agents
+from agents.vibe_workflow_orchestrator_agent import VibeWorkflowOrchestratorAgent
 
 # Configure logging
 structlog.configure(
@@ -48,11 +60,16 @@ app.add_middleware(
 # Store active WebSocket connections
 active_connections: Dict[str, WebSocket] = {}
 
+<<<<<<< HEAD
 # Store job data
 job_data: Dict[str, Dict] = {}
 
 # Store generated projects
 generated_projects: Dict[str, Dict] = {}
+=======
+# Job storage for tracking vibe coding progress
+job_store: Dict[str, Dict[str, Any]] = {}
+>>>>>>> cursor/bc-e2fa0403-b40e-4c65-9a69-dda967a8b502-84c3
 
 @app.get("/health")
 async def health_check():
@@ -341,6 +358,7 @@ async def websocket_endpoint(websocket: WebSocket):
         if connection_id in active_connections:
             del active_connections[connection_id]
 
+<<<<<<< HEAD
 async def execute_real_vibe_workflow(job_id: str, vibe_request: Dict[str, Any]):
     """Execute the real vibe workflow using existing agents."""
     try:
@@ -443,6 +461,193 @@ async def execute_real_vibe_workflow(job_id: str, vibe_request: Dict[str, Any]):
         job_data[job_id]["status"] = "failed"
         job_data[job_id]["error_message"] = str(e)
         job_data[job_id]["updated_at"] = time.time()
+=======
+@app.post("/api/vibe-coding")
+async def vibe_coding_endpoint(vibe_request: Dict[str, Any], background_tasks: BackgroundTasks):
+    """
+    Real vibe coding endpoint that integrates with existing sophisticated agents.
+    This replaces any mock functionality with actual agent processing.
+    """
+    try:
+        # Validate request
+        if not vibe_request.get('vibe_prompt'):
+            raise HTTPException(
+                status_code=400,
+                detail="vibe_prompt is required"
+            )
+        
+        # Generate unique job ID
+        job_id = str(uuid.uuid4())
+        
+        # Initialize job tracking
+        job_store[job_id] = {
+            "job_id": job_id,
+            "status": "processing",
+            "message": "Real agent processing started",
+            "progress": 0,
+            "vibe_prompt": vibe_request['vibe_prompt'],
+            "project_type": vibe_request.get('project_type', 'web'),
+            "framework": vibe_request.get('framework', 'react'),
+            "agent_status": {
+                "planner": "pending",
+                "coder": "pending", 
+                "critic": "pending",
+                "file_manager": "pending"
+            },
+            "files_generated": [],
+            "project_path": None,
+            "error_log": []
+        }
+        
+        # Start real agent processing in background
+        background_tasks.add_task(process_vibe_request_real, job_id, vibe_request)
+        
+        logger.info("🚀 Real vibe coding job started", job_id=job_id, prompt=vibe_request['vibe_prompt'][:50])
+        
+        return {
+            "job_id": job_id,
+            "status": "processing",
+            "message": "Real agent processing started using existing sophisticated agents"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Vibe coding endpoint failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to start vibe coding: {str(e)}"
+        )
+
+@app.get("/api/vibe-coding/status/{job_id}")
+async def get_vibe_job_status(job_id: str):
+    """Get real-time status of vibe coding job with actual agent progress."""
+    if job_id not in job_store:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return job_store[job_id]
+
+@app.get("/api/vibe-coding/files/{job_id}")
+async def get_vibe_generated_files(job_id: str):
+    """Get list of real generated files from vibe coding."""
+    if job_id not in job_store:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    job_data = job_store[job_id]
+    if job_data["status"] != "completed":
+        return {"files": [], "message": "Generation not complete"}
+    
+    return {"files": job_data.get("files_generated", [])}
+
+@app.get("/api/download/{job_id}")
+async def download_vibe_project(job_id: str):
+    """Download the real generated project as a ZIP file."""
+    if job_id not in job_store:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    job_data = job_store[job_id]
+    if job_data["status"] != "completed":
+        raise HTTPException(status_code=400, detail="Project generation not completed")
+    
+    zip_path = job_data.get("zip_path")
+    if not zip_path or not os.path.exists(zip_path):
+        raise HTTPException(status_code=404, detail="Generated project file not found")
+    
+    from fastapi.responses import FileResponse
+    project_name = job_data.get("project_name", f"vibe-project-{job_id}")
+    
+    return FileResponse(
+        zip_path,
+        media_type='application/zip',
+        filename=f"{project_name}.zip",
+        headers={"Content-Disposition": f"attachment; filename={project_name}.zip"}
+    )
+
+async def process_vibe_request_real(job_id: str, vibe_request: Dict[str, Any]):
+    """
+    Process vibe request using existing sophisticated agents - REAL IMPLEMENTATION
+    This function connects to the existing VibeWorkflowOrchestratorAgent.
+    """
+    try:
+        # Update job status
+        job_store[job_id]["message"] = "Initializing sophisticated AI agents..."
+        
+        # Initialize the existing orchestrator agent
+        orchestrator = VibeWorkflowOrchestratorAgent()
+        
+        # Update status - planning phase
+        job_store[job_id]["agent_status"]["planner"] = "processing"
+        job_store[job_id]["message"] = "AI Planner analyzing your vibe prompt..."
+        job_store[job_id]["progress"] = 10
+        
+        # Execute the real vibe workflow using existing agents
+        logger.info(f"🤖 Starting real workflow execution for job {job_id}")
+        workflow_result = orchestrator.orchestrate_vibe_project(vibe_request)
+        
+        # Update status based on real results
+        if workflow_result.get('workflow_status') == 'completed':
+            job_store[job_id]["status"] = "completed"
+            job_store[job_id]["message"] = "Project generated successfully!"
+            job_store[job_id]["progress"] = 100
+            
+            # Update all agent statuses to completed
+            for agent in job_store[job_id]["agent_status"]:
+                job_store[job_id]["agent_status"][agent] = "completed"
+            
+            # Extract real file information from workflow results
+            files_generated = []
+            project_data = workflow_result.get('project_data', {})
+            
+            # Get files from file manager result
+            file_manager_result = workflow_result.get('agent_results', {}).get('file_manager', {})
+            organized_files = file_manager_result.get('organized_files', {})
+            
+            # Create file list with real file information
+            for file_path, file_info in organized_files.items():
+                files_generated.append({
+                    "name": file_path,
+                    "type": file_info.get('type', 'unknown'),
+                    "size": file_info.get('size', len(file_info.get('content', ''))),
+                    "category": file_info.get('category', 'unknown')
+                })
+            
+            # If no organized files, try to get from coder result
+            if not files_generated:
+                coder_result = workflow_result.get('agent_results', {}).get('coder', {})
+                generated_files = coder_result.get('generated_files', {})
+                
+                for file_path, content in generated_files.items():
+                    files_generated.append({
+                        "name": file_path,
+                        "type": file_path.split('.')[-1] if '.' in file_path else "unknown",
+                        "size": len(content) if isinstance(content, str) else 0,
+                        "category": "generated"
+                    })
+            
+            # Store file information
+            job_store[job_id]["files_generated"] = files_generated
+            
+            # Store ZIP file path if available
+            zip_info = file_manager_result.get('zip_file', {})
+            if zip_info.get('success'):
+                job_store[job_id]["zip_path"] = zip_info.get('zip_path')
+                job_store[job_id]["project_name"] = zip_info.get('project_name')
+            
+            job_store[job_id]["project_path"] = workflow_result.get('project_id')
+            
+            logger.info(f"✅ Vibe coding completed successfully for job {job_id} - Generated {len(files_generated)} files")
+            
+        else:
+            # Handle failure case
+            job_store[job_id]["status"] = "failed"
+            job_store[job_id]["message"] = f"Generation failed: {workflow_result.get('error_log', ['Unknown error'])}"
+            logger.error(f"❌ Vibe coding failed for job {job_id}: {workflow_result.get('error_log')}")
+        
+    except Exception as e:
+        # Handle real errors
+        job_store[job_id]["status"] = "failed"
+        job_store[job_id]["message"] = f"Generation failed: {str(e)}"
+        job_store[job_id]["error_log"].append(str(e))
+        logger.error(f"❌ Vibe coding error for job {job_id}: {e}")
+>>>>>>> cursor/bc-e2fa0403-b40e-4c65-9a69-dda967a8b502-84c3
 
 if __name__ == "__main__":
     import uvicorn
