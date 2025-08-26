@@ -1,0 +1,493 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════════
+TEST VIBE INTEGRATION - API TESTING PAGE
+═══════════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Lightweight API testing page for the MultiAgent Vibe Coding Platform
+This file provides a minimal interface to verify backend endpoints are working properly
+and test the complete workflow before using the main dashboard.
+
+CORRESPONDING PAGE: Integration Test Page (Developer/Testing Tool)
+
+SECTIONS:
+1. STYLES (lines ~7-100): Minimal CSS styling for testing interface
+   - Simple form styling and dark theme
+   - Progress indicators and status displays
+   - Agent monitoring cards
+   - Results and logging sections
+
+2. HTML STRUCTURE (lines ~102-200): Testing interface layout
+   - Simple form for API testing
+   - Progress tracking section
+   - Agent status monitoring
+   - Results display area
+   - Real-time logging container
+
+3. JAVASCRIPT LOGIC (lines ~201-429): Core testing functionality
+   - API endpoint validation
+   - Form submission and error handling
+   - Real-time status monitoring
+   - File listing and download testing
+   - Logging and feedback system
+
+API ENDPOINTS TESTED:
+- POST /api/vibe-coding - Test project generation submission
+- GET /api/vibe-coding/status/{job_id} - Test status monitoring
+- GET /api/vibe-coding/files/{job_id} - Test file listing
+- GET /api/download/{job_id} - Test project download
+
+USAGE: Use this page first if you suspect API or connection problems.
+This is a simplified version of the main dashboard for debugging purposes.
+Keep this minimal - do not duplicate complex features from the main dashboard.
+═══════════════════════════════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding Integration Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0a0e1a;
+            color: #ffffff;
+        }
+        .container {
+            background: rgba(51, 65, 85, 0.95);
+            padding: 30px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #1e293b;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        button {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #475569;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .status-text {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+        .agent-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .agent-card {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .agent-pending { border-left: 3px solid #475569; }
+        .agent-processing { border-left: 3px solid #f59e0b; }
+        .agent-completed { border-left: 3px solid #059669; }
+        .files-list {
+            margin-top: 20px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #1e293b;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .download-section {
+            display: none;
+            margin-top: 20px;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .logs {
+            background: #1e293b;
+            border-radius: 6px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <!-- MAIN TESTING INTERFACE: Simple container for API testing -->
+    <div class="container">
+        <h1>🎨 Vibe Coding Integration Test</h1>
+        <p>Test the real backend integration with sophisticated AI agents</p>
+        
+        <!-- API TESTING FORM: Minimal form to test backend endpoints -->
+        <form id="vibeForm">
+            <!-- PROMPT INPUT: Test prompt for API validation -->
+            <div class="form-group">
+                <label for="vibePrompt">Vibe Prompt:</label>
+                <textarea id="vibePrompt" rows="3" placeholder="Describe your project vibe, e.g., 'Create a cozy coffee shop website with warm colors and easy navigation'"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="projectType">Project Type:</label>
+                <select id="projectType">
+                    <option value="web">Web Application</option>
+                    <option value="landing">Landing Page</option>
+                    <option value="blog">Blog</option>
+                    <option value="dashboard">Dashboard</option>
+                    <option value="portfolio">Portfolio</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="framework">Framework:</label>
+                <select id="framework">
+                    <option value="react">React</option>
+                    <option value="vue">Vue.js</option>
+                    <option value="vanilla">Vanilla JS</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="generateBtn">🚀 Generate Vibe Project</button>
+        </form>
+    </div>
+
+    <div class="container progress-container" id="progressContainer">
+        <h3>🤖 AI Agents Working</h3>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status-text" id="statusText">Initializing...</div>
+        
+        <div class="agent-status" id="agentStatus">
+            <div class="agent-card agent-pending" data-agent="planner">
+                <div>🧠 Planner</div>
+                <div id="planner-status">Pending</div>
+            </div>
+            <div class="agent-card agent-pending" data-agent="coder">
+                <div>⚡ Coder</div>
+                <div id="coder-status">Pending</div>
+            </div>
+            <div class="agent-card agent-pending" data-agent="critic">
+                <div>🔍 Critic</div>
+                <div id="critic-status">Pending</div>
+            </div>
+            <div class="agent-card agent-pending" data-agent="file_manager">
+                <div>📁 File Manager</div>
+                <div id="file_manager-status">Pending</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="resultsContainer" style="display: none;">
+        <h3>📁 Generated Files</h3>
+        <div class="files-list" id="filesList"></div>
+        
+        <div class="download-section" id="downloadSection">
+            <button id="downloadBtn">📥 Download Project</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>📊 Real-time Logs</h3>
+        <div class="logs" id="logs"></div>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════════════════════════════════════════════════════
+           JAVASCRIPT TESTING FUNCTIONALITY
+           ═══════════════════════════════════════════════════════════════════════════════════
+           
+           This section contains minimal JavaScript for API endpoint testing:
+           - Form submission testing
+           - API response validation  
+           - Basic status monitoring
+           - Error handling and logging
+           
+           Purpose: Quick validation of backend connectivity and basic workflow.
+           Keep this simple - complex features belong in the main dashboard.
+           ═══════════════════════════════════════════════════════════════════════════════════
+        */
+        
+        // CONFIGURATION: Backend API endpoint for testing
+        const API_BASE = 'http://localhost:8000';
+        
+        // TESTING STATE: Job tracking and polling control
+        let currentJobId = null;
+        let pollInterval = null;
+
+        // FORM SUBMISSION TEST: Validate API endpoint connectivity
+        document.getElementById('vibeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const vibePrompt = document.getElementById('vibePrompt').value.trim();
+            const projectType = document.getElementById('projectType').value;
+            const framework = document.getElementById('framework').value;
+            
+            if (!vibePrompt) {
+                log('❌ Please enter a vibe prompt', 'error');
+                return;
+            }
+            
+            await startVibeGeneration(vibePrompt, projectType, framework);
+        });
+
+        async function startVibeGeneration(vibePrompt, projectType, framework) {
+            try {
+                log(`🚀 Starting vibe generation: "${vibePrompt}"`);
+                
+                const generateBtn = document.getElementById('generateBtn');
+                generateBtn.disabled = true;
+                generateBtn.textContent = '⏳ Processing...';
+                
+                // Show progress
+                document.getElementById('progressContainer').style.display = 'block';
+                document.getElementById('resultsContainer').style.display = 'none';
+                
+                // Call real vibe-coding API
+                const response = await fetch(`${API_BASE}/api/vibe-coding`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: vibePrompt,
+                        project_type: projectType,
+                        framework: framework
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                currentJobId = result.job_id;
+                
+                log(`✅ Job started! ID: ${currentJobId}`, 'success');
+                
+                // Start monitoring
+                startMonitoring();
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                resetForm();
+            }
+        }
+
+        function startMonitoring() {
+            if (pollInterval) clearInterval(pollInterval);
+            
+            pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/vibe-coding/status/${currentJobId}`);
+                    const status = await response.json();
+                    
+                    updateProgress(status);
+                    
+                    if (status.status === 'completed') {
+                        clearInterval(pollInterval);
+                        await handleCompletion(status);
+                    } else if (status.status === 'failed') {
+                        clearInterval(pollInterval);
+                        handleError(status.message);
+                    }
+                    
+                } catch (error) {
+                    log(`❌ Monitoring error: ${error.message}`, 'error');
+                }
+            }, 3000);
+        }
+
+        function updateProgress(status) {
+            // Update progress bar
+            const progress = status.progress || 0;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('statusText').textContent = status.message || 'Processing...';
+            
+            // Update agent status
+            const agentStatus = status.agent_status || {};
+            Object.keys(agentStatus).forEach(agent => {
+                const card = document.querySelector(`[data-agent="${agent}"]`);
+                const statusEl = document.getElementById(`${agent}-status`);
+                
+                if (card && statusEl) {
+                    const agentState = agentStatus[agent];
+                    
+                    // Remove all status classes
+                    card.classList.remove('agent-pending', 'agent-processing', 'agent-completed');
+                    
+                    // Add appropriate class
+                    if (agentState === 'processing') {
+                        card.classList.add('agent-processing');
+                        statusEl.textContent = 'Working...';
+                    } else if (agentState === 'completed') {
+                        card.classList.add('agent-completed');
+                        statusEl.textContent = 'Completed';
+                    } else {
+                        card.classList.add('agent-pending');
+                        statusEl.textContent = 'Pending';
+                    }
+                }
+            });
+            
+            log(`📊 Progress: ${progress}% - ${status.message}`);
+        }
+
+        async function handleCompletion(status) {
+            log('🎉 Project generation completed!', 'success');
+            
+            try {
+                // Get generated files
+                const filesResponse = await fetch(`${API_BASE}/api/vibe-coding/files/${currentJobId}`);
+                const filesData = await filesResponse.json();
+                
+                displayFiles(filesData.files);
+                
+                // Show results
+                document.getElementById('resultsContainer').style.display = 'block';
+                document.getElementById('downloadSection').style.display = 'block';
+                
+                // Setup download
+                document.getElementById('downloadBtn').onclick = downloadProject;
+                
+                log(`📁 Generated ${filesData.files.length} files`);
+                
+            } catch (error) {
+                log(`❌ Error fetching files: ${error.message}`, 'error');
+            }
+            
+            resetForm();
+        }
+
+        function displayFiles(files) {
+            const filesList = document.getElementById('filesList');
+            
+            filesList.innerHTML = files.map(file => `
+                <div class="file-item">
+                    <span>${getFileIcon(file.type)} ${file.name}</span>
+                    <span>${formatFileSize(file.size)}</span>
+                </div>
+            `).join('');
+        }
+
+        async function downloadProject() {
+            try {
+                log('📥 Starting download...');
+                
+                const response = await fetch(`${API_BASE}/api/download/${currentJobId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Download failed');
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `vibe-project-${currentJobId}.zip`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                log('✅ Download completed!', 'success');
+                
+            } catch (error) {
+                log(`❌ Download error: ${error.message}`, 'error');
+            }
+        }
+
+        function handleError(message) {
+            log(`❌ Generation failed: ${message}`, 'error');
+            resetForm();
+        }
+
+        function resetForm() {
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = false;
+            generateBtn.textContent = '🚀 Generate Vibe Project';
+        }
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            
+            logs.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function getFileIcon(type) {
+            const icons = {
+                'typescript-react': '⚛️',
+                'javascript-react': '⚛️',
+                'stylesheet': '🎨',
+                'configuration': '⚙️',
+                'documentation': '📄',
+                'markup': '🌐'
+            };
+            return icons[type] || '📄';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+            return Math.round(bytes / (1024 * 1024)) + ' MB';
+        }
+
+        // Initialize
+        log('🎨 Vibe Coding Test Interface Ready');
+        log('💡 Enter a creative prompt to generate a real project!');
+    </script>
+</body>
+</html>

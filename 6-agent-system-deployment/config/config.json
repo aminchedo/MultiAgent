@@ -1,0 +1,198 @@
+{
+  "_comment": "تنظیمات سیستم چند-عامله تولید کد",
+  "system": {
+    "name": "Enhanced 6-Agent Code Generation System",
+    "version": "2.0.0",
+    "description": "سیستم پیشرفته 6-عامله تولید کد با تأیید کیفیت"
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8000,
+    "debug": true,
+    "reload": true,
+    "workers": 1,
+    "log_level": "info"
+  },
+  "database": {
+    "url": "sqlite:///multiagent.db",
+    "echo": false,
+    "pool_size": 10,
+    "max_overflow": 20
+  },
+  "cors": {
+    "allow_origins": ["*"],
+    "allow_credentials": true,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"]
+  },
+  "websocket": {
+    "ping_interval": 30,
+    "ping_timeout": 10,
+    "close_timeout": 10,
+    "max_size": 1048576
+  },
+  "agents": {
+    "max_concurrent_jobs": 10,
+    "job_timeout": 300,
+    "default_rounds": 3,
+    "max_rounds": 10,
+    "agents_list": [
+      {
+        "name": "هماهنگ‌کننده",
+        "class": "VibeWorkflowOrchestratorAgent",
+        "enabled": true,
+        "description": "هماهنگی و کنترل جریان کار 6-عامله"
+      },
+      {
+        "name": "برنامه‌ریز",
+        "class": "VibePlannerAgent",
+        "enabled": true,
+        "description": "تحلیل نیازمندی‌ها و برنامه‌ریزی پروژه"
+      },
+      {
+        "name": "کدنویس", 
+        "class": "VibeCoderAgent",
+        "enabled": true,
+        "description": "تولید کد بر اساس طرح"
+      },
+      {
+        "name": "بازبین",
+        "class": "VibeCriticAgent", 
+        "enabled": true,
+        "description": "بررسی کیفیت کد و بهترین شیوه‌ها"
+      },
+      {
+        "name": "مدیر فایل",
+        "class": "VibeFileManagerAgent",
+        "enabled": true,
+        "description": "سازماندهی ساختار پروژه و پیکربندی استقرار"
+      },
+      {
+        "name": "تأیید کیفیت",
+        "class": "VibeQAValidatorAgent",
+        "enabled": true,
+        "description": "تست جامع و اعتبارسنجی کیفیت نهایی"
+      }
+    ],
+    "total_agents": 6,
+    "qa_validation": {
+      "enabled": true,
+      "minimum_quality_score": 85,
+      "timeout_seconds": 600,
+      "run_security_scans": true,
+      "run_performance_tests": true,
+      "required_test_coverage": 80
+    }
+  },
+  "api": {
+    "base_url": "https://api.avalai.ir/v1",
+    "rate_limit": {
+      "enabled": false,
+      "requests_per_minute": 60,
+      "burst": 10
+    },
+    "authentication": {
+      "enabled": true,
+      "api_key_header": "X-API-Key",
+      "valid_keys": [
+        "aa-4jpbPW57MrwaTTMFJMqflwJC68cO2i3VeJvK7UG5Gsl6mWy4",
+        "aa-lPwmKyhGjxIqnqRx9XbotTjUczIlW6XfMDLhGqagWpcNd3be"
+      ]
+    },
+    "file_upload": {
+      "max_size": 10485760,
+      "allowed_extensions": [".txt", ".md", ".json", ".yaml", ".yml"],
+      "upload_path": "./uploads"
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "app.log",
+    "max_bytes": 10485760,
+    "backup_count": 5,
+    "console": true
+  },
+  "project_templates": {
+    "calculator": {
+      "name": "ماشین حساب",
+      "description": "ماشین حساب پیشرفته با UI زیبا",
+      "files": ["index.html", "style.css", "script.js", "README.md"],
+      "technologies": ["HTML5", "CSS3", "JavaScript ES6+"],
+      "complexity": "medium"
+    },
+    "blog": {
+      "name": "سیستم وبلاگ",
+      "description": "وبلاگ کامل با مدیریت محتوا",
+      "files": ["index.html", "blog.html", "post.html", "style.css", "script.js"],
+      "technologies": ["HTML5", "CSS3", "JavaScript", "Local Storage"],
+      "complexity": "medium"
+    },
+    "ecommerce": {
+      "name": "فروشگاه آنلاین",
+      "description": "فروشگاه کامل با سبد خرید",
+      "files": ["index.html", "products.html", "cart.html", "checkout.html", "style.css", "script.js"],
+      "technologies": ["HTML5", "CSS3", "JavaScript", "Payment API"],
+      "complexity": "advanced"
+    },
+    "dashboard": {
+      "name": "داشبورد مدیریت",
+      "description": "داشبورد کامل با نمودارها",
+      "files": ["index.html", "dashboard.html", "charts.js", "style.css", "script.js"],
+      "technologies": ["HTML5", "CSS3", "JavaScript", "Chart.js"],
+      "complexity": "advanced"
+    }
+  },
+  "features": {
+    "code_generation": true,
+    "real_time_monitoring": true,
+    "websocket_support": true,
+    "file_download": true,
+    "project_templates": true,
+    "multi_language_support": true,
+    "responsive_design": true,
+    "api_documentation": true
+  },
+  "paths": {
+    "static": "./static",
+    "templates": "./templates", 
+    "uploads": "./uploads",
+    "logs": "./logs",
+    "database": "./multiagent.db",
+    "cache": "./cache"
+  },
+  "performance": {
+    "cache_enabled": true,
+    "cache_ttl": 3600,
+    "compression": true,
+    "static_files_cache": true
+  },
+  "security": {
+    "csrf_protection": false,
+    "content_type_validation": true,
+    "max_request_size": 16777216,
+    "allowed_hosts": ["*"],
+    "secure_cookies": false
+  },
+  "monitoring": {
+    "health_check": true,
+    "metrics": true,
+    "error_tracking": true,
+    "performance_monitoring": true
+  },
+  "development": {
+    "auto_reload": true,
+    "debug_mode": true,
+    "verbose_logging": true,
+    "cors_all_origins": true
+  },
+  "production": {
+    "auto_reload": false,
+    "debug_mode": false,
+    "verbose_logging": false,
+    "cors_specific_origins": true,
+    "ssl_enabled": false,
+    "ssl_cert_path": "",
+    "ssl_key_path": ""
+  }
+}

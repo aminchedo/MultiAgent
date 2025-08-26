@@ -1,0 +1,94 @@
+{
+  "test_execution_date": "2025-08-26 05:37:18",
+  "websocket_test_results": {
+    "websocket_basic": {
+      "success": true,
+      "ping_pong": false,
+      "response": {
+        "type": "connection_status",
+        "status": "connected",
+        "connection_id": "cde426a7-e979-4c97-bc44-e563dd2f2c12",
+        "timestamp": 1756186635.561496
+      }
+    },
+    "websocket_updates": {
+      "success": true,
+      "messages_count": 2,
+      "message_types": [
+        "connection_status",
+        "initial_status"
+      ],
+      "job_id": "006583ac-b896-48e5-8e25-783a4bd89209"
+    },
+    "websocket_concurrent": {
+      "success": true,
+      "total_attempts": 5,
+      "successful_connections": 5,
+      "success_rate": 100.0,
+      "results": [
+        {
+          "job_id": "concurrent-test-0",
+          "success": true,
+          "response": {
+            "type": "connection_status",
+            "status": "connected",
+            "connection_id": "ccdfb1e2-672e-4627-ae5d-3febc69781a8",
+            "timestamp": 1756186637.5749884
+          }
+        },
+        {
+          "job_id": "concurrent-test-1",
+          "success": true,
+          "response": {
+            "type": "connection_status",
+            "status": "connected",
+            "connection_id": "f8a9d491-d7df-4d60-802c-da9da3dbf258",
+            "timestamp": 1756186637.575092
+          }
+        },
+        {
+          "job_id": "concurrent-test-2",
+          "success": true,
+          "response": {
+            "type": "connection_status",
+            "status": "connected",
+            "connection_id": "a1b30f03-8ead-486e-8b0e-750daa21ed9d",
+            "timestamp": 1756186637.5761316
+          }
+        },
+        {
+          "job_id": "concurrent-test-3",
+          "success": true,
+          "response": {
+            "type": "connection_status",
+            "status": "connected",
+            "connection_id": "eaf2b7a4-6b77-4f68-a06d-90fb208012c5",
+            "timestamp": 1756186637.5765705
+          }
+        },
+        {
+          "job_id": "concurrent-test-4",
+          "success": true,
+          "response": {
+            "type": "connection_status",
+            "status": "connected",
+            "connection_id": "cb507331-2db1-4fc4-84f2-16e9ecd18b5b",
+            "timestamp": 1756186637.5764658
+          }
+        }
+      ]
+    },
+    "websocket_error_handling": {
+      "success": true,
+      "invalid_endpoint_handled": true,
+      "malformed_message_handled": true
+    }
+  },
+  "summary": {
+    "total_websocket_tests": 4,
+    "passed_tests": 4,
+    "failed_tests": 0,
+    "websocket_success_rate": 100.0,
+    "websocket_functional": true
+  }
+}
