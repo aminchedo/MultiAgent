@@ -32,7 +32,8 @@ sys.path.insert(0, str(project_root))
 
 # Import our modules
 from config.config import settings
-from api.websocket_handler import connection_manager, send_agent_status, send_project_progress, send_completion_notification
+from api.websocket_handler import ConnectionManager, MessageType, AgentStatus
+connection_manager = ConnectionManager()
 from agents.vibe_workflow_orchestrator_agent import VibeWorkflowOrchestratorAgent
 
 # Configure structured logging
@@ -99,13 +100,13 @@ active_jobs: Dict[str, Dict[str, Any]] = {}
 generated_projects: Dict[str, Dict[str, Any]] = {}
 orchestrator_agent = None
 
-# Progress callback for orchestrator
+# Enhanced progress callback for 6-agent orchestrator
 async def orchestrator_progress_callback(job_id: str, agent_name: str, status: str, 
                                        progress: float, current_task: str, 
                                        details: Optional[Dict] = None):
-    """Callback function to receive progress updates from orchestrator agent."""
+    """Enhanced callback function to receive progress updates from 6-agent orchestrator."""
     try:
-        # Update job status in memory
+        # Update job status in memory for 6-agent system
         if job_id in active_jobs:
             active_jobs[job_id]["agents"][agent_name] = {
                 "status": status,
@@ -115,21 +116,29 @@ async def orchestrator_progress_callback(job_id: str, agent_name: str, status: s
             }
             active_jobs[job_id]["updated_at"] = time.time()
             
-            # Calculate overall progress
+            # Calculate overall progress across all 6 agents
             agent_progresses = [agent["progress"] for agent in active_jobs[job_id]["agents"].values()]
             overall_progress = sum(agent_progresses) / len(agent_progresses) if agent_progresses else 0
             active_jobs[job_id]["progress"] = overall_progress
             active_jobs[job_id]["current_phase"] = current_task
         
-        # Send WebSocket update
-        await send_agent_status(job_id, agent_name, status, progress, current_task, details)
+        # Send enhanced WebSocket update with agent-specific progress
+        await connection_manager.broadcast_agent_progress(
+            agent_name, job_id, status, int(progress), current_task, details
+        )
         
-        # Update overall progress if this is a major milestone
+        # Special handling for QA Validator updates
+        if agent_name == "qa_validator" and details and details.get("qa_metrics"):
+            await connection_manager.update_qa_metrics(job_id, details["qa_metrics"])
+        
+        # Update overall workflow status if this is a major milestone
         if status in ["completed", "failed"]:
-            await send_project_progress(job_id, overall_progress, current_task)
+            workflow_status = "completed" if status == "completed" else "failed"
+            agent_statuses = {name: agent["status"] for name, agent in active_jobs[job_id]["agents"].items()}
+            await connection_manager.broadcast_workflow_status(job_id, workflow_status, agent_statuses)
             
     except Exception as e:
-        logger.error(f"Failed to process orchestrator progress callback: {e}")
+        logger.error(f"Failed to process 6-agent orchestrator progress callback: {e}")
 
 # Security
 security = HTTPBearer(auto_error=False)
@@ -239,25 +248,29 @@ async def create_project(
         # Generate unique job ID
         job_id = str(uuid.uuid4())
         
-        # Initialize job tracking
+        # Initialize 6-agent job tracking
         job_start_time = time.time()
         active_jobs[job_id] = {
             "id": job_id,
             "status": "initializing",
             "progress": 0.0,
-            "current_phase": "Project initialization",
+            "current_phase": "6-Agent workflow initialization",
             "request": request.dict(),
             "created_at": job_start_time,
             "updated_at": job_start_time,
             "agents": {
                 "orchestrator": {"status": "starting", "progress": 0},
-                "planner": {"status": "pending", "progress": 0},
-                "coder": {"status": "pending", "progress": 0},
-                "critic": {"status": "pending", "progress": 0},
-                "file_manager": {"status": "pending", "progress": 0}
+                "planner": {"status": "waiting", "progress": 0},
+                "coder": {"status": "waiting", "progress": 0},
+                "critic": {"status": "waiting", "progress": 0},
+                "file_manager": {"status": "waiting", "progress": 0},
+                "qa_validator": {"status": "waiting", "progress": 0}
             },
             "files_generated": 0,
-            "user_id": request.user_id
+            "user_id": request.user_id,
+            "qa_results": None,
+            "quality_approved": False,
+            "agents_count": 6
         }
         
         # Start background generation task
@@ -272,14 +285,83 @@ async def create_project(
         return ProjectResponse(
             job_id=job_id,
             status="started",
-            message="Project generation started successfully",
-            estimated_time=300,  # 5 minutes estimate
+            message="6-agent project generation started successfully",
+            estimated_time=400,  # 6-7 minutes estimate for 6-agent system
             websocket_url=websocket_url
         )
         
     except Exception as e:
         logger.error(f"❌ Failed to start project generation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# QA Report endpoint
+@app.get("/api/vibe-coding/qa-report/{job_id}", tags=["QA"])
+async def get_qa_report(job_id: str):
+    """Get detailed QA validation report for a project"""
+    if job_id not in active_jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    job_data = active_jobs[job_id]
+    if "qa_results" not in job_data or job_data["qa_results"] is None:
+        raise HTTPException(status_code=400, detail="QA validation not completed")
+    
+    qa_results = job_data["qa_results"]
+    
+    return {
+        "job_id": job_id,
+        "qa_report": qa_results.get("qa_report", ""),
+        "quality_score": qa_results.get("quality_score", 0),
+        "final_approval": qa_results.get("final_approval", False),
+        "test_results": qa_results.get("test_results", {}),
+        "security_scan": qa_results.get("security_scan", {}),
+        "performance_metrics": qa_results.get("performance_metrics", {}),
+        "recommendations": qa_results.get("recommendations", []),
+        "validation_timestamp": qa_results.get("end_time"),
+        "compilation_status": qa_results.get("compilation", {}),
+        "validation_details": qa_results.get("validation_details", {})
+    }
+
+# Enhanced project status endpoint with QA metrics
+@app.get("/api/vibe-coding/detailed-status/{job_id}", tags=["Generation"])
+async def get_detailed_project_status(job_id: str):
+    """Get comprehensive project status including 6-agent details and QA metrics"""
+    if job_id not in active_jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    job_data = active_jobs[job_id]
+    
+    # Calculate overall progress based on 6 agents
+    agent_progresses = [agent["progress"] for agent in job_data["agents"].values()]
+    overall_progress = sum(agent_progresses) / len(agent_progresses) if agent_progresses else 0
+    
+    # Include QA-specific information
+    qa_info = {}
+    if job_data.get("qa_results"):
+        qa_results = job_data["qa_results"]
+        qa_info = {
+            "quality_score": qa_results.get("quality_score", 0),
+            "final_approval": qa_results.get("final_approval", False),
+            "tests_executed": len(qa_results.get("tests_executed", [])),
+            "security_issues": qa_results.get("security_scan", {}).get("vulnerabilities_found", 0),
+            "performance_score": qa_results.get("performance", {}).get("performance_score", 0),
+            "validation_status": qa_results.get("validation_status", "pending")
+        }
+    
+    return {
+        "job_id": job_id,
+        "status": job_data["status"],
+        "progress": overall_progress,
+        "current_phase": job_data["current_phase"],
+        "agents": job_data["agents"],
+        "agents_count": job_data.get("agents_count", 6),
+        "files_generated": job_data["files_generated"],
+        "created_at": job_data["created_at"],
+        "updated_at": job_data["updated_at"],
+        "estimated_completion": job_data.get("estimated_completion"),
+        "error_message": job_data.get("error_message"),
+        "qa_metrics": qa_info,
+        "quality_approved": job_data.get("quality_approved", False)
+    }
 
 # Project status endpoint
 @app.get("/api/vibe-coding/status/{job_id}", response_model=ProjectStatus, tags=["Generation"])
@@ -519,56 +601,90 @@ async def execute_project_generation(job_id: str, request_data: Dict[str, Any]):
             }
         }
         
-        # Execute the workflow through enhanced orchestrator
-        logger.info(f"🤖 Executing enhanced workflow with orchestrator for job: {job_id}")
+        # Initialize 6-agent tracking
+        await connection_manager.initialize_6_agent_tracking(job_id)
         
-        # The orchestrator will now handle all progress updates through the callback
-        workflow_result = orchestrator_agent.execute_vibe_workflow(vibe_request, job_id)
+        # Execute the enhanced 6-agent workflow
+        logger.info(f"🎭 Executing 6-agent workflow with orchestrator for job: {job_id}")
         
-        # Process workflow results
-        if workflow_result and workflow_result.get("workflow_status") == "completed":
-            # Store generated project with enhanced metadata
-            project_data = workflow_result.get("project_data", {})
+        # Use the enhanced orchestration method for 6-agent system
+        workflow_result = await orchestrator_agent.orchestrate_project_creation(
+            request_data["prompt"], job_id
+        )
+        
+        # Process 6-agent workflow results
+        if workflow_result and workflow_result.get("status") == "completed":
+            # Store generated project with enhanced 6-agent metadata
+            project_files = workflow_result.get("project_files", {})
+            statistics = workflow_result.get("statistics", {})
+            qa_validation = workflow_result.get("quality_validation", {})
+            
             generated_projects[job_id] = {
-                "files": project_data.get("files", {}),
-                "metadata": project_data.get("metadata", {}),
-                "deployment_config": project_data.get("deployment_config", {}),
-                "statistics": project_data.get("statistics", {}),
+                "files": project_files,
+                "metadata": {
+                    "framework": request_data.get("framework", "react"),
+                    "project_type": request_data.get("project_type", "web"),
+                    "quality_score": qa_validation.get("quality_score", 0),
+                    "final_approval": qa_validation.get("final_approval", False),
+                    "agents_executed": workflow_result.get("agents_executed", [])
+                },
+                "statistics": statistics,
+                "qa_validation": qa_validation,
                 "created_at": start_time,
-                "generation_time": time.time() - start_time,
+                "generation_time": workflow_result.get("execution_time", time.time() - start_time),
                 "workflow_summary": {
-                    "total_steps": len(workflow_result.get("agent_results", {})),
-                    "success_rate": len([r for r in workflow_result.get("agent_results", {}).values() if r.get("success")]),
-                    "quality_score": project_data.get("metadata", {}).get("quality_score", 0),
-                    "framework": project_data.get("metadata", {}).get("framework", "react")
+                    "total_agents": 6,
+                    "agents_completed": len(workflow_result.get("agents_executed", [])),
+                    "quality_score": qa_validation.get("quality_score", 0),
+                    "final_approval": qa_validation.get("final_approval", False),
+                    "tests_executed": qa_validation.get("test_results", {}).get("total_tests", 0),
+                    "security_issues": qa_validation.get("security_scan", {}).get("vulnerabilities_found", 0),
+                    "framework": request_data.get("framework", "react")
                 }
             }
             
-            # Update final status with enhanced statistics
-            stats = project_data.get("statistics", {})
+            # Store QA results in active job for reporting
+            active_jobs[job_id]["qa_results"] = qa_validation
+            active_jobs[job_id]["quality_approved"] = qa_validation.get("final_approval", False)
+            
+            # Update final status with enhanced 6-agent statistics
             active_jobs[job_id]["status"] = "completed"
             active_jobs[job_id]["progress"] = 100.0
-            active_jobs[job_id]["current_phase"] = "Project complete"
-            active_jobs[job_id]["files_generated"] = stats.get("total_files", len(project_data.get("files", {})))
+            active_jobs[job_id]["current_phase"] = "6-agent workflow complete"
+            active_jobs[job_id]["files_generated"] = statistics.get("total_files", len(project_files))
+            active_jobs[job_id]["agents"]["qa_validator"]["status"] = "completed"
+            active_jobs[job_id]["agents"]["qa_validator"]["progress"] = 100
             active_jobs[job_id]["updated_at"] = time.time()
-            active_jobs[job_id]["quality_score"] = stats.get("quality_score", 0)
+            active_jobs[job_id]["quality_score"] = qa_validation.get("quality_score", 0)
             active_jobs[job_id]["generation_summary"] = {
-                "total_lines": stats.get("total_lines", 0),
-                "components_created": stats.get("components_created", 0),
-                "framework": project_data.get("metadata", {}).get("framework", "react")
+                "total_lines": statistics.get("total_lines", 0),
+                "components_created": statistics.get("components_created", 0),
+                "generation_time": workflow_result.get("execution_time", time.time() - start_time),
+                "final_approval": qa_validation.get("final_approval", False),
+                "tests_executed": qa_validation.get("test_results", {}).get("total_tests", 0),
+                "framework": request_data.get("framework", "react")
             }
             
-            # Send completion notification with enhanced data
+            # Send completion notification with enhanced 6-agent data
             download_url = f"{settings.base_url}/api/download/{job_id}"
-            await send_completion_notification(
-                job_id, 
-                stats.get("total_files", len(project_data.get("files", {}))),
-                time.time() - start_time,
-                download_url
-            )
+            await connection_manager.send_to_job({
+                "type": "project_complete",
+                "job_id": job_id,
+                "total_files": statistics.get("total_files", len(project_files)),
+                "generation_time": workflow_result.get("execution_time", time.time() - start_time),
+                "download_url": download_url,
+                "quality_score": qa_validation.get("quality_score", 0),
+                "final_approval": qa_validation.get("final_approval", False),
+                "qa_summary": {
+                    "tests_executed": qa_validation.get("test_results", {}).get("total_tests", 0),
+                    "security_issues": qa_validation.get("security_scan", {}).get("vulnerabilities_found", 0),
+                    "performance_score": qa_validation.get("performance_metrics", {}).get("performance_score", 0)
+                }
+            }, job_id)
             
-            logger.info(f"✅ Enhanced project generation completed: {job_id}")
-            logger.info(f"📊 Generated {stats.get('total_files', 0)} files, {stats.get('total_lines', 0)} lines")
+            logger.info(f"✅ 6-agent project generation completed: {job_id}")
+            logger.info(f"📊 Generated {statistics.get('total_files', 0)} files, {statistics.get('total_lines', 0)} lines")
+            logger.info(f"🎯 Quality Score: {qa_validation.get('quality_score', 0)}%, Approved: {qa_validation.get('final_approval', False)}")
             
         else:
             # Handle workflow failure

@@ -278,12 +278,91 @@
         }
         
         .agent-card.status-idle::before { background: var(--agent-idle); }
+        .agent-card.status-waiting::before { background: var(--agent-idle); }
         .agent-card.status-starting::before { background: var(--agent-starting); }
         .agent-card.status-active::before { background: var(--agent-active); }
         .agent-card.status-processing::before { background: var(--agent-processing); }
+        .agent-card.status-validating::before { background: var(--agent-processing); }
         .agent-card.status-completed::before { background: var(--agent-completed); }
         .agent-card.status-error::before { background: var(--agent-error); }
         .agent-card.status-timeout::before { background: var(--agent-timeout); }
+
+        /* QA Validator specific styles */
+        .qa-validator-card {
+            border: 2px solid var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.05));
+        }
+
+        .qa-metrics {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-200);
+            backdrop-filter: blur(10px);
+        }
+
+        .qa-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .qa-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .qa-value {
+            font-weight: 700;
+            padding: 0.125rem 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .qa-value.quality-score.high { 
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success); 
+        }
+        .qa-value.quality-score.medium { 
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning); 
+        }
+        .qa-value.quality-score.low { 
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error); 
+        }
+
+        .qa-value.test-results {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary-600);
+        }
+
+        .qa-value.security-status.secure {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .qa-value.security-status.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .qa-value.security-status.vulnerable {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .qa-value.final-approval.approved {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .qa-value.final-approval.rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
         
         .agent-header {
             display: flex;
@@ -924,6 +1003,45 @@
                     </div>
                     <div class="agent-task">Ready to organize project structure...</div>
                 </div>
+
+                <!-- QA Validator Agent -->
+                <div class="agent-card qa-validator-card" id="agent-qa_validator">
+                    <div class="agent-header">
+                        <div class="agent-icon">✅</div>
+                        <div class="agent-info">
+                            <h3>QA Validator</h3>
+                            <span class="agent-status">pending</span>
+                        </div>
+                    </div>
+                    <div class="agent-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span class="progress-percentage">0%</span>
+                            <span class="progress-eta">--</span>
+                        </div>
+                    </div>
+                    <div class="agent-task">Ready to validate project quality...</div>
+                    <div class="qa-metrics hidden">
+                        <div class="qa-metric">
+                            <span class="qa-label">Quality Score:</span>
+                            <span class="qa-value quality-score">0%</span>
+                        </div>
+                        <div class="qa-metric">
+                            <span class="qa-label">Tests:</span>
+                            <span class="qa-value test-results">0/0</span>
+                        </div>
+                        <div class="qa-metric">
+                            <span class="qa-label">Security:</span>
+                            <span class="qa-value security-status">Pending</span>
+                        </div>
+                        <div class="qa-metric">
+                            <span class="qa-label">Approval:</span>
+                            <span class="qa-value final-approval">Pending</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
         
@@ -1121,6 +1239,15 @@
                 case 'agent_status':
                     updateAgentStatus(data.agent_update);
                     break;
+                case 'agent_progress':
+                    updateAgentProgress(data);
+                    break;
+                case 'qa_metrics':
+                    updateQAMetrics(data.qa_metrics);
+                    break;
+                case 'workflow_status':
+                    updateWorkflowStatus(data);
+                    break;
                 case 'progress_update':
                     updateOverallProgress(data.project_update);
                     break;
@@ -1145,8 +1272,12 @@
             const agentCard = document.getElementById(`agent-${agentUpdate.agent_name}`);
             if (!agentCard) return;
             
-            // Update status class
+            // Update status class (preserve QA validator class)
+            const isQAValidator = agentCard.classList.contains('qa-validator-card');
             agentCard.className = `agent-card status-${agentUpdate.status}`;
+            if (isQAValidator) {
+                agentCard.classList.add('qa-validator-card');
+            }
             
             // Update status text
             const statusElement = agentCard.querySelector('.agent-status');
@@ -1166,10 +1297,136 @@
             
             // Update icon based on status
             const iconElement = agentCard.querySelector('.agent-icon');
-            if (agentUpdate.status === 'active' || agentUpdate.status === 'processing') {
+            if (agentUpdate.status === 'active' || agentUpdate.status === 'processing' || agentUpdate.status === 'validating') {
                 iconElement.classList.add('pulse');
             } else {
                 iconElement.classList.remove('pulse');
+            }
+
+            // Handle QA metrics if present
+            if (agentUpdate.qa_metrics && agentUpdate.agent_name === 'qa_validator') {
+                updateQAMetrics(agentUpdate.qa_metrics);
+            }
+        }
+
+        function updateAgentProgress(data) {
+            const agentCard = document.getElementById(`agent-${data.agent}`);
+            if (!agentCard) return;
+
+            // Update with enhanced progress data
+            const agentUpdate = {
+                agent_name: data.agent,
+                status: data.status,
+                progress: data.progress,
+                current_task: data.message,
+                qa_metrics: data.qa_metrics
+            };
+
+            updateAgentStatus(agentUpdate);
+
+            // Show QA metrics if this is the QA validator
+            if (data.agent === 'qa_validator' && data.qa_metrics) {
+                const qaMetrics = agentCard.querySelector('.qa-metrics');
+                if (qaMetrics) {
+                    qaMetrics.classList.remove('hidden');
+                    updateQAMetrics(data.qa_metrics);
+                }
+            }
+        }
+
+        function updateQAMetrics(qaMetrics) {
+            const qaCard = document.getElementById('agent-qa_validator');
+            if (!qaCard) return;
+
+            const metricsContainer = qaCard.querySelector('.qa-metrics');
+            if (!metricsContainer) return;
+
+            // Show metrics container
+            metricsContainer.classList.remove('hidden');
+
+            // Update quality score
+            const qualityScoreElement = metricsContainer.querySelector('.quality-score');
+            if (qualityScoreElement && qaMetrics.quality_score !== undefined) {
+                qualityScoreElement.textContent = `${qaMetrics.quality_score}%`;
+                
+                // Update quality score color class
+                qualityScoreElement.classList.remove('high', 'medium', 'low');
+                if (qaMetrics.quality_score >= 85) {
+                    qualityScoreElement.classList.add('high');
+                } else if (qaMetrics.quality_score >= 70) {
+                    qualityScoreElement.classList.add('medium');
+                } else {
+                    qualityScoreElement.classList.add('low');
+                }
+            }
+
+            // Update test results
+            const testResultsElement = metricsContainer.querySelector('.test-results');
+            if (testResultsElement && qaMetrics.tests_passed !== undefined) {
+                testResultsElement.textContent = `${qaMetrics.tests_passed}/${qaMetrics.total_tests || 0}`;
+            }
+
+            // Update security status
+            const securityElement = metricsContainer.querySelector('.security-status');
+            if (securityElement && qaMetrics.security_status) {
+                securityElement.textContent = qaMetrics.security_status;
+                
+                // Update security status color class
+                securityElement.classList.remove('secure', 'warning', 'vulnerable');
+                if (qaMetrics.security_status.toLowerCase() === 'secure') {
+                    securityElement.classList.add('secure');
+                } else if (qaMetrics.security_status.toLowerCase() === 'warning') {
+                    securityElement.classList.add('warning');
+                } else if (qaMetrics.security_status.toLowerCase() === 'vulnerable') {
+                    securityElement.classList.add('vulnerable');
+                }
+            }
+
+            // Update final approval
+            const approvalElement = metricsContainer.querySelector('.final-approval');
+            if (approvalElement && qaMetrics.final_approval !== undefined) {
+                approvalElement.textContent = qaMetrics.final_approval ? 'Approved' : 'Pending';
+                
+                // Update approval color class
+                approvalElement.classList.remove('approved', 'rejected');
+                if (qaMetrics.final_approval) {
+                    approvalElement.classList.add('approved');
+                } else {
+                    approvalElement.classList.add('rejected');
+                }
+            }
+
+            console.log('QA Metrics updated:', qaMetrics);
+        }
+
+        function updateWorkflowStatus(data) {
+            console.log('Workflow status update:', data);
+
+            // Update individual agent statuses
+            if (data.agents) {
+                Object.entries(data.agents).forEach(([agentName, status]) => {
+                    const agentCard = document.getElementById(`agent-${agentName}`);
+                    if (agentCard) {
+                        const statusElement = agentCard.querySelector('.agent-status');
+                        if (statusElement) {
+                            statusElement.textContent = status;
+                            statusElement.className = `agent-status status-${status}`;
+                        }
+
+                        // Update card class
+                        const isQAValidator = agentCard.classList.contains('qa-validator-card');
+                        agentCard.className = `agent-card status-${status}`;
+                        if (isQAValidator) {
+                            agentCard.classList.add('qa-validator-card');
+                        }
+                    }
+                });
+            }
+
+            // Update overall workflow status
+            const phaseElement = document.getElementById('currentPhase');
+            if (phaseElement) {
+                phaseElement.textContent = data.workflow_status || 'Processing...';
             }
         }
         

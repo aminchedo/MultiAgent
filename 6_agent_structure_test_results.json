@@ -1,0 +1,196 @@
+{
+  "tests_passed": 31,
+  "tests_failed": 0,
+  "test_details": [
+    {
+      "test_name": "Agent File: vibe_workflow_orchestrator_agent.py",
+      "success": true,
+      "details": "Size: 35394 bytes",
+      "timestamp": 1756183094.0859168
+    },
+    {
+      "test_name": "Agent File: vibe_qa_validator_agent.py",
+      "success": true,
+      "details": "Size: 31553 bytes",
+      "timestamp": 1756183094.0859501
+    },
+    {
+      "test_name": "Agent File: vibe_planner_agent.py",
+      "success": true,
+      "details": "Size: 11704 bytes",
+      "timestamp": 1756183094.085977
+    },
+    {
+      "test_name": "Agent File: vibe_coder_agent.py",
+      "success": true,
+      "details": "Size: 21048 bytes",
+      "timestamp": 1756183094.0860004
+    },
+    {
+      "test_name": "Agent File: vibe_critic_agent.py",
+      "success": true,
+      "details": "Size: 34901 bytes",
+      "timestamp": 1756183094.0860212
+    },
+    {
+      "test_name": "Agent File: vibe_file_manager_agent.py",
+      "success": true,
+      "details": "Size: 26908 bytes",
+      "timestamp": 1756183094.0860426
+    },
+    {
+      "test_name": "QA Method: validate_project",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.086139
+    },
+    {
+      "test_name": "QA Method: generate_qa_report",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.0861623
+    },
+    {
+      "test_name": "QA Method: _validate_compilation",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.086177
+    },
+    {
+      "test_name": "QA Method: _run_functional_tests",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.0861967
+    },
+    {
+      "test_name": "QA Method: _run_security_scan",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.0862122
+    },
+    {
+      "test_name": "QA Method: _test_performance",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.0862262
+    },
+    {
+      "test_name": "QA Method: _calculate_quality_score",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.0862403
+    },
+    {
+      "test_name": "QA Validator Import",
+      "success": true,
+      "details": "Import found",
+      "timestamp": 1756183094.0865448
+    },
+    {
+      "test_name": "Enhanced Orchestration Method",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.0865698
+    },
+    {
+      "test_name": "QA Validator in Workflow",
+      "success": true,
+      "details": "Found in workflow",
+      "timestamp": 1756183094.086583
+    },
+    {
+      "test_name": "QA Validator UI Card",
+      "success": true,
+      "details": "Agent card found",
+      "timestamp": 1756183094.0869095
+    },
+    {
+      "test_name": "QA Metrics UI",
+      "success": true,
+      "details": "QA metrics UI found",
+      "timestamp": 1756183094.0869293
+    },
+    {
+      "test_name": "QA Metrics JavaScript",
+      "success": true,
+      "details": "QA update function found",
+      "timestamp": 1756183094.0869632
+    },
+    {
+      "test_name": "QA Report Endpoint",
+      "success": true,
+      "details": "Endpoint found",
+      "timestamp": 1756183094.0870602
+    },
+    {
+      "test_name": "Enhanced Orchestration Call",
+      "success": true,
+      "details": "Call found",
+      "timestamp": 1756183094.0870836
+    },
+    {
+      "test_name": "QA Validator Backend Support",
+      "success": true,
+      "details": "Found in backend",
+      "timestamp": 1756183094.0870974
+    },
+    {
+      "test_name": "Config.py 6-Agent Setting",
+      "success": true,
+      "details": "total_agents = 6",
+      "timestamp": 1756183094.0871544
+    },
+    {
+      "test_name": "QA Validation Config",
+      "success": true,
+      "details": "QA settings found",
+      "timestamp": 1756183094.0871663
+    },
+    {
+      "test_name": "Config.json 6-Agent Setting",
+      "success": true,
+      "details": "total_agents = 6",
+      "timestamp": 1756183094.0872884
+    },
+    {
+      "test_name": "QA Validation JSON Config",
+      "success": true,
+      "details": "QA config found",
+      "timestamp": 1756183094.0873024
+    },
+    {
+      "test_name": "Package.json Name Update",
+      "success": true,
+      "details": "6-agent in name",
+      "timestamp": 1756183094.0873837
+    },
+    {
+      "test_name": "Package.json QA Keywords",
+      "success": true,
+      "details": "QA keywords found",
+      "timestamp": 1756183094.0873969
+    },
+    {
+      "test_name": "QA Metrics Class",
+      "success": true,
+      "details": "QAMetrics class found",
+      "timestamp": 1756183094.0875154
+    },
+    {
+      "test_name": "6-Agent Tracking Method",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.087532
+    },
+    {
+      "test_name": "QA Metrics Update Method",
+      "success": true,
+      "details": "Method found",
+      "timestamp": 1756183094.0875475
+    }
+  ],
+  "overall_status": "success",
+  "success_rate": 100.0,
+  "execution_time": 0.0017194747924804688,
+  "total_tests": 31
+}

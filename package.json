@@ -1,7 +1,7 @@
 {
-  "name": "multi-agent-code-generation-system",
-  "version": "1.0.0",
-  "description": "A multi-agent code generation system with intelligent AI agents",
+  "name": "enhanced-6-agent-code-generation-system",
+  "version": "2.0.0",
+  "description": "Enhanced 6-agent code generation system with comprehensive QA validation",
   "main": "public/index.html",
   "scripts": {
     "dev": "next dev -p 3000",
@@ -15,13 +15,18 @@
   "keywords": [
     "ai",
     "code-generation",
+    "6-agent-system",
+    "qa-validation",
+    "quality-assurance",
     "multi-agent",
     "fastapi",
     "vercel",
     "python",
-    "frontend"
+    "frontend",
+    "testing",
+    "security-scanning"
   ],
-  "author": "Multi-Agent Code Generation Team",
+  "author": "Enhanced 6-Agent Code Generation Team",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     """Application settings with environment variable support."""
     
     # Application settings
-    app_name: str = "Multi-Agent Code Generation System"
-    app_version: str = "1.0.0"
+    app_name: str = "Enhanced 6-Agent Code Generation System"
+    app_version: str = "2.0.0"
     debug: bool = False
     environment: str = Field(default="development", description="Environment: development, staging, production")
     
@@ -37,17 +37,35 @@ class Settings(BaseSettings):
     openai_timeout: int = 120
     openai_max_retries: int = 3
     
-    # Agent Configuration
-    max_concurrent_agents: int = 5
+    # Enhanced 6-Agent Configuration
+    total_agents: int = 6
+    qa_validation_enabled: bool = True
+    minimum_quality_score: int = 85
+    max_concurrent_agents: int = 6
     agent_timeout: int = 300
     agent_retry_attempts: int = 3
     agent_heartbeat_interval: int = 30
     
-    # WebSocket Configuration
+    # QA Validation Configuration
+    qa_timeout_seconds: int = 600
+    run_security_scans: bool = True
+    run_performance_tests: bool = True
+    required_test_coverage: int = 80
+    
+    # QA Testing Tools Configuration
+    jest_timeout: int = 30000
+    cypress_timeout: int = 60000
+    lighthouse_timeout: int = 45000
+    npm_audit_enabled: bool = True
+    python_safety_check: bool = True
+    
+    # Enhanced WebSocket Configuration for 6-Agent System
     ws_message_size_limit: int = 1048576  # 1MB
     ws_ping_interval: int = 30
     ws_ping_timeout: int = 10
     ws_close_timeout: int = 10
+    ws_agent_update_interval: int = 2  # seconds
+    ws_qa_progress_detail: bool = True
     ws_max_connections: int = 100
     
     # File System Configuration

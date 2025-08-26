@@ -19,20 +19,25 @@ logger = logging.getLogger(__name__)
 class MessageType(Enum):
     """WebSocket message types"""
     AGENT_STATUS = "agent_status"
+    AGENT_PROGRESS = "agent_progress" 
     PROGRESS_UPDATE = "progress_update"
+    QA_METRICS = "qa_metrics"
     ERROR = "error"
     SUCCESS = "success"
     CONNECTION_STATUS = "connection_status"
     HEARTBEAT = "heartbeat"
     PROJECT_COMPLETE = "project_complete"
     FILE_GENERATED = "file_generated"
+    WORKFLOW_STATUS = "workflow_status"
 
 class AgentStatus(Enum):
     """Agent status states"""
     IDLE = "idle"
+    WAITING = "waiting"
     STARTING = "starting"
     ACTIVE = "active"
     PROCESSING = "processing"
+    VALIDATING = "validating"
     COMPLETED = "completed"
     ERROR = "error"
     TIMEOUT = "timeout"
@@ -47,6 +52,19 @@ class AgentUpdate:
     timestamp: float
     details: Optional[Dict[str, Any]] = None
     error_message: Optional[str] = None
+    qa_metrics: Optional[Dict[str, Any]] = None
+
+@dataclass
+class QAMetrics:
+    """QA validation metrics data structure"""
+    quality_score: int
+    tests_passed: int
+    total_tests: int
+    security_status: str
+    final_approval: bool
+    compilation_status: Optional[Dict[str, bool]] = None
+    performance_score: Optional[int] = None
+    recommendations: Optional[List[str]] = None
 
 @dataclass
 class ProjectUpdate:
@@ -259,6 +277,87 @@ class ConnectionManager:
         await self.send_to_job(message, job_id)
         
         logger.info(f"Project progress updated: {job_id} -> {overall_progress}% ({current_phase})")
+    
+    async def broadcast_agent_progress(self, agent_name: str, job_id: str, 
+                                     status: str, progress: int, message: str, details: Optional[Dict] = None):
+        """Enhanced progress broadcasting with agent-specific details for 6-agent system"""
+        update_message = {
+            'type': MessageType.AGENT_PROGRESS.value,
+            'agent': agent_name,
+            'job_id': job_id,
+            'status': status,
+            'progress': progress,
+            'message': message,
+            'timestamp': time.time(),
+            'details': details or {}
+        }
+        
+        # Special handling for QA Validator with metrics
+        if agent_name == 'qa_validator' and details:
+            update_message['qa_metrics'] = {
+                'quality_score': details.get('quality_score', 0),
+                'tests_passed': details.get('tests_passed', 0),
+                'total_tests': details.get('total_tests', 0),
+                'security_status': details.get('security_status', 'pending'),
+                'final_approval': details.get('final_approval', False)
+            }
+        
+        await self.send_to_job(update_message, job_id)
+        logger.info(f"Agent progress broadcast: {agent_name} -> {status} ({progress}%)")
+    
+    async def broadcast_to_job(self, job_id: str, message: Dict[str, Any]):
+        """Broadcast message to all connections for a specific job"""
+        await self.send_to_job(message, job_id)
+    
+    async def update_qa_metrics(self, job_id: str, qa_metrics: Dict[str, Any]):
+        """Update and broadcast QA validation metrics"""
+        message = {
+            'type': MessageType.QA_METRICS.value,
+            'job_id': job_id,
+            'qa_metrics': qa_metrics,
+            'timestamp': time.time()
+        }
+        
+        await self.send_to_job(message, job_id)
+        logger.info(f"QA metrics updated for job {job_id}: Quality Score {qa_metrics.get('quality_score', 0)}%")
+    
+    async def broadcast_workflow_status(self, job_id: str, status: str, agents_status: Dict[str, str]):
+        """Broadcast overall workflow status with all 6 agents"""
+        message = {
+            'type': MessageType.WORKFLOW_STATUS.value,
+            'job_id': job_id,
+            'workflow_status': status,
+            'agents': agents_status,
+            'timestamp': time.time()
+        }
+        
+        await self.send_to_job(message, job_id)
+        logger.info(f"Workflow status broadcast for job {job_id}: {status}")
+    
+    async def initialize_6_agent_tracking(self, job_id: str):
+        """Initialize tracking for all 6 agents"""
+        agent_names = ['orchestrator', 'planner', 'coder', 'critic', 'file_manager', 'qa_validator']
+        
+        if job_id not in self.agent_status:
+            self.agent_status[job_id] = {}
+        
+        for agent_name in agent_names:
+            initial_status = 'active' if agent_name == 'orchestrator' else 'waiting'
+            self.agent_status[job_id][agent_name] = AgentUpdate(
+                agent_name=agent_name,
+                status=AgentStatus.ACTIVE if agent_name == 'orchestrator' else AgentStatus.WAITING,
+                progress=0.0,
+                current_task=f"Initializing {agent_name}",
+                timestamp=time.time()
+            )
+        
+        # Broadcast initial status
+        await self.broadcast_workflow_status(job_id, 'initializing', {
+            agent: 'active' if agent == 'orchestrator' else 'waiting' 
+            for agent in agent_names
+        })
+        
+        logger.info(f"Initialized 6-agent tracking for job {job_id}")
     
     async def send_error(self, job_id: str, error_message: str, error_type: str = "general",
                         agent_name: Optional[str] = None):
