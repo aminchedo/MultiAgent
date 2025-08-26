@@ -120,6 +120,33 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
             "production_deployment_preparation"
         ]
     
+    def validate_input(self, input_data: Dict[str, Any]) -> bool:
+        """Validate input data for the orchestrator."""
+        required_fields = ['prompt']
+        
+        # Check if required fields are present
+        for field in required_fields:
+            if field not in input_data:
+                return False
+            
+        # Validate prompt is not empty
+        if not input_data.get('prompt', '').strip():
+            return False
+            
+        # Validate framework if provided
+        valid_frameworks = ['react', 'vue', 'nextjs', 'vanilla', 'python']
+        framework = input_data.get('framework', 'react')
+        if framework not in valid_frameworks:
+            return False
+            
+        # Validate complexity if provided
+        valid_complexities = ['simple', 'intermediate', 'advanced']
+        complexity = input_data.get('complexity', 'intermediate')
+        if complexity not in valid_complexities:
+            return False
+            
+        return True
+    
     async def send_progress_update(self, agent_name: str, status: str, progress: float, 
                                  current_task: str, details: Optional[Dict] = None):
         """Send progress update via callback if available."""

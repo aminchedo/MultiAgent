@@ -166,20 +166,12 @@ class Settings(BaseSettings):
             return [fw.strip() for fw in v.split(",")]
         return v
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        
-        # Environment variable mappings
-        fields = {
-            'openai_api_key': {'env': 'OPENAI_API_KEY'},
-            'jwt_secret_key': {'env': 'JWT_SECRET_KEY'},
-            'database_url': {'env': 'DATABASE_URL'},
-            'redis_url': {'env': 'REDIS_URL'},
-            'environment': {'env': 'ENVIRONMENT'},
-            'base_url': {'env': 'BASE_URL'},
-        }
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False,
+        "extra": "allow"
+    }
 
 
 # Global settings instance

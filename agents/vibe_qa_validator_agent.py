@@ -42,6 +42,38 @@ class VibeQAValidatorAgent(VibeBaseAgent):
             'performance': 20         # 20% weight
         }
         self.minimum_quality_score = 85
+    
+    def get_capabilities(self) -> List[str]:
+        """Return list of QA validator capabilities."""
+        return [
+            "code_compilation_validation",
+            "functional_testing", 
+            "security_vulnerability_scanning",
+            "performance_analysis",
+            "quality_scoring",
+            "final_project_approval",
+            "test_automation",
+            "code_coverage_analysis"
+        ]
+    
+    def validate_input(self, input_data: Dict[str, Any]) -> bool:
+        """Validate input data for QA validation."""
+        required_fields = ['project_files', 'job_id']
+        
+        # Check if required fields are present
+        for field in required_fields:
+            if field not in input_data:
+                return False
+                
+        # Validate project files is a dictionary
+        if not isinstance(input_data.get('project_files'), dict):
+            return False
+            
+        # Validate job_id is not empty
+        if not input_data.get('job_id', '').strip():
+            return False
+            
+        return True
         
     async def validate_project(self, project_files: Dict[str, Any], job_id: str) -> Dict[str, Any]:
         """
