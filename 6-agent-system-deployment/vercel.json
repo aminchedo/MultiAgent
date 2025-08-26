@@ -1,0 +1,164 @@
+{
+  "name": "multi-agent-code-generation-system",
+  "version": 2,
+  "public": false,
+  "github": {
+    "enabled": true,
+    "autoJobCancelation": true,
+    "autoDeployments": true
+  },
+  "regions": ["iad1", "sfo1"],
+  "builds": [
+    {
+      "src": "frontend/enhanced_vibe_frontend.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "backend/simple_app.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "runtime": "python3.9"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/health",
+      "dest": "/backend/simple_app.py"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/simple_app.py"
+    },
+    {
+      "src": "/ws/(.*)",
+      "dest": "/backend/simple_app.py"
+    },
+    {
+      "src": "/docs",
+      "dest": "/backend/simple_app.py"
+    },
+    {
+      "src": "/redoc",
+      "dest": "/backend/simple_app.py"
+    },
+    {
+      "src": "/openapi.json",
+      "dest": "/backend/simple_app.py"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/",
+      "dest": "/frontend/enhanced_vibe_frontend.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/enhanced_vibe_frontend.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-Requested-With, Content-Type, Authorization"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' wss: ws:"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "ENVIRONMENT": "production",
+    "DEBUG": "false",
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "backend/simple_app.py": {
+      "runtime": "python3.9",
+      "maxDuration": 300,
+      "memory": 1024,
+      "environment": {
+        "PYTHONPATH": "/var/task",
+        "ENVIRONMENT": "production"
+      }
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cleanup",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/dashboard",
+      "destination": "/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/app/(.*)",
+      "destination": "/"
+    }
+  ]
+}

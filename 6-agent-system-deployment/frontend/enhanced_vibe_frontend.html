@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Code Generation Platform</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.44.0/min/vs/loader.js"></script>
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <style>
+        /* CSS Variables for Design System */
+        :root {
+            /* Colors */
+            --primary-50: #eff6ff;
+            --primary-100: #dbeafe;
+            --primary-500: #4A90E2;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --primary-900: #1e3a8a;
+            
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --info: #06B6D4;
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Agent Status Colors */
+            --agent-idle: #6B7280;
+            --agent-starting: #F59E0B;
+            --agent-active: #3B82F6;
+            --agent-processing: #8B5CF6;
+            --agent-completed: #10B981;
+            --agent-error: #EF4444;
+            --agent-timeout: #DC2626;
+            
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            
+            /* Borders */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--gray-900);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Container and Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-4);
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+            padding: var(--space-6) 0;
+        }
+        
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-2);
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.125rem;
+            font-weight: 500;
+        }
+        
+        /* Card System */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: var(--space-6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Form Styles */
+        .form-section {
+            margin-bottom: var(--space-8);
+        }
+        
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+        
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        /* Button System */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            gap: var(--space-2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        /* Agent Dashboard Grid */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+        
+        .agent-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            box-shadow: var(--shadow-md);
+            border: 2px solid var(--gray-100);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--agent-idle);
+            transition: background 0.3s ease;
+        }
+        
+        .agent-card.status-idle::before { background: var(--agent-idle); }
+        .agent-card.status-waiting::before { background: var(--agent-idle); }
+        .agent-card.status-starting::before { background: var(--agent-starting); }
+        .agent-card.status-active::before { background: var(--agent-active); }
+        .agent-card.status-processing::before { background: var(--agent-processing); }
+        .agent-card.status-validating::before { background: var(--agent-processing); }
+        .agent-card.status-completed::before { background: var(--agent-completed); }
+        .agent-card.status-error::before { background: var(--agent-error); }
+        .agent-card.status-timeout::before { background: var(--agent-timeout); }
+
+        /* QA Validator specific styles */
+        .qa-validator-card {
+            border: 2px solid var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.05));
+        }
+
+        .qa-metrics {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-200);
+            backdrop-filter: blur(10px);
+        }
+
+        .qa-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .qa-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .qa-value {
+            font-weight: 700;
+            padding: 0.125rem 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .qa-value.quality-score.high { 
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success); 
+        }
+        .qa-value.quality-score.medium { 
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning); 
+        }
+        .qa-value.quality-score.low { 
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error); 
+        }
+
+        .qa-value.test-results {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary-600);
+        }
+
+        .qa-value.security-status.secure {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .qa-value.security-status.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .qa-value.security-status.vulnerable {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .qa-value.final-approval.approved {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .qa-value.final-approval.rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+        
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--space-3);
+        }
+        
+        .agent-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: var(--space-3);
+            font-size: 1.25rem;
+            background: var(--gray-100);
+            transition: all 0.3s ease;
+        }
+        
+        .agent-info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+        
+        .agent-status {
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-sm);
+            text-transform: capitalize;
+        }
+        
+        .agent-progress {
+            margin-top: var(--space-3);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+            border-radius: var(--radius-sm);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .progress-text {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-top: var(--space-1);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .agent-task {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: var(--space-2);
+            font-style: italic;
+        }
+        
+        /* Overall Progress */
+        .overall-progress {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .overall-progress h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-4);
+        }
+        
+        .progress-ring-circle {
+            stroke: var(--primary-500);
+            stroke-width: 8;
+            fill: transparent;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .progress-ring-bg {
+            stroke: var(--gray-200);
+            stroke-width: 8;
+            fill: transparent;
+        }
+        
+        /* File Preview System */
+        .file-preview-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--space-4);
+            height: 600px;
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--space-6);
+        }
+        
+        .file-tree {
+            background: var(--gray-50);
+            border-right: 1px solid var(--gray-200);
+            overflow-y: auto;
+        }
+        
+        .file-tree-header {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--gray-200);
+            font-weight: 600;
+            color: var(--gray-900);
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .file-tree-content {
+            padding: var(--space-2);
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: var(--space-1);
+        }
+        
+        .file-item:hover {
+            background: var(--gray-100);
+        }
+        
+        .file-item.active {
+            background: var(--primary-50);
+            color: var(--primary-700);
+            font-weight: 500;
+        }
+        
+        .file-icon {
+            margin-right: var(--space-2);
+            width: 16px;
+            height: 16px;
+        }
+        
+        .code-preview {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .editor-tabs {
+            display: flex;
+            background: var(--gray-100);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 var(--space-4);
+            gap: var(--space-1);
+        }
+        
+        .editor-tab {
+            padding: var(--space-2) var(--space-4);
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .editor-tab.active {
+            background: white;
+            color: var(--gray-900);
+            font-weight: 500;
+        }
+        
+        .monaco-editor-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        /* Results Section */
+        .results-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-md);
+            margin-bottom: var(--space-6);
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+        
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-600);
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Loading States */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: var(--radius-sm);
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: var(--space-4);
+            right: var(--space-4);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+        
+        .toast {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid;
+            min-width: 300px;
+            transform: translateX(400px);
+            animation: slideIn 0.3s ease forwards;
+        }
+        
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+        .toast.warning { border-left-color: var(--warning); }
+        .toast.info { border-left-color: var(--info); }
+        
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: var(--space-1);
+        }
+        
+        .toast-message {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-2);
+            }
+            
+            .card {
+                padding: var(--space-4);
+                margin-bottom: var(--space-4);
+            }
+            
+            .agents-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-3);
+            }
+            
+            .file-preview-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .file-tree {
+                border-right: none;
+                border-bottom: 1px solid var(--gray-200);
+                max-height: 200px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .toast {
+                min-width: calc(100vw - 2rem);
+                margin: 0 var(--space-2);
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .results-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-muted { color: var(--gray-600); }
+        .text-success { color: var(--success); }
+        .text-error { color: var(--error); }
+        .text-warning { color: var(--warning); }
+        .mb-4 { margin-bottom: var(--space-4); }
+        .mt-4 { margin-top: var(--space-4); }
+        .pulse { animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Connection Status Indicator */
+        .connection-status {
+            position: fixed;
+            bottom: var(--space-4);
+            right: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            background: white;
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            z-index: 100;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+        
+        .status-indicator.disconnected {
+            background: var(--error);
+        }
+        
+        .status-indicator.connecting {
+            background: var(--warning);
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Multi-Agent Code Generation</h1>
+            <p>Transform your ideas into production-ready code with AI agents</p>
+        </header>
+        
+        <!-- Project Creation Form -->
+        <section class="form-section">
+            <div class="card">
+                <form id="projectForm">
+                    <h2 style="margin-bottom: 1.5rem; color: var(--gray-900); font-weight: 700;">Create Your Project</h2>
+                    
+                    <div class="form-group">
+                        <label for="prompt" class="form-label">Project Description</label>
+                        <textarea 
+                            id="prompt" 
+                            name="prompt" 
+                            class="form-input form-textarea" 
+                            placeholder="Describe your project in detail. What features do you want? What should it look like?"
+                            required
+                            minlength="10"
+                            maxlength="2000"
+                        ></textarea>
+                        <small class="text-muted">Be specific about features, design, and functionality (10-2000 characters)</small>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="framework" class="form-label">Framework</label>
+                            <select id="framework" name="framework" class="form-input form-select">
+                                <option value="react">React</option>
+                                <option value="vue">Vue.js</option>
+                                <option value="vanilla">Vanilla JS</option>
+                                <option value="nextjs">Next.js</option>
+                                <option value="nuxt">Nuxt.js</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="complexity" class="form-label">Complexity</label>
+                            <select id="complexity" name="complexity" class="form-input form-select">
+                                <option value="simple">Simple</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="complex">Complex</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Additional Features</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; text-transform: none;">
+                                <input type="checkbox" name="features" value="responsive-design"> Responsive Design
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; text-transform: none;">
+                                <input type="checkbox" name="features" value="dark-mode"> Dark Mode
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; text-transform: none;">
+                                <input type="checkbox" name="features" value="animations"> Animations
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; text-transform: none;">
+                                <input type="checkbox" name="features" value="api-integration"> API Integration
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; text-transform: none;">
+                                <input type="checkbox" name="features" value="testing"> Testing Setup
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; text-transform: none;">
+                                <input type="checkbox" name="features" value="deployment"> Deployment Config
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        <i data-feather="play" style="width: 16px; height: 16px;"></i>
+                        Generate Project
+                    </button>
+                </form>
+            </div>
+        </section>
+        
+        <!-- Overall Progress -->
+        <section id="overallProgress" class="overall-progress hidden">
+            <h2>
+                <i data-feather="activity" style="width: 20px; height: 20px;"></i>
+                Generation Progress
+            </h2>
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 2rem; align-items: center;">
+                <div>
+                    <svg class="progress-ring" width="80" height="80">
+                        <circle class="progress-ring-bg" cx="40" cy="40" r="32"></circle>
+                        <circle class="progress-ring-circle" cx="40" cy="40" r="32" id="progressCircle"></circle>
+                    </svg>
+                    <div class="text-center">
+                        <div id="overallPercentage" style="font-size: 1.25rem; font-weight: 700; color: var(--primary-600);">0%</div>
+                    </div>
+                </div>
+                <div>
+                    <div id="currentPhase" style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Initializing...</div>
+                    <div id="estimatedTime" class="text-muted" style="font-size: 0.875rem;">Estimated time: ~5 minutes</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Agent Dashboard -->
+        <section id="agentDashboard" class="hidden">
+            <h2 style="margin-bottom: 1.5rem; color: white; font-weight: 700; text-align: center;">
+                <i data-feather="users" style="width: 24px; height: 24px; margin-right: 0.5rem;"></i>
+                AI Agent Status
+            </h2>
+            <div class="agents-grid">
+                <!-- Orchestrator Agent -->
+                <div class="agent-card" id="agent-orchestrator">
+                    <div class="agent-header">
+                        <div class="agent-icon">🎭</div>
+                        <div class="agent-info">
+                            <h3>Workflow Orchestrator</h3>
+                            <span class="agent-status">idle</span>
+                        </div>
+                    </div>
+                    <div class="agent-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span class="progress-percentage">0%</span>
+                            <span class="progress-eta">--</span>
+                        </div>
+                    </div>
+                    <div class="agent-task">Waiting to coordinate agents...</div>
+                </div>
+                
+                <!-- Planner Agent -->
+                <div class="agent-card" id="agent-planner">
+                    <div class="agent-header">
+                        <div class="agent-icon">📋</div>
+                        <div class="agent-info">
+                            <h3>Project Planner</h3>
+                            <span class="agent-status">pending</span>
+                        </div>
+                    </div>
+                    <div class="agent-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span class="progress-percentage">0%</span>
+                            <span class="progress-eta">--</span>
+                        </div>
+                    </div>
+                    <div class="agent-task">Ready to analyze requirements...</div>
+                </div>
+                
+                <!-- Coder Agent -->
+                <div class="agent-card" id="agent-coder">
+                    <div class="agent-header">
+                        <div class="agent-icon">💻</div>
+                        <div class="agent-info">
+                            <h3>Code Generator</h3>
+                            <span class="agent-status">pending</span>
+                        </div>
+                    </div>
+                    <div class="agent-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span class="progress-percentage">0%</span>
+                            <span class="progress-eta">--</span>
+                        </div>
+                    </div>
+                    <div class="agent-task">Waiting for project plan...</div>
+                </div>
+                
+                <!-- Critic Agent -->
+                <div class="agent-card" id="agent-critic">
+                    <div class="agent-header">
+                        <div class="agent-icon">🔍</div>
+                        <div class="agent-info">
+                            <h3>Code Reviewer</h3>
+                            <span class="agent-status">pending</span>
+                        </div>
+                    </div>
+                    <div class="agent-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span class="progress-percentage">0%</span>
+                            <span class="progress-eta">--</span>
+                        </div>
+                    </div>
+                    <div class="agent-task">Ready to review code quality...</div>
+                </div>
+                
+                <!-- File Manager Agent -->
+                <div class="agent-card" id="agent-file_manager">
+                    <div class="agent-header">
+                        <div class="agent-icon">📁</div>
+                        <div class="agent-info">
+                            <h3>File Manager</h3>
+                            <span class="agent-status">pending</span>
+                        </div>
+                    </div>
+                    <div class="agent-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span class="progress-percentage">0%</span>
+                            <span class="progress-eta">--</span>
+                        </div>
+                    </div>
+                    <div class="agent-task">Ready to organize project structure...</div>
+                </div>
+
+                <!-- QA Validator Agent -->
+                <div class="agent-card qa-validator-card" id="agent-qa_validator">
+                    <div class="agent-header">
+                        <div class="agent-icon">✅</div>
+                        <div class="agent-info">
+                            <h3>QA Validator</h3>
+                            <span class="agent-status">pending</span>
+                        </div>
+                    </div>
+                    <div class="agent-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span class="progress-percentage">0%</span>
+                            <span class="progress-eta">--</span>
+                        </div>
+                    </div>
+                    <div class="agent-task">Ready to validate project quality...</div>
+                    <div class="qa-metrics hidden">
+                        <div class="qa-metric">
+                            <span class="qa-label">Quality Score:</span>
+                            <span class="qa-value quality-score">0%</span>
+                        </div>
+                        <div class="qa-metric">
+                            <span class="qa-label">Tests:</span>
+                            <span class="qa-value test-results">0/0</span>
+                        </div>
+                        <div class="qa-metric">
+                            <span class="qa-label">Security:</span>
+                            <span class="qa-value security-status">Pending</span>
+                        </div>
+                        <div class="qa-metric">
+                            <span class="qa-label">Approval:</span>
+                            <span class="qa-value final-approval">Pending</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- File Preview System -->
+        <section id="filePreview" class="hidden">
+            <h2 style="margin-bottom: 1.5rem; color: white; font-weight: 700; text-align: center;">
+                <i data-feather="file-text" style="width: 24px; height: 24px; margin-right: 0.5rem;"></i>
+                Generated Files
+            </h2>
+            <div class="file-preview-container">
+                <div class="file-tree">
+                    <div class="file-tree-header">
+                        <i data-feather="folder" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
+                        Project Structure
+                    </div>
+                    <div class="file-tree-content" id="fileTreeContent">
+                        <!-- File tree will be populated here -->
+                    </div>
+                </div>
+                <div class="code-preview">
+                    <div class="editor-tabs" id="editorTabs">
+                        <!-- Tabs will be populated here -->
+                    </div>
+                    <div class="monaco-editor-container">
+                        <div id="monacoEditor" style="width: 100%; height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Results Section -->
+        <section id="resultsSection" class="results-section hidden">
+            <div class="results-header">
+                <h2 style="color: var(--gray-900); font-weight: 700;">
+                    <i data-feather="check-circle" style="width: 24px; height: 24px; margin-right: 0.5rem; color: var(--success);"></i>
+                    Project Complete!
+                </h2>
+                <button id="downloadBtn" class="btn btn-primary">
+                    <i data-feather="download" style="width: 16px; height: 16px;"></i>
+                    Download Project
+                </button>
+            </div>
+            
+            <div class="results-stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="totalFiles">0</span>
+                    <span class="stat-label">Files Generated</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="generationTime">0s</span>
+                    <span class="stat-label">Generation Time</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="codeLines">0</span>
+                    <span class="stat-label">Lines of Code</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="projectSize">0 KB</span>
+                    <span class="stat-label">Project Size</span>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Connection Status -->
+    <div class="connection-status" id="connectionStatus">
+        <div class="status-indicator" id="statusIndicator"></div>
+        <span id="statusText">Disconnected</span>
+    </div>
+    
+    <script>
+        // Global state
+        let currentJobId = null;
+        let websocket = null;
+        let monacoEditor = null;
+        let generatedFiles = {};
+        let startTime = null;
+        
+        // Initialize feather icons
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            initializeApp();
+        });
+        
+        function initializeApp() {
+            // Setup form submission
+            document.getElementById('projectForm').addEventListener('submit', handleFormSubmit);
+            
+            // Setup download button
+            document.getElementById('downloadBtn').addEventListener('click', downloadProject);
+            
+            // Initialize Monaco Editor
+            initializeMonacoEditor();
+        }
+        
+        function initializeMonacoEditor() {
+            require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@0.44.0/min/vs' } });
+            require(['vs/editor/editor.main'], function () {
+                monacoEditor = monaco.editor.create(document.getElementById('monacoEditor'), {
+                    value: '// Select a file from the tree to view its contents',
+                    language: 'javascript',
+                    theme: 'vs-light',
+                    automaticLayout: true,
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    fontSize: 14,
+                    lineNumbers: 'on',
+                    renderLineHighlight: 'line',
+                    selectOnLineNumbers: true
+                });
+            });
+        }
+        
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const features = [];
+            formData.getAll('features').forEach(feature => features.push(feature));
+            
+            const projectData = {
+                prompt: formData.get('prompt'),
+                framework: formData.get('framework'),
+                complexity: formData.get('complexity'),
+                features: features,
+                project_type: 'web',
+                user_id: generateUserId()
+            };
+            
+            try {
+                showLoading(true);
+                const response = await fetch('/api/vibe-coding', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(projectData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                currentJobId = result.job_id;
+                startTime = Date.now();
+                
+                showToast('success', 'Project Started', 'Your project generation has begun!');
+                showDashboard();
+                connectWebSocket(result.job_id);
+                
+            } catch (error) {
+                console.error('Error starting project:', error);
+                showToast('error', 'Error', 'Failed to start project generation');
+                showLoading(false);
+            }
+        }
+        
+        function connectWebSocket(jobId) {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/${jobId}`;
+            
+            websocket = new WebSocket(wsUrl);
+            
+            websocket.onopen = function() {
+                updateConnectionStatus('connected');
+                console.log('WebSocket connected');
+            };
+            
+            websocket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            };
+            
+            websocket.onclose = function() {
+                updateConnectionStatus('disconnected');
+                console.log('WebSocket disconnected');
+            };
+            
+            websocket.onerror = function(error) {
+                updateConnectionStatus('error');
+                console.error('WebSocket error:', error);
+                showToast('error', 'Connection Error', 'Lost connection to server');
+            };
+        }
+        
+        function handleWebSocketMessage(data) {
+            console.log('WebSocket message:', data);
+            
+            switch (data.type) {
+                case 'agent_status':
+                    updateAgentStatus(data.agent_update);
+                    break;
+                case 'agent_progress':
+                    updateAgentProgress(data);
+                    break;
+                case 'qa_metrics':
+                    updateQAMetrics(data.qa_metrics);
+                    break;
+                case 'workflow_status':
+                    updateWorkflowStatus(data);
+                    break;
+                case 'progress_update':
+                    updateOverallProgress(data.project_update);
+                    break;
+                case 'project_complete':
+                    handleProjectComplete(data);
+                    break;
+                case 'error':
+                    handleError(data);
+                    break;
+                case 'file_generated':
+                    handleFileGenerated(data);
+                    break;
+                case 'heartbeat':
+                    // Keep connection alive
+                    break;
+                default:
+                    console.log('Unknown message type:', data.type);
+            }
+        }
+        
+        function updateAgentStatus(agentUpdate) {
+            const agentCard = document.getElementById(`agent-${agentUpdate.agent_name}`);
+            if (!agentCard) return;
+            
+            // Update status class (preserve QA validator class)
+            const isQAValidator = agentCard.classList.contains('qa-validator-card');
+            agentCard.className = `agent-card status-${agentUpdate.status}`;
+            if (isQAValidator) {
+                agentCard.classList.add('qa-validator-card');
+            }
+            
+            // Update status text
+            const statusElement = agentCard.querySelector('.agent-status');
+            statusElement.textContent = agentUpdate.status;
+            statusElement.className = `agent-status status-${agentUpdate.status}`;
+            
+            // Update progress
+            const progressFill = agentCard.querySelector('.progress-fill');
+            const progressPercentage = agentCard.querySelector('.progress-percentage');
+            
+            progressFill.style.width = `${agentUpdate.progress}%`;
+            progressPercentage.textContent = `${Math.round(agentUpdate.progress)}%`;
+            
+            // Update task
+            const taskElement = agentCard.querySelector('.agent-task');
+            taskElement.textContent = agentUpdate.current_task;
+            
+            // Update icon based on status
+            const iconElement = agentCard.querySelector('.agent-icon');
+            if (agentUpdate.status === 'active' || agentUpdate.status === 'processing' || agentUpdate.status === 'validating') {
+                iconElement.classList.add('pulse');
+            } else {
+                iconElement.classList.remove('pulse');
+            }
+
+            // Handle QA metrics if present
+            if (agentUpdate.qa_metrics && agentUpdate.agent_name === 'qa_validator') {
+                updateQAMetrics(agentUpdate.qa_metrics);
+            }
+        }
+
+        function updateAgentProgress(data) {
+            const agentCard = document.getElementById(`agent-${data.agent}`);
+            if (!agentCard) return;
+
+            // Update with enhanced progress data
+            const agentUpdate = {
+                agent_name: data.agent,
+                status: data.status,
+                progress: data.progress,
+                current_task: data.message,
+                qa_metrics: data.qa_metrics
+            };
+
+            updateAgentStatus(agentUpdate);
+
+            // Show QA metrics if this is the QA validator
+            if (data.agent === 'qa_validator' && data.qa_metrics) {
+                const qaMetrics = agentCard.querySelector('.qa-metrics');
+                if (qaMetrics) {
+                    qaMetrics.classList.remove('hidden');
+                    updateQAMetrics(data.qa_metrics);
+                }
+            }
+        }
+
+        function updateQAMetrics(qaMetrics) {
+            const qaCard = document.getElementById('agent-qa_validator');
+            if (!qaCard) return;
+
+            const metricsContainer = qaCard.querySelector('.qa-metrics');
+            if (!metricsContainer) return;
+
+            // Show metrics container
+            metricsContainer.classList.remove('hidden');
+
+            // Update quality score
+            const qualityScoreElement = metricsContainer.querySelector('.quality-score');
+            if (qualityScoreElement && qaMetrics.quality_score !== undefined) {
+                qualityScoreElement.textContent = `${qaMetrics.quality_score}%`;
+                
+                // Update quality score color class
+                qualityScoreElement.classList.remove('high', 'medium', 'low');
+                if (qaMetrics.quality_score >= 85) {
+                    qualityScoreElement.classList.add('high');
+                } else if (qaMetrics.quality_score >= 70) {
+                    qualityScoreElement.classList.add('medium');
+                } else {
+                    qualityScoreElement.classList.add('low');
+                }
+            }
+
+            // Update test results
+            const testResultsElement = metricsContainer.querySelector('.test-results');
+            if (testResultsElement && qaMetrics.tests_passed !== undefined) {
+                testResultsElement.textContent = `${qaMetrics.tests_passed}/${qaMetrics.total_tests || 0}`;
+            }
+
+            // Update security status
+            const securityElement = metricsContainer.querySelector('.security-status');
+            if (securityElement && qaMetrics.security_status) {
+                securityElement.textContent = qaMetrics.security_status;
+                
+                // Update security status color class
+                securityElement.classList.remove('secure', 'warning', 'vulnerable');
+                if (qaMetrics.security_status.toLowerCase() === 'secure') {
+                    securityElement.classList.add('secure');
+                } else if (qaMetrics.security_status.toLowerCase() === 'warning') {
+                    securityElement.classList.add('warning');
+                } else if (qaMetrics.security_status.toLowerCase() === 'vulnerable') {
+                    securityElement.classList.add('vulnerable');
+                }
+            }
+
+            // Update final approval
+            const approvalElement = metricsContainer.querySelector('.final-approval');
+            if (approvalElement && qaMetrics.final_approval !== undefined) {
+                approvalElement.textContent = qaMetrics.final_approval ? 'Approved' : 'Pending';
+                
+                // Update approval color class
+                approvalElement.classList.remove('approved', 'rejected');
+                if (qaMetrics.final_approval) {
+                    approvalElement.classList.add('approved');
+                } else {
+                    approvalElement.classList.add('rejected');
+                }
+            }
+
+            console.log('QA Metrics updated:', qaMetrics);
+        }
+
+        function updateWorkflowStatus(data) {
+            console.log('Workflow status update:', data);
+
+            // Update individual agent statuses
+            if (data.agents) {
+                Object.entries(data.agents).forEach(([agentName, status]) => {
+                    const agentCard = document.getElementById(`agent-${agentName}`);
+                    if (agentCard) {
+                        const statusElement = agentCard.querySelector('.agent-status');
+                        if (statusElement) {
+                            statusElement.textContent = status;
+                            statusElement.className = `agent-status status-${status}`;
+                        }
+
+                        // Update card class
+                        const isQAValidator = agentCard.classList.contains('qa-validator-card');
+                        agentCard.className = `agent-card status-${status}`;
+                        if (isQAValidator) {
+                            agentCard.classList.add('qa-validator-card');
+                        }
+                    }
+                });
+            }
+
+            // Update overall workflow status
+            const phaseElement = document.getElementById('currentPhase');
+            if (phaseElement) {
+                phaseElement.textContent = data.workflow_status || 'Processing...';
+            }
+        }
+        
+        function updateOverallProgress(projectUpdate) {
+            const progressCircle = document.getElementById('progressCircle');
+            const percentage = document.getElementById('overallPercentage');
+            const phase = document.getElementById('currentPhase');
+            
+            // Update circular progress
+            const circumference = 2 * Math.PI * 32;
+            const offset = circumference - (projectUpdate.overall_progress / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+            
+            // Update text
+            percentage.textContent = `${Math.round(projectUpdate.overall_progress)}%`;
+            phase.textContent = projectUpdate.current_phase;
+            
+            // Update estimated time
+            if (projectUpdate.estimated_completion) {
+                const eta = new Date(projectUpdate.estimated_completion * 1000);
+                const now = new Date();
+                const remaining = Math.max(0, eta - now);
+                const minutes = Math.ceil(remaining / 60000);
+                document.getElementById('estimatedTime').textContent = `Est. ${minutes}m remaining`;
+            }
+        }
+        
+        async function handleProjectComplete(data) {
+            showToast('success', 'Project Complete!', `Generated ${data.total_files} files in ${Math.round(data.generation_time)}s`);
+            
+            // Update stats
+            document.getElementById('totalFiles').textContent = data.total_files;
+            document.getElementById('generationTime').textContent = `${Math.round(data.generation_time)}s`;
+            
+            // Show results section
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            // Load and display files
+            await loadProjectFiles();
+            
+            showLoading(false);
+        }
+        
+        async function loadProjectFiles() {
+            try {
+                const response = await fetch(`/api/vibe-coding/files/${currentJobId}`);
+                if (!response.ok) throw new Error('Failed to load files');
+                
+                const data = await response.json();
+                generatedFiles = {};
+                
+                // Process files
+                let totalLines = 0;
+                data.files.forEach(file => {
+                    generatedFiles[file.path] = file.content;
+                    totalLines += file.content.split('\n').length;
+                });
+                
+                // Update stats
+                document.getElementById('codeLines').textContent = totalLines.toLocaleString();
+                document.getElementById('projectSize').textContent = formatBytes(data.total_size);
+                
+                // Build file tree
+                buildFileTree(data.files);
+                
+                // Show file preview
+                document.getElementById('filePreview').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error loading files:', error);
+                showToast('error', 'Error', 'Failed to load generated files');
+            }
+        }
+        
+        function buildFileTree(files) {
+            const fileTreeContent = document.getElementById('fileTreeContent');
+            const editorTabs = document.getElementById('editorTabs');
+            
+            fileTreeContent.innerHTML = '';
+            editorTabs.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                // Create file tree item
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <i data-feather="file" class="file-icon"></i>
+                    <span>${file.path}</span>
+                `;
+                fileItem.addEventListener('click', () => openFile(file.path, file.language));
+                fileTreeContent.appendChild(fileItem);
+                
+                // Create editor tab
+                const tab = document.createElement('button');
+                tab.className = 'editor-tab';
+                tab.textContent = file.path.split('/').pop();
+                tab.addEventListener('click', () => openFile(file.path, file.language));
+                editorTabs.appendChild(tab);
+                
+                // Open first file by default
+                if (index === 0) {
+                    openFile(file.path, file.language);
+                }
+            });
+            
+            feather.replace();
+        }
+        
+        function openFile(filePath, language) {
+            // Update active states
+            document.querySelectorAll('.file-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.editor-tab').forEach(tab => tab.classList.remove('active'));
+            
+            const fileItem = Array.from(document.querySelectorAll('.file-item')).find(item => 
+                item.textContent.trim() === filePath
+            );
+            const tab = Array.from(document.querySelectorAll('.editor-tab')).find(tab => 
+                tab.textContent === filePath.split('/').pop()
+            );
+            
+            if (fileItem) fileItem.classList.add('active');
+            if (tab) tab.classList.add('active');
+            
+            // Update Monaco editor
+            if (monacoEditor && generatedFiles[filePath]) {
+                const model = monaco.editor.createModel(
+                    generatedFiles[filePath],
+                    getMonacoLanguage(language)
+                );
+                monacoEditor.setModel(model);
+            }
+        }
+        
+        function getMonacoLanguage(fileExtension) {
+            const languageMap = {
+                'js': 'javascript',
+                'jsx': 'javascript',
+                'ts': 'typescript',
+                'tsx': 'typescript',
+                'html': 'html',
+                'css': 'css',
+                'scss': 'scss',
+                'json': 'json',
+                'md': 'markdown',
+                'py': 'python',
+                'yml': 'yaml',
+                'yaml': 'yaml'
+            };
+            return languageMap[fileExtension] || 'plaintext';
+        }
+        
+        function handleError(data) {
+            showToast('error', 'Generation Error', data.error_message);
+            showLoading(false);
+        }
+        
+        function handleFileGenerated(data) {
+            // Could show individual file generation notifications
+            console.log('File generated:', data.file_path);
+        }
+        
+        async function downloadProject() {
+            if (!currentJobId) return;
+            
+            try {
+                const response = await fetch(`/api/download/${currentJobId}`);
+                if (!response.ok) throw new Error('Download failed');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `project-${currentJobId}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showToast('success', 'Download Started', 'Your project is downloading...');
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('error', 'Download Failed', 'Could not download project');
+            }
+        }
+        
+        function showDashboard() {
+            document.getElementById('overallProgress').classList.remove('hidden');
+            document.getElementById('agentDashboard').classList.remove('hidden');
+        }
+        
+        function showLoading(loading) {
+            const btn = document.getElementById('generateBtn');
+            if (loading) {
+                btn.classList.add('btn-loading');
+                btn.disabled = true;
+            } else {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        }
+        
+        function updateConnectionStatus(status) {
+            const indicator = document.getElementById('statusIndicator');
+            const text = document.getElementById('statusText');
+            
+            indicator.className = `status-indicator ${status}`;
+            
+            switch (status) {
+                case 'connected':
+                    text.textContent = 'Connected';
+                    break;
+                case 'connecting':
+                    text.textContent = 'Connecting...';
+                    break;
+                case 'disconnected':
+                    text.textContent = 'Disconnected';
+                    break;
+                case 'error':
+                    text.textContent = 'Connection Error';
+                    break;
+            }
+        }
+        
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => container.removeChild(toast), 300);
+            }, 5000);
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+        
+        function generateUserId() {
+            return 'user_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden
+            } else {
+                // Page is visible - reconnect if needed
+                if (websocket && websocket.readyState !== WebSocket.OPEN && currentJobId) {
+                    connectWebSocket(currentJobId);
+                }
+            }
+        });
+        
+        // Handle before unload
+        window.addEventListener('beforeunload', function() {
+            if (websocket) {
+                websocket.close();
+            }
+        });
+    </script>
+</body>
+</html>

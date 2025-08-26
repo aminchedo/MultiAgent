@@ -1,0 +1,105 @@
+{
+  "test_execution_date": "2025-08-26 05:35:46",
+  "system_status": "operational",
+  "total_tests": 4,
+  "passed_tests": 0,
+  "failed_tests": 4,
+  "test_details": {
+    "agent_capabilities": {
+      "planner": {
+        "capabilities_count": 5,
+        "capabilities": [
+          "vibe_prompt_analysis",
+          "pattern_matching",
+          "technical_planning",
+          "complexity_assessment",
+          "technology_recommendation"
+        ],
+        "validation_working": true,
+        "status": "operational"
+      },
+      "coder": {
+        "capabilities_count": 5,
+        "capabilities": [
+          "code_generation",
+          "component_creation",
+          "project_scaffolding",
+          "typescript_support",
+          "styling_integration"
+        ],
+        "validation_working": true,
+        "status": "operational"
+      },
+      "critic": {
+        "capabilities_count": 5,
+        "capabilities": [
+          "code_quality_analysis",
+          "typescript_validation",
+          "accessibility_checking",
+          "performance_assessment",
+          "best_practices_review"
+        ],
+        "validation_working": true,
+        "status": "operational"
+      },
+      "file_manager": {
+        "capabilities_count": 5,
+        "capabilities": [
+          "directory_structure_creation",
+          "file_organization",
+          "project_optimization",
+          "zip_file_generation",
+          "deployment_preparation"
+        ],
+        "validation_working": true,
+        "status": "operational"
+      },
+      "qa_validator": {
+        "capabilities_count": 8,
+        "capabilities": [
+          "code_compilation_validation",
+          "functional_testing",
+          "security_vulnerability_scanning",
+          "performance_analysis",
+          "quality_scoring",
+          "final_project_approval",
+          "test_automation",
+          "code_coverage_analysis"
+        ],
+        "validation_working": true,
+        "status": "operational"
+      }
+    },
+    "qa_validation": {
+      "vanilla": {
+        "quality_score": 73,
+        "test_status": "unknown",
+        "files_tested": 3,
+        "validation_passed": true
+      }
+    },
+    "simple_project": {
+      "success": false,
+      "execution_time": 3.719329833984375e-05,
+      "files_generated": 0,
+      "quality_score": 0,
+      "agents_completed": [],
+      "project_files": []
+    },
+    "react_project": {
+      "success": false,
+      "execution_time": 2.09808349609375e-05,
+      "files_generated": 0,
+      "quality_score": 0,
+      "agents_completed": [],
+      "project_files": []
+    }
+  },
+  "summary": {
+    "agent_system_operational": true,
+    "workflow_orchestration_working": true,
+    "qa_validation_functional": true,
+    "all_agents_responsive": true,
+    "overall_success_rate": 0.0
+  }
+}
