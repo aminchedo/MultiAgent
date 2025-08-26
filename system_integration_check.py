@@ -101,7 +101,10 @@ class SystemIntegrationValidator:
         
         for package in required_packages:
             try:
-                __import__(package.replace('-', '_'))
+                if package == 'python-multipart':
+                    __import__('multipart')
+                else:
+                    __import__(package.replace('-', '_'))
                 installed_packages.append(package)
             except ImportError:
                 missing_packages.append(package)
