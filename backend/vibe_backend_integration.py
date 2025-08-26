@@ -137,7 +137,7 @@ async def get_generated_files(job_id: str):
 
 @app.get("/api/download/{job_id}")
 async def download_project(job_id: str):
-    """Download REAL generated project"""
+    """Download REAL generated project as zip file"""
     if job_id not in job_store:
         raise HTTPException(status_code=404, detail="Job not found")
     
@@ -149,7 +149,27 @@ async def download_project(job_id: str):
     if not project_path or not os.path.exists(project_path):
         raise HTTPException(status_code=404, detail="Project files not found")
     
-    return {"message": "Project ready for download", "job_id": job_id, "path": project_path}
+    # Create zip file
+    import zipfile
+    import tempfile
+    from fastapi.responses import FileResponse
+    
+    zip_path = f"/tmp/vibe_project_{job_id}.zip"
+    
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(project_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                # Create relative path for zip file
+                arcname = os.path.relpath(file_path, project_path)
+                zipf.write(file_path, arcname)
+    
+    return FileResponse(
+        zip_path,
+        media_type='application/zip',
+        filename=f"vibe_project_{job_id}.zip",
+        headers={"Content-Disposition": f"attachment; filename=vibe_project_{job_id}.zip"}
+    )
 
 async def process_with_real_agents(job_id: str, prompt: str, project_type: str, framework: str):
     """Process vibe request using REAL existing sophisticated agents"""

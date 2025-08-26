@@ -9,6 +9,9 @@ export default function Home() {
   const [currentJob, setCurrentJob] = useState(null)
   const [jobStatus, setJobStatus] = useState(null)
   const [generatedFiles, setGeneratedFiles] = useState([])
+  
+  // Backend API configuration
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
   const submitVibePrompt = async () => {
     if (!vibePrompt.trim() || vibePrompt.length < 10) {
@@ -22,13 +25,13 @@ export default function Home() {
     setGeneratedFiles([])
 
     try {
-      const response = await fetch('/api/vibe-coding', {
+      const response = await fetch(`${API_BASE_URL}/api/vibe-coding`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          vibe_prompt: vibePrompt,
+          prompt: vibePrompt,
           project_type: projectType,
           framework: framework
         })
@@ -53,7 +56,7 @@ export default function Home() {
   const monitorJob = async (jobId) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/vibe-coding/status/${jobId}`)
+        const response = await fetch(`${API_BASE_URL}/api/vibe-coding/status/${jobId}`)
         
         if (response.ok) {
           const status = await response.json()
@@ -64,7 +67,7 @@ export default function Home() {
             setIsGenerating(false)
             
             // Get generated files
-            const filesResponse = await fetch(`/api/vibe-coding/files/${jobId}`)
+            const filesResponse = await fetch(`${API_BASE_URL}/api/vibe-coding/files/${jobId}`)
             if (filesResponse.ok) {
               const filesData = await filesResponse.json()
               setGeneratedFiles(filesData.files || [])
@@ -85,7 +88,7 @@ export default function Home() {
     if (!currentJob) return
 
     try {
-      const response = await fetch(`/api/download/${currentJob}`)
+      const response = await fetch(`${API_BASE_URL}/api/download/${currentJob}`)
       
       if (response.ok) {
         const blob = await response.blob()
