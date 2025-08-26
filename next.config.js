@@ -4,38 +4,77 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	reactStrictMode: true,
-	async rewrites() {
-		const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_DESTINATION
-		if (!apiUrl) return []
-		let destination
-		if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
-			destination = `${apiUrl}/api/:path*`
-		} else if (apiUrl.startsWith('/')) {
-			destination = `${apiUrl}/api/:path*`
-		} else {
-			return []
-		}
-		return [
-			{ source: '/api/:path*', destination }
-		]
-	},
-	async redirects() {
-		return [
-			{ source: '/legacy', destination: '/legacy/index.html', permanent: false }
-		]
-	},
-	async headers() {
-		return [
-			{
-				source: '/ws/:path*',
-				headers: [
-					{ key: 'Connection', value: 'Upgrade' },
-					{ key: 'Upgrade', value: 'websocket' }
-				]
-			}
-		]
-	}
+  output: 'standalone',
+  experimental: {
+    appDir: false,
+  },
+  
+  // Static file handling
+  trailingSlash: true,
+  
+  // API routes configuration
+  async rewrites() {
+    return [
+      {
+        source: '/api/vibe-coding',
+        destination: '/api/vibe-coding',
+      },
+      {
+        source: '/api/vibe-coding/status/:job_id',
+        destination: '/api/status/:job_id',
+      },
+      {
+        source: '/api/vibe-coding/files/:job_id',
+        destination: '/api/files/:job_id',
+      },
+      {
+        source: '/api/download/:job_id',
+        destination: '/api/download/:job_id',
+      }
+    ]
+  },
+
+  // Handle static assets
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+        ],
+      },
+    ]
+  },
+
+  // Webpack configuration for handling static files
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        path: false,
+        os: false,
+      }
+    }
+    return config
+  },
+
+  // Environment variables
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : 'http://localhost:3000',
+  },
 }
 
 module.exports = nextConfig

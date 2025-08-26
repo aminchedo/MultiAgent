@@ -10,14 +10,42 @@
       "use": "@vercel/python"
     }
   ],
+  "functions": {
+    "api/**/*.py": {
+      "runtime": "python3.9"
+    }
+  },
   "env": {
     "PYTHONPATH": ".",
     "NODE_ENV": "production"
   },
   "rewrites": [
     {
+      "source": "/api/vibe-coding/status/(.*)",
+      "destination": "/api/status/$1"
+    },
+    {
+      "source": "/api/vibe-coding/files/(.*)",
+      "destination": "/api/files/$1"
+    }
+  ],
+  "headers": [
+    {
       "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
     }
   ]
 }
