@@ -1,9 +1,17 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 import json
 import asyncio
+import uuid
+import os
+import zipfile
+import tempfile
+import time
 from typing import Dict, Any
 import structlog
+import sys
+sys.path.append('/workspace')
 
 # Configure logging
 structlog.configure(
@@ -40,6 +48,12 @@ app.add_middleware(
 # Store active WebSocket connections
 active_connections: Dict[str, WebSocket] = {}
 
+# Store job data
+job_data: Dict[str, Dict] = {}
+
+# Store generated projects
+generated_projects: Dict[str, Dict] = {}
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
@@ -75,12 +89,77 @@ async def get_templates():
         ]
     }
 
+@app.post("/api/vibe-coding")
+async def create_vibe_project(
+    vibe_request: Dict[str, Any],
+    background_tasks: BackgroundTasks
+):
+    """Create a project from a natural language vibe description using real agents."""
+    try:
+        # Import the real vibe agents - add full path
+        import sys
+        import os
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+        from agents.vibe_planner_agent import VibePlannerAgent
+        from agents.vibe_coder_agent import VibeCoderAgent
+        from agents.vibe_critic_agent import VibeCriticAgent
+        from agents.vibe_file_manager_agent import VibeFileManagerAgent
+        
+        # Validate request
+        if not vibe_request.get('prompt'):
+            raise HTTPException(status_code=400, detail="prompt is required")
+        
+        # Generate job ID
+        job_id = str(uuid.uuid4())
+        
+        # Store job data
+        job_data[job_id] = {
+            "job_id": job_id,
+            "prompt": vibe_request['prompt'],
+            "project_type": vibe_request.get('project_type', 'web'),
+            "status": "processing",
+            "created_at": time.time(),
+            "progress": 0,
+            "current_step": "Planning",
+            "agents": {
+                "planner": {"status": "starting", "progress": 0},
+                "coder": {"status": "pending", "progress": 0},
+                "critic": {"status": "pending", "progress": 0},
+                "file_manager": {"status": "pending", "progress": 0}
+            }
+        }
+        
+        # Start background task for real agent processing
+        background_tasks.add_task(
+            execute_real_vibe_workflow,
+            job_id,
+            vibe_request
+        )
+        
+        logger.info("🚀 Real vibe project generation started", 
+                   job_id=job_id, 
+                   prompt=vibe_request['prompt'][:100])
+        
+        return {
+            "success": True,
+            "message": "🚀 Your vibe project is being created! Real AI agents are working on your vision.",
+            "job_id": job_id,
+            "estimated_duration": 120
+        }
+        
+    except Exception as e:
+        logger.error("Failed to start vibe project generation", error=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to start vibe project generation: {str(e)}"
+        )
+
 @app.post("/api/jobs")
-async def create_job(job_data: Dict[str, Any]):
+async def create_job(job_request: Dict[str, Any]):
     """Create a new code generation job."""
-    job_id = f"job_{len(active_connections) + 1}"
+    job_id = f"job_{len(job_data) + 1}"
     
-    logger.info("Job created", job_id=job_id, description=job_data.get("description"))
+    logger.info("Job created", job_id=job_id, description=job_request.get("description"))
     
     return {
         "job_id": job_id,
@@ -88,21 +167,86 @@ async def create_job(job_data: Dict[str, Any]):
         "message": "Job created successfully"
     }
 
-@app.get("/api/jobs/{job_id}")
+@app.get("/api/status/{job_id}")
 async def get_job_status(job_id: str):
-    """Get job status and progress."""
+    """Get real job status and progress."""
+    if job_id not in job_data:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    job = job_data[job_id]
+    files = []
+    
+    # Get generated files if job is completed
+    if job_id in generated_projects:
+        project = generated_projects[job_id]
+        files = list(project.get('files', {}).keys())
+    
     return {
+        "success": True,
+        "message": "Job status retrieved successfully",
         "job_id": job_id,
-        "status": "running",
-        "progress": 25,
-        "agents": {
-            "planner": {"status": "completed", "progress": 100},
-            "code_generator": {"status": "running", "progress": 50},
-            "tester": {"status": "pending", "progress": 0},
-            "doc_generator": {"status": "pending", "progress": 0},
-            "reviewer": {"status": "pending", "progress": 0}
-        }
+        "status": job["status"],
+        "progress": job["progress"],
+        "current_step": job["current_step"],
+        "step_number": job["progress"] // 25,
+        "total_steps": 4,
+        "files": files,
+        "error_message": job.get("error_message"),
+        "created_at": job["created_at"],
+        "updated_at": job.get("updated_at", job["created_at"]),
+        "estimated_completion": job.get("completed_at")
     }
+
+@app.get("/api/download/{job_id}")
+async def download_project(job_id: str):
+    """Download the generated project as a ZIP file."""
+    if job_id not in job_data:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    job = job_data[job_id]
+    if job["status"] != "completed":
+        raise HTTPException(status_code=400, detail="Job is not completed yet")
+    
+    if job_id not in generated_projects:
+        raise HTTPException(status_code=404, detail="No project files found")
+    
+    project = generated_projects[job_id]
+    
+    # Create ZIP file in memory
+    import io
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        files_dict = project.get('files', {})
+        
+        # Handle the case where files is a dict of file objects vs. simple strings
+        if isinstance(files_dict, dict):
+            for file_path, file_data in files_dict.items():
+                # If file_data is a dict with content, use that
+                if isinstance(file_data, dict) and 'content' in file_data:
+                    content = file_data['content']
+                else:
+                    # Otherwise treat it as the content itself
+                    content = str(file_data) if file_data else f"# {file_path}\n\n# Generated by Vibe Coding Platform"
+                
+                zip_file.writestr(file_path, content)
+        
+        # If no files, add a basic structure
+        if not files_dict:
+            zip_file.writestr("README.md", "# Vibe Generated Project\n\nThis project was generated by the Vibe Coding Platform.")
+            zip_file.writestr("package.json", json.dumps({
+                "name": "vibe-generated-project",
+                "version": "1.0.0",
+                "description": "Generated by Vibe Coding Platform",
+                "main": "index.js"
+            }, indent=2))
+    
+    zip_buffer.seek(0)
+    
+    return StreamingResponse(
+        io.BytesIO(zip_buffer.read()),
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename=vibe_project_{job_id[:8]}.zip"}
+    )
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -196,6 +340,109 @@ async def websocket_endpoint(websocket: WebSocket):
     finally:
         if connection_id in active_connections:
             del active_connections[connection_id]
+
+async def execute_real_vibe_workflow(job_id: str, vibe_request: Dict[str, Any]):
+    """Execute the real vibe workflow using existing agents."""
+    try:
+        # Import real agents - add full path
+        import sys
+        import os
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+        from agents.vibe_planner_agent import VibePlannerAgent
+        from agents.vibe_coder_agent import VibeCoderAgent
+        from agents.vibe_critic_agent import VibeCriticAgent
+        from agents.vibe_file_manager_agent import VibeFileManagerAgent
+        
+        logger.info(f"🚀 Starting real agent workflow for job {job_id}")
+        
+        # Step 1: Planning Agent
+        job_data[job_id]["current_step"] = "Planning"
+        job_data[job_id]["progress"] = 10
+        job_data[job_id]["agents"]["planner"]["status"] = "running"
+        
+        planner = VibePlannerAgent()
+        plan_input = {
+            'vibe_prompt': vibe_request['prompt'],
+            'project_type': vibe_request.get('project_type', 'web')
+        }
+        
+        logger.info(f"🔍 Planner analyzing vibe: {vibe_request['prompt'][:50]}...")
+        plan_result = planner.decompose_vibe_prompt(vibe_request['prompt'], plan_input)
+        logger.info(f"📋 Plan result keys: {list(plan_result.keys()) if plan_result else 'None'}")
+        
+        job_data[job_id]["progress"] = 25
+        job_data[job_id]["agents"]["planner"]["status"] = "completed"
+        job_data[job_id]["agents"]["planner"]["progress"] = 100
+        
+        # Step 2: Code Generation Agent
+        job_data[job_id]["current_step"] = "Code Generation"
+        job_data[job_id]["progress"] = 30
+        job_data[job_id]["agents"]["coder"]["status"] = "running"
+        
+        coder = VibeCoderAgent()
+        logger.info(f"⚡ Coder generating code from plan...")
+        code_result = coder.generate_code_from_plan(plan_result, int(job_id.replace('-', '')[:8], 16))
+        logger.info(f"💻 Code result keys: {list(code_result.keys()) if code_result else 'None'}")
+        logger.info(f"💻 Generated files: {len(code_result.get('code_files', []))}")
+        
+        job_data[job_id]["progress"] = 50
+        job_data[job_id]["agents"]["coder"]["status"] = "completed"
+        job_data[job_id]["agents"]["coder"]["progress"] = 100
+        
+        # Step 3: Quality Review Agent
+        job_data[job_id]["current_step"] = "Quality Review"
+        job_data[job_id]["progress"] = 60
+        job_data[job_id]["agents"]["critic"]["status"] = "running"
+        
+        critic = VibeCriticAgent()
+        logger.info(f"🔍 Critic reviewing code quality...")
+        review_result = critic.review_generated_code(code_result.get('code_files', []), plan_result)
+        logger.info(f"🔍 Review result keys: {list(review_result.keys()) if review_result else 'None'}")
+        logger.info(f"🔍 Reviewed files: {len(review_result.get('files', []))}")
+        
+        job_data[job_id]["progress"] = 75
+        job_data[job_id]["agents"]["critic"]["status"] = "completed"
+        job_data[job_id]["agents"]["critic"]["progress"] = 100
+        
+        # Step 4: File Organization Agent
+        job_data[job_id]["current_step"] = "File Organization"
+        job_data[job_id]["progress"] = 80
+        job_data[job_id]["agents"]["file_manager"]["status"] = "running"
+        
+        file_manager = VibeFileManagerAgent()
+        logger.info(f"📁 File manager organizing project structure...")
+        final_result = file_manager.organize_project_structure(review_result.get('files', []), vibe_request.get('project_type', 'web'))
+        logger.info(f"📁 Final result keys: {list(final_result.keys()) if final_result else 'None'}")
+        logger.info(f"📁 Organized files: {len(final_result.get('organized_files', {}))}")
+        logger.info(f"📁 Final result success: {final_result.get('success', False)}")
+        
+        # Store the generated project
+        generated_projects[job_id] = {
+            "job_id": job_id,
+            "files": final_result.get('organized_files', {}),
+            "structure": final_result.get('project_structure', {}),
+            "metadata": final_result.get('optimization_report', {}),
+            "file_manifest": final_result.get('file_manifest', {}),
+            "zip_info": final_result.get('zip_file', {})
+        }
+        
+        # Mark job as completed
+        job_data[job_id]["status"] = "completed"
+        job_data[job_id]["progress"] = 100
+        job_data[job_id]["current_step"] = "Completed"
+        job_data[job_id]["completed_at"] = time.time()
+        job_data[job_id]["updated_at"] = time.time()
+        job_data[job_id]["agents"]["file_manager"]["status"] = "completed"
+        job_data[job_id]["agents"]["file_manager"]["progress"] = 100
+        
+        file_count = len(generated_projects[job_id]["files"])
+        logger.info(f"✅ Real agent workflow completed successfully! Generated {file_count} files for job {job_id}")
+        
+    except Exception as e:
+        logger.error(f"❌ Real agent workflow failed for job {job_id}: {e}")
+        job_data[job_id]["status"] = "failed"
+        job_data[job_id]["error_message"] = str(e)
+        job_data[job_id]["updated_at"] = time.time()
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding Platform - Test Frontend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1e293b 50%, #334155 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5em;
+            font-weight: 800;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+        
+        textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            background: rgba(51, 65, 85, 0.8);
+            color: #ffffff;
+            font-size: 16px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+        
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-container {
+            background: rgba(51, 65, 85, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .status-container.visible {
+            display: block;
+        }
+        
+        .status-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #f1f5f9;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #475569;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        .agent-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .agent-card {
+            background: rgba(71, 85, 105, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .agent-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+        
+        .agent-progress {
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+        
+        .status-message {
+            background: rgba(71, 85, 105, 0.4);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            color: #f1f5f9;
+            margin-bottom: 10px;
+        }
+        
+        .download-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .download-btn.visible {
+            display: block;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+        }
+        
+        .error-message {
+            background: rgba(220, 38, 38, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        
+        .files-list {
+            background: rgba(71, 85, 105, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .files-list h4 {
+            margin-bottom: 10px;
+            color: #f1f5f9;
+        }
+        
+        .file-item {
+            background: rgba(51, 65, 85, 0.6);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            font-family: 'Monaco', 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Vibe Coding Platform</h1>
+        
+        <form id="vibeForm">
+            <div class="input-group">
+                <label for="prompt">Describe your project idea:</label>
+                <textarea 
+                    id="prompt" 
+                    name="prompt" 
+                    placeholder="e.g., Create a modern todo app with React and TypeScript"
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="project_type">Project Type:</label>
+                <select id="project_type" name="project_type">
+                    <option value="web">Web Application</option>
+                    <option value="api">REST API</option>
+                    <option value="cli">CLI Tool</option>
+                    <option value="mobile">Mobile App</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="generate-btn" id="generateBtn">
+                ✨ Generate Project
+            </button>
+        </form>
+        
+        <div class="status-container" id="statusContainer">
+            <div class="status-title">🤖 AI Agents Working...</div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Initializing agents...
+            </div>
+            
+            <div class="agent-status" id="agentStatus">
+                <!-- Agent cards will be populated here -->
+            </div>
+            
+            <div class="files-list" id="filesList" style="display: none;">
+                <h4>📁 Generated Files:</h4>
+                <div id="filesContainer"></div>
+            </div>
+            
+            <button class="download-btn" id="downloadBtn">
+                💾 Download Project
+            </button>
+        </div>
+        
+        <div id="errorContainer"></div>
+    </div>
+
+    <script>
+        let currentJobId = null;
+        let statusInterval = null;
+        
+        const form = document.getElementById('vibeForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const statusContainer = document.getElementById('statusContainer');
+        const progressFill = document.getElementById('progressFill');
+        const statusMessage = document.getElementById('statusMessage');
+        const agentStatus = document.getElementById('agentStatus');
+        const filesList = document.getElementById('filesList');
+        const filesContainer = document.getElementById('filesContainer');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const errorContainer = document.getElementById('errorContainer');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const prompt = formData.get('prompt');
+            const project_type = formData.get('project_type');
+            
+            if (!prompt.trim()) {
+                showError('Please enter a project description');
+                return;
+            }
+            
+            // Reset UI
+            clearError();
+            generateBtn.disabled = true;
+            generateBtn.textContent = '🚀 Starting AI agents...';
+            statusContainer.classList.add('visible');
+            downloadBtn.classList.remove('visible');
+            filesList.style.display = 'none';
+            
+            try {
+                // Call the real backend API
+                const response = await fetch('http://localhost:8000/api/vibe-coding', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        project_type: project_type
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentJobId = result.job_id;
+                    statusMessage.textContent = result.message;
+                    
+                    // Start polling for status
+                    startStatusPolling();
+                } else {
+                    throw new Error(result.detail || 'Failed to start project generation');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Failed to start project generation: ${error.message}`);
+                resetUI();
+            }
+        });
+        
+        async function startStatusPolling() {
+            if (!currentJobId) return;
+            
+            statusInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`http://localhost:8000/api/status/${currentJobId}`);
+                    const status = await response.json();
+                    
+                    if (status.success) {
+                        updateUI(status);
+                        
+                        if (status.status === 'completed') {
+                            clearInterval(statusInterval);
+                            onJobCompleted(status);
+                        } else if (status.status === 'failed') {
+                            clearInterval(statusInterval);
+                            showError(status.error_message || 'Job failed');
+                            resetUI();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Status polling error:', error);
+                }
+            }, 2000); // Poll every 2 seconds
+        }
+        
+        function updateUI(status) {
+            // Update progress bar
+            progressFill.style.width = `${status.progress}%`;
+            
+            // Update status message
+            statusMessage.textContent = `${status.current_step} (${status.progress}%)`;
+            
+            // Update agent status if available
+            if (status.agents) {
+                updateAgentStatus(status.agents);
+            }
+        }
+        
+        function updateAgentStatus(agents) {
+            agentStatus.innerHTML = '';
+            
+            for (const [agentName, agentData] of Object.entries(agents)) {
+                const agentCard = document.createElement('div');
+                agentCard.className = 'agent-card';
+                
+                let statusIcon = '⏳';
+                if (agentData.status === 'completed') statusIcon = '✅';
+                else if (agentData.status === 'running') statusIcon = '🔄';
+                else if (agentData.status === 'failed') statusIcon = '❌';
+                
+                agentCard.innerHTML = `
+                    <div class="agent-name">${statusIcon} ${agentName}</div>
+                    <div class="agent-progress">${agentData.status} (${agentData.progress || 0}%)</div>
+                `;
+                
+                agentStatus.appendChild(agentCard);
+            }
+        }
+        
+        function onJobCompleted(status) {
+            statusMessage.textContent = '✅ Project generation completed!';
+            generateBtn.textContent = '✨ Generate Another Project';
+            generateBtn.disabled = false;
+            
+            // Show files if available
+            if (status.files && status.files.length > 0) {
+                displayFiles(status.files);
+                downloadBtn.classList.add('visible');
+            }
+        }
+        
+        function displayFiles(files) {
+            filesList.style.display = 'block';
+            filesContainer.innerHTML = '';
+            
+            files.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.textContent = file;
+                filesContainer.appendChild(fileItem);
+            });
+        }
+        
+        downloadBtn.addEventListener('click', async () => {
+            if (!currentJobId) return;
+            
+            try {
+                const response = await fetch(`http://localhost:8000/api/download/${currentJobId}`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `vibe_project_${currentJobId.slice(0, 8)}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    throw new Error('Download failed');
+                }
+            } catch (error) {
+                showError(`Download failed: ${error.message}`);
+            }
+        });
+        
+        function showError(message) {
+            errorContainer.innerHTML = `
+                <div class="error-message">
+                    ❌ ${message}
+                </div>
+            `;
+        }
+        
+        function clearError() {
+            errorContainer.innerHTML = '';
+        }
+        
+        function resetUI() {
+            generateBtn.disabled = false;
+            generateBtn.textContent = '✨ Generate Project';
+            statusContainer.classList.remove('visible');
+            progressFill.style.width = '0%';
+            
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = null;
+            }
+        }
+    </script>
+</body>
+</html>

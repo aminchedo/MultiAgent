@@ -43,6 +43,15 @@ from backend.database.db import db_manager
 from backend.agents.agents import create_and_execute_workflow
 from backend.agents.specialized.vibe_workflow_orchestrator import create_and_execute_enhanced_workflow
 
+# Simple get_current_user function for vibe endpoints
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Simple user validation for vibe endpoints."""
+    try:
+        return verify_token(credentials)
+    except HTTPException:
+        # For development, allow anonymous access to vibe endpoints
+        return None
+
 
 settings = get_settings()
 logger = structlog.get_logger()
