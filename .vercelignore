@@ -4,6 +4,7 @@ tests/
 docs/
 scripts/
 deployment/
+generated_projects/
 .git/
 
 # Documentation
