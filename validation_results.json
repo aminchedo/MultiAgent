@@ -1,0 +1,233 @@
+{
+  "timestamp": "2025-08-26 00:58:18",
+  "checks": [
+    {
+      "name": "Python Version",
+      "status": "PASS",
+      "details": "Python 3.13.3",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Workspace Structure",
+      "status": "PASS",
+      "details": "All required directories present: ['agents', 'backend', 'frontend']",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Virtual Environment",
+      "status": "PASS",
+      "details": "Python virtual environment detected",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Package fastapi",
+      "status": "PASS",
+      "details": "FastAPI web framework",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Package uvicorn",
+      "status": "PASS",
+      "details": "ASGI server",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Package pydantic",
+      "status": "PASS",
+      "details": "Data validation",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Package aiohttp",
+      "status": "PASS",
+      "details": "Async HTTP client",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Package structlog",
+      "status": "PASS",
+      "details": "Structured logging",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Agent Dependencies",
+      "status": "PASS",
+      "details": "All agent modules importable",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Agent VibePlannerAgent",
+      "status": "PASS",
+      "details": "Capabilities: 5",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Agent VibeCoderAgent",
+      "status": "PASS",
+      "details": "Capabilities: 5",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Agent VibeCriticAgent",
+      "status": "PASS",
+      "details": "Capabilities: 5",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Agent VibeFileManagerAgent",
+      "status": "PASS",
+      "details": "Capabilities: 5",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Agent VibeWorkflowOrchestratorAgent",
+      "status": "PASS",
+      "details": "Capabilities: 5",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Orchestrator Initialization",
+      "status": "PASS",
+      "details": "Workflow orchestrator ready",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "Backend Already Running",
+      "status": "PASS",
+      "details": "Backend service is already active",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "API /health",
+      "status": "PASS",
+      "details": "Health check endpoint",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "API /api/vibe-coding",
+      "status": "PASS",
+      "details": "Job ID generated: dde90b26...",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "E2E Test: Quick React App",
+      "status": "INFO",
+      "details": "Testing: Create a simple React app with a welcome...",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "E2E Submit: Quick React App",
+      "status": "PASS",
+      "details": "Job: 41a15d59...",
+      "critical": false,
+      "timestamp": "00:58:18"
+    },
+    {
+      "name": "E2E Process: Quick React App",
+      "status": "PASS",
+      "details": "Completed in 5.0s",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "E2E Files: Quick React App",
+      "status": "PASS",
+      "details": "12 files generated",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "E2E Download: Quick React App",
+      "status": "PASS",
+      "details": "ZIP size: 4433 bytes",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Frontend File: frontend/test_vibe_integration.html",
+      "status": "PASS",
+      "details": "Size: 15598 bytes",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Frontend API Integration: frontend/test_vibe_integration.html",
+      "status": "PASS",
+      "details": "Real API calls detected",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Frontend File: frontend/assets/index.html",
+      "status": "PASS",
+      "details": "Size: 66042 bytes",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Frontend API Integration: frontend/assets/index.html",
+      "status": "PASS",
+      "details": "Real API calls detected",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Frontend File: frontend/pages/index.html",
+      "status": "PASS",
+      "details": "Size: 205408 bytes",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Frontend API Integration: frontend/pages/index.html",
+      "status": "WARN",
+      "details": "No vibe-coding API calls found",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Generated Project Quality",
+      "status": "PASS",
+      "details": "Sample project size: 4812 bytes",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Code File Generation",
+      "status": "PASS",
+      "details": "11 functional files",
+      "critical": false,
+      "timestamp": "00:58:23"
+    },
+    {
+      "name": "Project Structure Quality",
+      "status": "PASS",
+      "details": "Proper React structure detected",
+      "critical": false,
+      "timestamp": "00:58:23"
+    }
+  ],
+  "overall_status": "FULLY_FUNCTIONAL",
+  "critical_issues": [],
+  "warnings": [],
+  "recommendations": []
+}
