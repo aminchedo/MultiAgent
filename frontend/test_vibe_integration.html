@@ -1,3 +1,46 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════════
+TEST VIBE INTEGRATION - API TESTING PAGE
+═══════════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Lightweight API testing page for the MultiAgent Vibe Coding Platform
+This file provides a minimal interface to verify backend endpoints are working properly
+and test the complete workflow before using the main dashboard.
+
+CORRESPONDING PAGE: Integration Test Page (Developer/Testing Tool)
+
+SECTIONS:
+1. STYLES (lines ~7-100): Minimal CSS styling for testing interface
+   - Simple form styling and dark theme
+   - Progress indicators and status displays
+   - Agent monitoring cards
+   - Results and logging sections
+
+2. HTML STRUCTURE (lines ~102-200): Testing interface layout
+   - Simple form for API testing
+   - Progress tracking section
+   - Agent status monitoring
+   - Results display area
+   - Real-time logging container
+
+3. JAVASCRIPT LOGIC (lines ~201-429): Core testing functionality
+   - API endpoint validation
+   - Form submission and error handling
+   - Real-time status monitoring
+   - File listing and download testing
+   - Logging and feedback system
+
+API ENDPOINTS TESTED:
+- POST /api/vibe-coding - Test project generation submission
+- GET /api/vibe-coding/status/{job_id} - Test status monitoring
+- GET /api/vibe-coding/files/{job_id} - Test file listing
+- GET /api/download/{job_id} - Test project download
+
+USAGE: Use this page first if you suspect API or connection problems.
+This is a simplified version of the main dashboard for debugging purposes.
+Keep this minimal - do not duplicate complex features from the main dashboard.
+═══════════════════════════════════════════════════════════════════════════════════
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -123,11 +166,14 @@
     </style>
 </head>
 <body>
+    <!-- MAIN TESTING INTERFACE: Simple container for API testing -->
     <div class="container">
         <h1>🎨 Vibe Coding Integration Test</h1>
         <p>Test the real backend integration with sophisticated AI agents</p>
         
+        <!-- API TESTING FORM: Minimal form to test backend endpoints -->
         <form id="vibeForm">
+            <!-- PROMPT INPUT: Test prompt for API validation -->
             <div class="form-group">
                 <label for="vibePrompt">Vibe Prompt:</label>
                 <textarea id="vibePrompt" rows="3" placeholder="Describe your project vibe, e.g., 'Create a cozy coffee shop website with warm colors and easy navigation'"></textarea>
@@ -199,11 +245,29 @@
     </div>
 
     <script>
+        /* ═══════════════════════════════════════════════════════════════════════════════════
+           JAVASCRIPT TESTING FUNCTIONALITY
+           ═══════════════════════════════════════════════════════════════════════════════════
+           
+           This section contains minimal JavaScript for API endpoint testing:
+           - Form submission testing
+           - API response validation  
+           - Basic status monitoring
+           - Error handling and logging
+           
+           Purpose: Quick validation of backend connectivity and basic workflow.
+           Keep this simple - complex features belong in the main dashboard.
+           ═══════════════════════════════════════════════════════════════════════════════════
+        */
+        
+        // CONFIGURATION: Backend API endpoint for testing
         const API_BASE = 'http://localhost:8000';
+        
+        // TESTING STATE: Job tracking and polling control
         let currentJobId = null;
         let pollInterval = null;
 
-        // Form submission
+        // FORM SUBMISSION TEST: Validate API endpoint connectivity
         document.getElementById('vibeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
