@@ -12,6 +12,7 @@ from agents.vibe_planner_agent import VibePlannerAgent
 from agents.vibe_coder_agent import VibeCoderAgent
 from agents.vibe_critic_agent import VibeCriticAgent
 from agents.vibe_file_manager_agent import VibeFileManagerAgent
+from agents.vibe_qa_validator_agent import VibeQAValidatorAgent
 import logging
 import traceback
 from dataclasses import dataclass
@@ -27,6 +28,7 @@ class WorkflowStatus(Enum):
     CODING = "coding"
     REVIEWING = "reviewing"
     ORGANIZING = "organizing"
+    VALIDATING = "validating"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
@@ -49,7 +51,7 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
         self.current_job_id = None
         self.workflow_status = WorkflowStatus.IDLE
         
-        # Define workflow steps with enhanced metadata
+        # Define enhanced 6-agent workflow steps
         self.workflow_steps = [
             AgentTask(
                 agent_name='planner',
@@ -78,6 +80,13 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
                 description='Organizing project structure and creating deployment config',
                 timeout=120,
                 retries=2
+            ),
+            AgentTask(
+                agent_name='qa_validator',
+                display_name='QA Validator',
+                description='Performing comprehensive testing and quality validation',
+                timeout=240,
+                retries=3
             )
         ]
         
@@ -85,15 +94,16 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
         self._initialize_agents()
     
     def _initialize_agents(self):
-        """Initialize all vibe agent instances with error handling."""
+        """Initialize all 6 vibe agent instances with error handling."""
         try:
             self.agent_instances = {
                 'planner': VibePlannerAgent(),
                 'coder': VibeCoderAgent(),
                 'critic': VibeCriticAgent(),
-                'file_manager': VibeFileManagerAgent()
+                'file_manager': VibeFileManagerAgent(),
+                'qa_validator': VibeQAValidatorAgent()
             }
-            logger.info("✅ All vibe agents initialized successfully")
+            logger.info("✅ All 6 vibe agents initialized successfully")
         except Exception as e:
             logger.error(f"❌ Failed to initialize agents: {e}")
             raise RuntimeError(f"Agent initialization failed: {e}")
@@ -307,6 +317,10 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
     async def _execute_agent_step_sync(self, agent_name: str, workflow_result: Dict[str, Any], 
                                      vibe_request: Dict[str, Any]) -> Dict[str, Any]:
         """Execute agent step synchronously (wrapped in async for timeout)."""
+        if agent_name == 'qa_validator':
+            # QA Validator is async, so handle it directly
+            return await self._execute_qa_validator_step(self.agent_instances[agent_name], workflow_result)
+        
         def sync_execution():
             if agent_name == 'planner':
                 return self._execute_planner_step(self.agent_instances[agent_name], vibe_request)
@@ -571,6 +585,63 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
             logger.info(f"🔄 No recovery strategy for {agent_name} error: {error}")
             return False
     
+    async def _execute_qa_validator_step(self, agent: VibeQAValidatorAgent, workflow_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute the QA validator agent step with comprehensive testing."""
+        logger.info("🔍 QA Validator performing comprehensive project validation")
+        
+        # Prepare project files for validation from previous agent results
+        project_files = {}
+        
+        # Extract generated files from coder results
+        if 'coder' in workflow_result['agent_results']:
+            coder_result = workflow_result['agent_results']['coder']
+            project_files.update({
+                'frontend_files': coder_result.get('frontend_files', {}),
+                'backend_files': coder_result.get('backend_files', {}),
+                'configuration_files': coder_result.get('configuration_files', {}),
+                'test_files': coder_result.get('test_files', {})
+            })
+        
+        # Extract organized files from file manager
+        if 'file_manager' in workflow_result['agent_results']:
+            file_manager_result = workflow_result['agent_results']['file_manager']
+            # Update with organized structure
+            organized_files = file_manager_result.get('organized_files', {})
+            for category, files in organized_files.items():
+                if category in project_files:
+                    project_files[category].update(files)
+                else:
+                    project_files[category] = files
+        
+        # Validate with QA agent
+        job_id = workflow_result.get('job_id', 'unknown')
+        validation_results = await agent.validate_project(project_files, job_id)
+        
+        # Enhanced validation
+        if not validation_results:
+            raise ValueError("QA Validator failed to generate validation results")
+        
+        if validation_results.get('validation_status') != 'completed':
+            raise ValueError(f"QA validation incomplete: {validation_results.get('validation_status')}")
+        
+        quality_score = validation_results.get('quality_score', 0)
+        final_approval = validation_results.get('final_approval', False)
+        
+        logger.info(f"📊 QA Validation Results - Quality Score: {quality_score}%, Approved: {final_approval}")
+        
+        return {
+            'success': True,
+            'agent': 'qa_validator',
+            'validation_results': validation_results,
+            'quality_score': quality_score,
+            'final_approval': final_approval,
+            'test_results': validation_results.get('functional_tests', {}),
+            'security_scan': validation_results.get('security_scan', {}),
+            'performance_metrics': validation_results.get('performance', {}),
+            'recommendations': validation_results.get('recommendations', []),
+            'qa_report': await agent.generate_qa_report(validation_results)
+        }
+
     def _finalize_workflow(self, workflow_result: Dict[str, Any]):
         """Finalize workflow execution and prepare results."""
         end_time = time.time()
@@ -582,12 +653,20 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
             workflow_result['workflow_status'] = 'completed'
             self.workflow_status = WorkflowStatus.COMPLETED
             
-            # Calculate final statistics
+            # Calculate final statistics including QA validation
+            qa_results = workflow_result['agent_results'].get('qa_validator', {})
+            quality_score = qa_results.get('quality_score', workflow_result['project_data']['metadata'].get('quality_score', 0))
+            final_approval = qa_results.get('final_approval', False)
+            
             stats = workflow_result['project_data']['statistics'] = {
                 'total_files': len(workflow_result['project_data']['files']),
                 'total_lines': sum(len(str(content).split('\n')) for content in workflow_result['project_data']['files'].values()),
                 'components_created': workflow_result['project_data']['metadata'].get('components_created', 0),
-                'quality_score': workflow_result['project_data']['metadata'].get('quality_score', 0),
+                'quality_score': quality_score,
+                'final_approval': final_approval,
+                'tests_executed': len(qa_results.get('test_results', {})),
+                'security_issues': qa_results.get('security_scan', {}).get('vulnerabilities_found', 0),
+                'performance_score': qa_results.get('performance_metrics', {}).get('performance_score', 0),
                 'generation_time': workflow_result['timing']['total_time']
             }
             
@@ -602,6 +681,106 @@ class VibeWorkflowOrchestratorAgent(VibeBaseAgent):
         
         # Reset job tracking
         self.current_job_id = None
+    
+    async def orchestrate_project_creation(self, prompt: str, job_id: str) -> Dict[str, Any]:
+        """
+        Master orchestration method for the enhanced 6-agent workflow.
+        This is the main entry point for the complete project generation system.
+        """
+        logger.info(f"🎭 Starting 6-agent project orchestration for job: {job_id}")
+        
+        workflow_result = {
+            'job_id': job_id,
+            'status': 'in_progress',
+            'current_agent': 'orchestrator',
+            'progress': 0,
+            'agents_completed': [],
+            'final_validation': False,
+            'start_time': time.time()
+        }
+        
+        try:
+            # Prepare vibe request
+            vibe_request = {
+                'vibe_prompt': prompt,
+                'project_data': {},
+                'requirements': {
+                    'quality_score_minimum': 85,
+                    'security_scan_required': True,
+                    'performance_testing': True,
+                    'comprehensive_validation': True
+                }
+            }
+            
+            # Execute the complete 6-agent workflow
+            result = self.execute_vibe_workflow(vibe_request, job_id)
+            
+            # Extract final results
+            final_result = {
+                'status': 'completed' if result['workflow_status'] == 'completed' else 'failed',
+                'job_id': job_id,
+                'project_files': result['project_data']['files'],
+                'statistics': result['project_data']['statistics'],
+                'quality_validation': result['agent_results'].get('qa_validator', {}),
+                'download_ready': result['workflow_status'] == 'completed',
+                'execution_time': result['timing']['total_time'],
+                'agents_executed': list(result['agent_results'].keys())
+            }
+            
+            # Include QA-specific results
+            if 'qa_validator' in result['agent_results']:
+                qa_results = result['agent_results']['qa_validator']
+                final_result.update({
+                    'test_results': qa_results.get('test_results', {}),
+                    'quality_score': qa_results.get('quality_score', 0),
+                    'final_approval': qa_results.get('final_approval', False),
+                    'qa_report': qa_results.get('qa_report', ''),
+                    'recommendations': qa_results.get('recommendations', [])
+                })
+            
+            logger.info(f"✅ 6-agent orchestration completed for job: {job_id}")
+            return final_result
+            
+        except Exception as e:
+            logger.error(f"❌ 6-agent orchestration failed for job {job_id}: {str(e)}")
+            await self.handle_workflow_error(job_id, e)
+            
+            return {
+                'status': 'failed',
+                'job_id': job_id,
+                'error': str(e),
+                'execution_time': time.time() - workflow_result['start_time'],
+                'agents_executed': workflow_result.get('agents_completed', [])
+            }
+    
+    async def handle_workflow_error(self, job_id: str, error: Exception):
+        """Handle comprehensive workflow errors with detailed logging."""
+        logger.error(f"🚨 Workflow error in job {job_id}: {str(error)}")
+        logger.error(traceback.format_exc())
+        
+        # Send error notification via progress callback if available
+        if self.progress_callback:
+            try:
+                await self.send_progress_update(
+                    "orchestrator", "error", 0.0, f"Workflow failed: {str(error)}"
+                )
+            except Exception as callback_error:
+                logger.error(f"Failed to send error update: {callback_error}")
+    
+    async def broadcast_status(self, job_id: str, message: str, progress: int, agent: str = "orchestrator"):
+        """Broadcast status update via WebSocket if progress callback is available."""
+        if self.progress_callback:
+            try:
+                status_data = {
+                    'job_id': job_id,
+                    'message': message,
+                    'progress': progress,
+                    'timestamp': time.time(),
+                    'agent': agent
+                }
+                await self.progress_callback(job_id, agent, 'active', progress, message, status_data)
+            except Exception as e:
+                logger.warning(f"Failed to broadcast status: {e}")
     
     def orchestrate_vibe_project(self, vibe_request: Dict[str, Any]) -> Dict[str, Any]:
         """Legacy method name for backward compatibility."""

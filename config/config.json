@@ -1,9 +1,9 @@
 {
   "_comment": "تنظیمات سیستم چند-عامله تولید کد",
   "system": {
-    "name": "Multi-Agent Code Generation System",
-    "version": "1.0.0",
-    "description": "سیستم چند-عامله تولید کد با هوش مصنوعی"
+    "name": "Enhanced 6-Agent Code Generation System",
+    "version": "2.0.0",
+    "description": "سیستم پیشرفته 6-عامله تولید کد با تأیید کیفیت"
   },
   "server": {
     "host": "127.0.0.1",
@@ -38,36 +38,51 @@
     "max_rounds": 10,
     "agents_list": [
       {
+        "name": "هماهنگ‌کننده",
+        "class": "VibeWorkflowOrchestratorAgent",
+        "enabled": true,
+        "description": "هماهنگی و کنترل جریان کار 6-عامله"
+      },
+      {
         "name": "برنامه‌ریز",
-        "class": "PlannerAgent",
+        "class": "VibePlannerAgent",
         "enabled": true,
         "description": "تحلیل نیازمندی‌ها و برنامه‌ریزی پروژه"
       },
       {
         "name": "کدنویس", 
-        "class": "CoderAgent",
+        "class": "VibeCoderAgent",
         "enabled": true,
         "description": "تولید کد بر اساس طرح"
       },
       {
         "name": "بازبین",
-        "class": "ReviewerAgent", 
+        "class": "VibeCriticAgent", 
         "enabled": true,
-        "description": "بررسی کیفیت کد"
+        "description": "بررسی کیفیت کد و بهترین شیوه‌ها"
       },
       {
-        "name": "بهینه‌ساز",
-        "class": "OptimizerAgent",
+        "name": "مدیر فایل",
+        "class": "VibeFileManagerAgent",
         "enabled": true,
-        "description": "بهینه‌سازی کد"
+        "description": "سازماندهی ساختار پروژه و پیکربندی استقرار"
       },
       {
-        "name": "تست‌کننده",
-        "class": "TesterAgent",
+        "name": "تأیید کیفیت",
+        "class": "VibeQAValidatorAgent",
         "enabled": true,
-        "description": "تولید تست‌های خودکار"
+        "description": "تست جامع و اعتبارسنجی کیفیت نهایی"
       }
-    ]
+    ],
+    "total_agents": 6,
+    "qa_validation": {
+      "enabled": true,
+      "minimum_quality_score": 85,
+      "timeout_seconds": 600,
+      "run_security_scans": true,
+      "run_performance_tests": true,
+      "required_test_coverage": 80
+    }
   },
   "api": {
     "base_url": "https://api.avalai.ir/v1",
