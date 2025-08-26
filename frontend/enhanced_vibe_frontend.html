@@ -1,3 +1,56 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════════
+ENHANCED VIBE FRONTEND - MAIN DASHBOARD
+═══════════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Main Dashboard for the MultiAgent Vibe Coding Platform
+This file provides the primary user interface for submitting creative coding prompts,
+monitoring AI agent progress in real-time, and downloading generated project files.
+
+CORRESPONDING PAGE: Main Dashboard (Primary User Interface)
+
+SECTIONS:
+1. STYLES (lines ~7-304): Complete CSS styling for the dashboard UI
+   - Modern gradient background and glassmorphism effects
+   - Agent monitoring cards with status indicators  
+   - Form styling for project input
+   - Progress tracking and file display components
+   - Responsive mobile layout
+
+2. HTML STRUCTURE (lines ~306-432): Dashboard layout components
+   - Header with platform branding
+   - Project creation form (prompt, type, framework selection)
+   - Agent monitoring grid (Planner, Coder, Critic, FileManager)
+   - Progress tracker with real-time status updates
+   - Results display with file listing and download options
+   - Activity log for tracking generation process
+
+3. JAVASCRIPT LOGIC (lines ~434-736): Core dashboard functionality
+   - Form submission and API integration with backend
+   - Real-time agent status monitoring via polling
+   - Progress tracking and UI updates
+   - File listing and download management
+   - Error handling and user feedback
+   - Backend connectivity validation
+
+API INTEGRATION:
+- POST /api/vibe-coding - Submit new project generation requests
+- GET /api/vibe-coding/status/{job_id} - Monitor real-time agent progress  
+- GET /api/vibe-coding/files/{job_id} - Fetch generated project files
+- GET /api/download/{job_id} - Download complete project as ZIP
+- GET /health - Verify backend connectivity
+
+AGENT WORKFLOW MONITORED:
+- VibePlannerAgent: Analyzes prompt and creates project structure
+- VibeCoderAgent: Generates code based on specifications
+- VibeCriticAgent: Reviews code for quality and accessibility
+- VibeFileManagerAgent: Organizes and structures project files
+- VibeWorkflowOrchestratorAgent: Coordinates all agent activities
+
+USAGE: This is the main entry point for end users to interact with the platform.
+Developers should start here for understanding the complete user workflow.
+═══════════════════════════════════════════════════════════════════════════════════
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -304,17 +357,22 @@
     </style>
 </head>
 <body>
+    <!-- MAIN CONTAINER: Responsive wrapper for the entire dashboard -->
     <div class="container">
+        <!-- HEADER SECTION: Platform branding and description -->
         <div class="header">
             <h1>🎨 Vibe Coding Platform</h1>
             <p>Transform your creative vision into functional code with our sophisticated AI agents</p>
         </div>
 
+        <!-- MAIN GRID LAYOUT: Two-column layout for input and monitoring sections -->
         <div class="main-grid">
-            <!-- Input Section -->
+            <!-- PROJECT CREATION SECTION: User input form for project specifications -->
             <div class="card">
                 <h3>🚀 Create Your Project</h3>
+                <!-- PROJECT SPECIFICATION FORM: Collects user requirements for code generation -->
                 <form id="vibeForm">
+                    <!-- PROMPT INPUT: Free-text description of desired project -->
                     <div class="form-group">
                         <label for="vibePrompt">Describe Your Project Vibe</label>
                         <textarea 
@@ -324,6 +382,7 @@
                         ></textarea>
                     </div>
 
+                    <!-- PROJECT TYPE SELECTOR: Pre-defined project categories -->
                     <div class="form-group">
                         <label for="projectType">Project Type</label>
                         <select id="projectType">
@@ -335,6 +394,7 @@
                         </select>
                     </div>
 
+                    <!-- FRAMEWORK SELECTOR: Target development framework -->
                     <div class="form-group">
                         <label for="framework">Framework</label>
                         <select id="framework">
@@ -344,11 +404,13 @@
                         </select>
                     </div>
 
+                    <!-- SUBMIT BUTTON: Triggers project generation workflow -->
                     <button type="submit" class="btn" id="generateBtn">
                         ✨ Generate Project
                     </button>
                 </form>
 
+                <!-- EXAMPLE PROMPTS: Pre-filled prompt suggestions for quick testing -->
                 <div class="example-prompts">
                     <div class="example-prompt" onclick="setPrompt('Create a cozy coffee shop website with warm colors and easy navigation')">
                         ☕ Coffee Shop Site
@@ -365,25 +427,30 @@
                 </div>
             </div>
 
-            <!-- Status Section -->
+            <!-- AI AGENT MONITORING SECTION: Real-time status tracking for each agent -->
             <div class="card">
                 <h3>🤖 AI Agents Status</h3>
+                <!-- AGENT GRID: Visual cards showing status of each AI agent -->
                 <div class="agent-grid">
+                    <!-- PLANNER AGENT: Analyzes prompt and creates project structure -->
                     <div class="agent-card" data-agent="planner">
                         <h4>🎯 Planner</h4>
                         <p>Analyzing your vibe</p>
                         <div class="agent-status status-idle" id="planner-status">Idle</div>
                     </div>
+                    <!-- CODER AGENT: Generates code based on specifications -->
                     <div class="agent-card" data-agent="coder">
                         <h4>💻 Coder</h4>
                         <p>Generating code</p>
                         <div class="agent-status status-idle" id="coder-status">Idle</div>
                     </div>
+                    <!-- CRITIC AGENT: Reviews code for quality and accessibility -->
                     <div class="agent-card" data-agent="critic">
                         <h4>🔍 Critic</h4>
                         <p>Reviewing quality</p>
                         <div class="agent-status status-idle" id="critic-status">Idle</div>
                     </div>
+                    <!-- FILE MANAGER AGENT: Organizes and structures project files -->
                     <div class="agent-card" data-agent="file_manager">
                         <h4>📁 File Manager</h4>
                         <p>Organizing structure</p>
@@ -391,16 +458,19 @@
                     </div>
                 </div>
 
+                <!-- PROGRESS TRACKER: Visual progress bar showing generation completion -->
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
+                <!-- STATUS TEXT: Current operation being performed by the agents -->
                 <div id="statusText">Ready to generate...</div>
             </div>
         </div>
 
-        <!-- Progress Log -->
+        <!-- ACTIVITY LOG SECTION: Real-time log of generation process -->
         <div class="card">
             <h3>📋 Generation Log</h3>
+            <!-- LOG CONTAINER: Scrollable container for status updates and messages -->
             <div class="log-container" id="logContainer">
                 <div class="log-entry log-info">
                     🎉 Welcome to the Vibe Coding Platform! Our sophisticated AI agents are ready to transform your ideas into code.
@@ -408,17 +478,21 @@
             </div>
         </div>
 
-        <!-- Results Section -->
+        <!-- RESULTS SECTION: Displays generated files and download options (hidden until completion) -->
         <div class="card hidden" id="resultsContainer">
             <h3>🎯 Generated Project</h3>
+            <!-- RESULTS GRID: Two-column layout for files and project statistics -->
             <div class="results-grid">
                 <div>
+                    <!-- FILE LIST: Individual file listing with download links -->
                     <h4>📂 Project Files</h4>
                     <ul class="file-list" id="fileList"></ul>
                 </div>
                 <div>
+                    <!-- PROJECT STATISTICS: File counts, sizes, and summary information -->
                     <h4>📊 Project Stats</h4>
                     <div id="projectStats"></div>
+                    <!-- DOWNLOAD BUTTON: Complete project download as ZIP file -->
                     <button class="btn" id="downloadProject" style="margin-top: 20px;">
                         📥 Download Complete Project
                     </button>
@@ -428,17 +502,40 @@
     </div>
 
     <script>
+        /* ═══════════════════════════════════════════════════════════════════════════════════
+           JAVASCRIPT CORE FUNCTIONALITY
+           ═══════════════════════════════════════════════════════════════════════════════════
+           
+           This section contains all the interactive logic for the dashboard:
+           - API communication with the backend
+           - Real-time agent status monitoring 
+           - Progress tracking and UI updates
+           - File management and downloads
+           - User feedback and error handling
+           
+           Key Functions:
+           - Form submission and validation
+           - Real-time polling of job status
+           - Agent status visualization
+           - File listing and download management
+           - Logging and user notifications
+           ═══════════════════════════════════════════════════════════════════════════════════
+        */
+        
+        // CONFIGURATION: Backend API endpoint
         const API_BASE = 'http://localhost:8000';
+        
+        // GLOBAL STATE: Current job tracking and polling control
         let currentJobId = null;
         let pollInterval = null;
 
-        // Initialize
+        // INITIALIZATION: Setup dashboard when page loads
         document.addEventListener('DOMContentLoaded', () => {
             log('🎉 Vibe Coding Platform initialized with real AI agents', 'info');
             log('Backend connected to: ' + API_BASE, 'info');
         });
 
-        // Form submission
+        // FORM SUBMISSION HANDLER: Process user input and start generation
         document.getElementById('vibeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
